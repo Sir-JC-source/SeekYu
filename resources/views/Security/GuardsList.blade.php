@@ -9,17 +9,16 @@
     </div>
     <div class="card-body">
         <div class="table-responsive">
-            <table class="table table-striped table-bordered text-center w-100" id="guards-table">
+            <table class="table table-striped table-bordered text-center mx-auto" id="guards-table" style="max-width: 1200px;">
                 <thead>
                     <tr>
                         <th style="width: 8%;">Employee No.</th>
-                        <th style="width: 20%;">Full Name</th>
+                        <th style="width: 22%;">Full Name</th>
                         <th style="width: 12%;">Position</th>
-                        <th style="width: 20%;">Shift</th>
-                        <th style="width: 10%;">Designation</th>
-                        <th style="width: 15%;">Assigned Head Guard</th>
-                        <th style="width: 10%;">Status of Deployment</th>
-                        <th style="width: 10%;">Action</th>
+                        <th style="width: 22%;">Shift</th>
+                        <th style="width: 12%;">Designation</th>
+                        <th style="width: 10%;">Status</th>
+                        <th style="width: 14%;">Action</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -46,11 +45,11 @@
                         </td>
                         <td>
                             @if($guard->shift_in && $guard->shift_out)
-                                <div class="d-flex justify-content-center gap-1">
-                                    <span class="px-3 py-1 rounded text-white" style="background-color: #28a745; min-width: 80px;">
+                                <div class="d-flex justify-content-center gap-1 flex-wrap">
+                                    <span class="px-3 py-1 rounded text-white" style="background-color: #28a745; min-width: 70px;">
                                         {{ \Carbon\Carbon::createFromFormat('H:i', substr(trim($guard->shift_in),0,5))->format('h:i A') }}
                                     </span>
-                                    <span class="px-3 py-1 rounded text-white" style="background-color: #dc3545; min-width: 80px;">
+                                    <span class="px-3 py-1 rounded text-white" style="background-color: #dc3545; min-width: 70px;">
                                         {{ \Carbon\Carbon::createFromFormat('H:i', substr(trim($guard->shift_out),0,5))->format('h:i A') }}
                                     </span>
                                 </div>
@@ -59,11 +58,6 @@
                             @endif
                         </td>
                         <td>{{ $guard->designation ?? '-' }}</td>
-                        <td>
-                            <span title="{{ $guard->assignedHeadGuard?->full_name ?? '-' }}" class="text-truncate d-inline-block" style="max-width: 140px;">
-                                {{ $guard->assignedHeadGuard?->full_name ?? '-' }}
-                            </span>
-                        </td>
                         <td>
                             @php
                                 $status = $guard->deployment_status ?? 'Not Deployed';
@@ -112,18 +106,18 @@
 <script>
     $(document).ready(function() {
         $('#guards-table').DataTable({
-            "order": [[ 1, "asc" ]],
-            "scrollX": true,
+            "order": [[1, "asc"]],
+            "scrollX": false, // No horizontal scroll
             "autoWidth": false,
+            "responsive": true,
             "columnDefs": [
                 { "width": "8%", "targets": 0 },
-                { "width": "20%", "targets": 1 },
+                { "width": "22%", "targets": 1 },
                 { "width": "12%", "targets": 2 },
-                { "width": "20%", "targets": 3 },
-                { "width": "10%", "targets": 4 },
-                { "width": "15%", "targets": 5 },
-                { "width": "10%", "targets": 6 },
-                { "width": "10%", "targets": 7 },
+                { "width": "22%", "targets": 3 },
+                { "width": "12%", "targets": 4 },
+                { "width": "10%", "targets": 5 },
+                { "width": "14%", "targets": 6 } // Action buttons
             ]
         });
 

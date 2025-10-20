@@ -217,6 +217,51 @@
             </li>
         @endif
 
+        {{-- Head Guard Menu --}}
+        @if($userRole === 'head-guard')
+            {{-- Security Guard Tracking --}}
+            <li class="menu-item {{ request()->is('security*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="ti ti-shield-check menu-icon"></i>
+                    <div>Security Guard Tracking</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('security.list') ? 'active' : '' }}">
+                        <a href="{{ route('security.list') }}" class="menu-link"><div>List of Guards</div></a>
+                    </li>
+                </ul>
+            </li>
+
+            {{-- Leave Requests --}}
+            <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="ti ti-calendar-event menu-icon"></i>
+                    <div>Leave Requests</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
+                        <a href="{{ route('leaves.request') }}" class="menu-link"><div>Request</div></a>
+                    </li>
+                </ul>
+            </li>
+        @endif
+
+        {{-- Security Guard Menu --}}
+        @if($userRole === 'security-guard')
+            {{-- Leave Requests --}}
+            <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="ti ti-calendar-event menu-icon"></i>
+                    <div>Leave Requests</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
+                        <a href="{{ route('leaves.request') }}" class="menu-link"><div>Request</div></a>
+                    </li>
+                </ul>
+            </li>
+        @endif
+
         {{-- Logout Button --}}
         <div class="menu-bottom-logout mt-auto text-center p-3" style="position: absolute; bottom: 10px; width: 100%;">
             <form action="{{ route('logout') }}" method="POST">
@@ -227,4 +272,5 @@
                 </button>
             </form>
         </div>
+    </ul>
 </aside>

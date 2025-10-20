@@ -22,8 +22,8 @@
             <div class="alert alert-info">There are no leave requests at the moment.</div>
         @else
             <div class="table-responsive">
-                <table class="table table-striped table-bordered table-hover" id="leave-table">
-                    <thead class="table-dark">
+                <table class="table table-striped table-bordered" id="leave-table">
+                    <thead>
                         <tr>
                             <th>#</th>
                             <th>Requestor</th>
@@ -38,7 +38,7 @@
                     </thead>
                     <tbody>
                         @foreach($leaves as $index => $leave)
-                        <tr class="table-row" data-id="{{ $leave->id }}" data-status="{{ $leave->status }}" style="cursor:pointer;">
+                        <tr class="table-row" data-id="{{ $leave->id }}" data-status="{{ $leave->status }}">
                             <td>{{ $index + 1 }}</td>
                             <td>{{ $leave->requestor }}</td>
                             <td>{{ $leave->position }}</td>
@@ -203,7 +203,21 @@ document.addEventListener('DOMContentLoaded', function(){
     }
 });
 </script>
+
 <style>
-.table-row:hover { background-color: #d9edf7; transition: 0.3s; }
+/* Remove hover highlight and header background */
+#leave-table thead th {
+    background-color: transparent !important;
+    color: #333 !important;
+}
+
+#leave-table tbody tr {
+    background-color: #fff !important;
+}
+
+#leave-table tbody tr:hover {
+    background-color: #fff !important;
+    cursor: default;
+}
 </style>
 @endsection

@@ -5,27 +5,7 @@
 @section('content')
 
 <style>
-    /* Left-side carousel styling */
-    .auth-cover-bg {
-        position: relative;
-        width: 100%;
-        height: 100vh;
-        overflow: hidden;
-    }
-
-    #authCarousel,
-    #authCarousel .carousel-inner,
-    #authCarousel .carousel-item {
-        height: 100%;
-    }
-
-    #authCarousel img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-    }
-
-    /* Register form styling */
+    /* Centered register form styling */
     .register-container {
         min-height: 100vh;
         display: flex;
@@ -36,7 +16,7 @@
     }
 
     .register-card {
-        max-width: 400px;
+        max-width: 500px;
         width: 100%;
         padding: 2rem;
         border-radius: 12px;
@@ -69,50 +49,10 @@
     .register-card .alert { color: #fff; }
 </style>
 
-<!-- Left-side carousel -->
-<div class="d-none d-lg-flex col-lg-7 p-0">
-    <div class="auth-cover-bg w-100">
-        <div id="authCarousel" class="carousel slide carousel-fade w-100 h-100"
-             data-bs-ride="carousel" data-bs-interval="4000">
-            <div class="carousel-inner h-100">
-                <div class="carousel-item active">
-                    <img src="{{ asset('storage/assets/wallpaper.jpg') }}" alt="Slide 1">
-                </div>
-                <div class="carousel-item">
-                    <img src="{{ asset('storage/assets/wallpaper2.jpg') }}" alt="Slide 2">
-                </div>
-                <div class="carousel-item">
-                    <img src="{{ asset('storage/assets/wallpaper3.jpg') }}" alt="Slide 3">
-                </div>
-                <div class="carousel-item">
-                    <img src="{{ asset('storage/assets/wallpaper4.jpg') }}" alt="Slide 4">
-                </div>
-            </div>
-
-            <button class="carousel-control-prev" type="button" data-bs-target="#authCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#authCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
-
-            <div class="carousel-indicators">
-                <button type="button" data-bs-target="#authCarousel" data-bs-slide-to="0" class="active"></button>
-                <button type="button" data-bs-target="#authCarousel" data-bs-slide-to="1"></button>
-                <button type="button" data-bs-target="#authCarousel" data-bs-slide-to="2"></button>
-                <button type="button" data-bs-target="#authCarousel" data-bs-slide-to="3"></button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Register form -->
-<div class="d-flex col-12 col-lg-5 align-items-center p-sm-5 p-4">
+<div class="register-container">
     <div class="register-card mx-auto">
         <div class="text-center mb-4">
-            <h4>Security Personnel Registration 👋</h4>
+            <h4>Security Personnel Registration </h4>
             <p class="mb-0">Apply as Security Guard or Head Guard</p>
         </div>
 
@@ -134,32 +74,62 @@
         <form method="POST" action="{{ route('login.store') }}">
             @csrf
 
-            {{-- Full Name --}}
+            {{-- Name Fields --}}
             <div class="mb-3">
-                <label for="fullname" class="form-label">Full Name</label>
-                <input type="text"
-                       class="form-control @error('fullname') is-invalid @enderror"
-                       id="fullname"
-                       name="fullname"
-                       placeholder="Enter your full name"
-                       value="{{ old('fullname') }}"
+                <label class="form-label">Full Name</label>
+                <div class="d-flex gap-2">
+                    <input type="text"
+                           class="form-control @error('last_name') is-invalid @enderror"
+                           id="last_name"
+                           name="last_name"
+                           placeholder="Last Name"
+                           value="{{ old('last_name') }}"
+                           required>
+                    <input type="text"
+                           class="form-control @error('middle_name') is-invalid @enderror"
+                           id="middle_name"
+                           name="middle_name"
+                           placeholder="Middle Name (Optional)"
+                           value="{{ old('middle_name') }}">
+                    <input type="text"
+                           class="form-control @error('first_name') is-invalid @enderror"
+                           id="first_name"
+                           name="first_name"
+                           placeholder="First Name"
+                           value="{{ old('first_name') }}"
+                           required>
+                </div>
+                @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                @error('middle_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+            </div>
+
+            {{-- Login ID (Email) --}}
+            <div class="mb-3">
+                <label for="email_login" class="form-label">Login ID (Email)</label>
+                <input type="email"
+                       class="form-control @error('email_login') is-invalid @enderror"
+                       id="email_login"
+                       name="email_login"
+                       placeholder="Enter your email"
+                       value="{{ old('email_login') }}"
                        required>
-                @error('fullname')
+                @error('email_login')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
-            {{-- Email (Login ID) --}}
+            {{-- Email Address --}}
             <div class="mb-3">
-                <label for="email" class="form-label">Login ID (Email)</label>
+                <label for="email_address" class="form-label">Email Address</label>
                 <input type="email"
-                       class="form-control @error('email') is-invalid @enderror"
-                       id="email"
-                       name="email"
-                       placeholder="Enter your email"
-                       value="{{ old('email') }}"
+                       class="form-control @error('email_address') is-invalid @enderror"
+                       id="email_address"
+                       name="email_address"
+                       placeholder="Enter your email address"
+                       value="{{ old('email_address') }}"
                        required>
-                @error('email')
+                @error('email_address')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
@@ -181,47 +151,36 @@
             {{-- Contact Number --}}
             <div class="mb-3">
                 <label for="contact_number" class="form-label">Contact Number</label>
-                <input type="text"
-                       class="form-control @error('contact_number') is-invalid @enderror"
-                       id="contact_number"
-                       name="contact_number"
-                       placeholder="Enter your contact number"
-                       value="{{ old('contact_number') }}"
-                       required>
+                <div class="input-group">
+                    <span class="input-group-text">+63</span>
+                    <input type="text"
+                           class="form-control @error('contact_number') is-invalid @enderror"
+                           id="contact_number"
+                           name="contact_number"
+                           placeholder="9123456789"
+                           value="{{ old('contact_number') }}"
+                           pattern="[0-9]{10}"
+                           maxlength="10"
+                           required>
+                </div>
                 @error('contact_number')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
+                <small class="text-muted">Enter 10 digits after +63</small>
             </div>
 
-            {{-- Address --}}
+            {{-- Location Dropdown --}}
             <div class="mb-3">
-                <label for="address" class="form-label">Address</label>
-                <input type="text"
-                       class="form-control @error('address') is-invalid @enderror"
-                       id="address"
-                       name="address"
-                       placeholder="Enter your address"
-                       value="{{ old('address') }}"
-                       required>
-                @error('address')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-            </div>
-
-            {{-- Position --}}
-            <div class="mb-3">
-                <label for="position" class="form-label">Position</label>
-                <select class="form-select @error('position') is-invalid @enderror"
-                        id="position"
-                        name="position"
-                        required>
-                    <option value="">Select Position</option>
-                    <option value="Security Guard" {{ old('position')=='Security Guard'?'selected':'' }}>Security Guard</option>
-                    <option value="Head Guard" {{ old('position')=='Head Guard'?'selected':'' }}>Head Guard</option>
+                <label class="form-label">Location</label>
+                <select class="form-select mb-2" id="province" required>
+                    <option value="">Select Province</option>
                 </select>
-                @error('position')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
+                <select class="form-select mb-2" id="city" required disabled>
+                    <option value="">Select City/Municipality</option>
+                </select>
+                <select class="form-select" id="barangay" name="location" required disabled>
+                    <option value="">Select Barangay</option>
+                </select>
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Register</button>
@@ -233,5 +192,68 @@
         </p>
     </div>
 </div>
+
+{{-- Philippines locations JSON --}}
+<script>
+    const phData = {
+        "Metro Manila": {
+            "Quezon City": ["Barangay 1", "Barangay 2", "Barangay 3"],
+            "Makati": ["Barangay A", "Barangay B"]
+        },
+        "Cebu": {
+            "Cebu City": ["Barangay X", "Barangay Y"],
+            "Lapu-Lapu": ["Barangay Z"]
+        }
+        // Add more provinces/cities/barangays as needed
+    };
+
+    const provinceSelect = document.getElementById('province');
+    const citySelect = document.getElementById('city');
+    const barangaySelect = document.getElementById('barangay');
+
+    // Load provinces
+    Object.keys(phData).forEach(province => {
+        const option = document.createElement('option');
+        option.value = province;
+        option.textContent = province;
+        provinceSelect.appendChild(option);
+    });
+
+    provinceSelect.addEventListener('change', function() {
+        citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
+        barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+        barangaySelect.disabled = true;
+
+        const cities = phData[this.value];
+        if(cities) {
+            citySelect.disabled = false;
+            Object.keys(cities).forEach(city => {
+                const option = document.createElement('option');
+                option.value = city;
+                option.textContent = city;
+                citySelect.appendChild(option);
+            });
+        } else {
+            citySelect.disabled = true;
+        }
+    });
+
+    citySelect.addEventListener('change', function() {
+        barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+        const province = provinceSelect.value;
+        const barangays = phData[province][this.value];
+        if(barangays) {
+            barangaySelect.disabled = false;
+            barangays.forEach(barangay => {
+                const option = document.createElement('option');
+                option.value = `${province}, ${this.value}, ${barangay}`;
+                option.textContent = barangay;
+                barangaySelect.appendChild(option);
+            });
+        } else {
+            barangaySelect.disabled = true;
+        }
+    });
+</script>
 
 @endsection
