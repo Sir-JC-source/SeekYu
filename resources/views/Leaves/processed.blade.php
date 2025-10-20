@@ -50,11 +50,13 @@
                                 <span class="badge {{ $badgeClass }}">{{ $leave->status }}</span>
                             </td>
                             <td>
-                                @php
-                                    $processorId = $leave->status === 'Approved' ? $leave->approved_by : $leave->rejected_by;
-                                    $processor = $processorId ? \App\Models\User::find($processorId)->fullname : '-';
-                                @endphp
-                                {{ $processor }}
+                                @if($leave->status === 'Approved')
+                                    {{ $leave->approver?->fullname ?? '-' }}
+                                @elseif($leave->status === 'Rejected')
+                                    {{ $leave->rejecter?->fullname ?? '-' }}
+                                @else
+                                    -
+                                @endif
                             </td>
                         </tr>
                         @endforeach

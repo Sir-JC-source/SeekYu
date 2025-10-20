@@ -9,7 +9,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy all source code
+# Copy all frontend source code
 COPY . .
 
 # Build frontend (Vite)
@@ -48,6 +48,8 @@ RUN php artisan config:clear \
     && php artisan route:clear \
     && php artisan view:clear
 
-# Expose port and start PHP-FPM
+# Expose HTTP port
 EXPOSE 9000
-CMD ["php-fpm"]
+
+# Start Laravel with PHP built-in server (Render detects HTTP port)
+CMD ["php", "-S", "0.0.0.0:9000", "-t", "public"]

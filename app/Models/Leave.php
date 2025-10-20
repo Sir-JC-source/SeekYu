@@ -29,4 +29,14 @@ class Leave extends Model
     {
         return $this->belongsTo(RegisteredUsers::class, 'user_id');
     }
+
+    public function approver()
+    {
+        return $this->belongsTo(RegisteredUsers::class, 'approved_by');
+    }
+
+    public function rejecter()
+    {
+        return $this->belongsTo(RegisteredUsers::class, 'rejected_by');
+    }
 }
