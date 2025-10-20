@@ -95,6 +95,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/pending', [LeaveController::class, 'pending'])->name('pending');
         Route::get('/accepted', [LeaveController::class, 'accepted'])->name('accepted');
         Route::get('/rejected', [LeaveController::class, 'rejected'])->name('rejected');
+
+        // New route for processed leaves view
+        Route::get('/processed', [LeaveController::class, 'processed'])->name('processed');
+
         Route::get('/request', [LeaveController::class, 'create'])->name('request');
         Route::post('/request/store', [LeaveController::class, 'store'])->name('request.store');
         Route::match(['put','post'],'/approve/{id}', [LeaveController::class, 'approve'])->name('approve');

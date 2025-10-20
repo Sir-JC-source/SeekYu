@@ -6,141 +6,164 @@
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
         <h5>Pending Leave Requests</h5>
-        <div>
-            <label for="statusFilter" class="form-label me-2">Filter by Status:</label>
-            <select id="statusFilter" class="form-select form-select-sm d-inline-block w-auto">
-                <option value="All" selected>All</option>
-                <option value="Pending">Pending</option>
-                <option value="Approved">Approved</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-        </div>
+        <a href="{{ route('leaves.processed') }}" class="btn btn-outline-primary btn-sm">View Processed Leaves</a>
     </div>
 
     <div class="card-body">
-        @if($leaves->isEmpty())
-            <div class="alert alert-info">There are no leave requests at the moment.</div>
+        @if($leaves->where('status','Pending')->isEmpty())
+            <div class="alert alert-info">There are no pending leave requests at the moment.</div>
         @else
-            <div class="table-responsive">
-                <table class="table table-striped table-bordered" id="leave-table">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Requestor</th>
-                            <th>Position</th>
-                            <th>Type of Leave</th>
-                            <th>Reason</th>
-                            <th>Duration</th>
-                            <th>Date Requested</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($leaves as $index => $leave)
-                        <tr class="table-row" data-id="{{ $leave->id }}" data-status="{{ $leave->status }}">
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $leave->requestor }}</td>
-                            <td>{{ $leave->position }}</td>
-                            <td>{{ $leave->leave_type }}</td>
-                            <td title="{{ $leave->reason }}">{{ Str::limit($leave->reason, 30) }}</td>
-                            <td>
-                                @if($leave->date_from && $leave->date_to)
-                                    {{ \Carbon\Carbon::parse($leave->date_from)->format('M d, Y') }} - {{ \Carbon\Carbon::parse($leave->date_to)->format('M d, Y') }}
-                                @else
-                                    {{ $leave->duration }}
-                                @endif
-                            </td>
-                            <td>{{ $leave->created_at->format('F d, Y') }}</td>
-                            <td>
-                                @php
-                                    $status = $leave->status;
-                                    $badgeClass = match($status) {
-                                        'Pending' => 'bg-warning text-dark',
-                                        'Approved' => 'bg-success',
-                                        'Rejected' => 'bg-danger',
-                                        default => 'bg-secondary'
-                                    };
-                                @endphp
-                                <span class="badge {{ $badgeClass }}">{{ $status }}</span>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+            <table class="table table-striped table-bordered text-center" id="pending-leave-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Requestor</th>
+                        <th>Position</th>
+                        <th>Type</th>
+                        <th>Reason</th>
+                        <th>Duration</th>
+                        <th>Date Requested</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($leaves->where('status','Pending') as $index => $leave)
+                    <tr class="leave-row" 
+                        data-id="{{ $leave->id }}"
+                        data-requestor="{{ $leave->requestor }}"
+                        data-position="{{ $leave->position }}"
+                        data-type="{{ $leave->leave_type }}"
+                        data-reason="{{ $leave->reason }}"
+                        data-duration="@if($leave->date_from && $leave->date_to){{ \Carbon\Carbon::parse($leave->date_from)->format('F d, Y') }} - {{ \Carbon\Carbon::parse($leave->date_to)->format('F d, Y') }}@else{{ $leave->duration }}@endif"
+                        data-date="{{ $leave->created_at->format('F d, Y') }}">
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $leave->requestor }}</td>
+                        <td>{{ $leave->position }}</td>
+                        <td><span class="badge bg-info">{{ $leave->leave_type }}</span></td>
+                        <td style="max-width:200px; overflow:hidden; text-overflow:ellipsis;" title="{{ $leave->reason }}">{{ $leave->reason }}</td>
+                        <td style="word-wrap: break-word; white-space: normal;">
+                            @if($leave->date_from && $leave->date_to)
+                                {{ \Carbon\Carbon::parse($leave->date_from)->format('F d, Y') }} - {{ \Carbon\Carbon::parse($leave->date_to)->format('F d, Y') }}
+                            @else
+                                {{ $leave->duration }}
+                            @endif
+                        </td>
+                        <td>{{ $leave->created_at->format('F d, Y') }}</td>
+                        <td class="d-flex flex-column gap-1">
+                            <button class="btn btn-success btn-sm approve-btn">Approve</button>
+                            <button class="btn btn-danger btn-sm reject-btn">Reject</button>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
         @endif
     </div>
 </div>
 
-<!-- Modal -->
-<div class="modal fade" id="leaveModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Leave Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <table class="table table-borderless">
-                    <tr><th>Requestor:</th><td id="modal-requestor"></td></tr>
-                    <tr><th>Position:</th><td id="modal-position"></td></tr>
-                    <tr><th>Type of Leave:</th><td id="modal-type"></td></tr>
-                    <tr><th>Reason:</th><td id="modal-reason" style="word-break: break-word;"></td></tr>
-                    <tr><th>Duration:</th><td id="modal-duration"></td></tr>
-                    <tr><th>Date Requested:</th><td id="modal-date"></td></tr>
-                    <tr><th>Status:</th><td id="modal-status"></td></tr>
-                </table>
-            </div>
-            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
+{{-- Leave Details Modal --}}
+<div class="modal fade" id="leaveModal" tabindex="-1" aria-labelledby="leaveModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
+    <div class="modal-content p-3 shadow-sm border-0 rounded-3">
+      <div class="modal-header border-0 pb-0 text-center d-block">
+        <h6 class="modal-title fw-semibold" id="leaveModalLabel">Leave Details</h6>
+      </div>
+      <div class="modal-body text-center py-2">
+        <div class="text-start mx-auto" style="max-width: 280px;">
+            <p class="mb-1"><strong>Requestor:</strong> <span id="modalRequestor"></span></p>
+            <p class="mb-1"><strong>Position:</strong> <span id="modalPosition"></span></p>
+            <p class="mb-1"><strong>Type:</strong> <span id="modalType"></span></p>
+            <p class="mb-1"><strong>Reason:</strong> <span id="modalReason"></span></p>
+            <p class="mb-1"><strong>Duration:</strong> <span id="modalDuration"></span></p>
+            <p class="mb-0"><strong>Date Requested:</strong> <span id="modalDate"></span></p>
         </div>
+      </div>
+      <div class="modal-footer border-0 pt-1 pb-2 justify-content-center">
+        <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">Close</button>
+      </div>
     </div>
+  </div>
 </div>
 @endsection
 
-@section('scripts')
+@push('page-scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function(){
-    const tableRows = document.querySelectorAll('.table-row');
-    const statusFilter = document.getElementById('statusFilter');
-
-    // Show modal
-    tableRows.forEach(row=>{
-        row.addEventListener('click', e=>{
-            const modal = new bootstrap.Modal(document.getElementById('leaveModal'));
-            document.getElementById('modal-requestor').textContent = row.querySelector('td:nth-child(2)').textContent;
-            document.getElementById('modal-position').textContent = row.querySelector('td:nth-child(3)').textContent;
-            document.getElementById('modal-type').textContent = row.querySelector('td:nth-child(4)').textContent;
-            document.getElementById('modal-reason').textContent = row.querySelector('td:nth-child(5)').getAttribute('title');
-            document.getElementById('modal-duration').textContent = row.querySelector('td:nth-child(6)').textContent;
-            document.getElementById('modal-date').textContent = row.querySelector('td:nth-child(7)').textContent;
-            document.getElementById('modal-status').textContent = row.querySelector('td:nth-child(8) .badge').textContent;
-            modal.show();
-        });
+$(document).ready(function() {
+    var table = $('#pending-leave-table').DataTable({
+        "order": [[ 1, "asc" ]]
     });
 
-    // Status filter
-    statusFilter.addEventListener('change', function(){
-        const selected = statusFilter.value;
-        tableRows.forEach(row=>{
-            row.style.display = (selected==='All'||row.dataset.status===selected)?'':'none';
+    // Row click to open modal
+    $('#pending-leave-table tbody').on('click', 'tr.leave-row', function(e) {
+        if($(e.target).closest('.approve-btn, .reject-btn').length) return;
+
+        var row = $(this);
+        $('#modalRequestor').text(row.data('requestor'));
+        $('#modalPosition').text(row.data('position'));
+        $('#modalType').text(row.data('type'));
+        $('#modalReason').text(row.data('reason'));
+        $('#modalDuration').text(row.data('duration'));
+        $('#modalDate').text(row.data('date'));
+        $('#leaveModal').modal('show');
+    });
+
+    // Approve/Reject with proper quoted status
+    function updateLeaveStatus(leaveId, action, row) {
+        const url = action === 'approve'
+            ? "{{ url('leaves/approve') }}/" + leaveId
+            : "{{ url('leaves/reject') }}/" + leaveId;
+
+        Swal.fire({
+            title: `Are you sure you want to ${action} this leave request?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes',
+            cancelButtonText: 'Cancel'
+        }).then(result => {
+            if(result.isConfirmed) {
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
+                    },
+                    body: new URLSearchParams({ _method: 'PUT' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if(data.success) {
+                        Swal.fire('Success', `Leave has been ${action}d successfully.`, 'success')
+                        .then(() => table.row(row).remove().draw());
+                    } else {
+                        Swal.fire('Error', data.message, 'error');
+                    }
+                })
+                .catch(err => {
+                    Swal.fire('Error', 'Something went wrong.', 'error');
+                    console.error(err);
+                });
+            }
         });
+    }
+
+    $('#pending-leave-table').on('click', '.approve-btn', function() {
+        var row = $(this).closest('tr');
+        updateLeaveStatus(row.data('id'), 'approve', row);
+    });
+
+    $('#pending-leave-table').on('click', '.reject-btn', function() {
+        var row = $(this).closest('tr');
+        updateLeaveStatus(row.data('id'), 'reject', row);
     });
 });
 </script>
 
 <style>
-#leave-table thead th {
-    background-color: transparent !important;
-    color: #333 !important;
-}
-
-#leave-table tbody tr {
-    background-color: #fff !important;
-}
-
-#leave-table tbody tr:hover {
-    background-color: #fff !important;
-    cursor: default;
-}
+#pending-leave-table tbody tr:hover { background-color: #f0f8ff; cursor: pointer; }
+.modal-content { border-radius: 12px; background-color: #fff; }
+.modal-body p { font-size: 0.875rem; color: #333; }
+.modal-footer button { border-radius: 6px; }
+.d-flex.flex-column.gap-1 button { width: 100%; }
 </style>
-@endsection
+@endpush

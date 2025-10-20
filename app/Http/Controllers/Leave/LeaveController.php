@@ -46,6 +46,18 @@ class LeaveController extends Controller
     }
 
     /**
+     * Display processed leaves (approved + rejected).
+     */
+    public function processed()
+    {
+        $leaves = Leave::whereIn('status', ['Approved', 'Rejected'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('leaves.processed', compact('leaves'));
+    }
+
+    /**
      * Show leave request form.
      */
     public function create()
@@ -101,4 +113,41 @@ class LeaveController extends Controller
         return redirect()->route('leaves.list')->with('success', 'Leave request submitted successfully.');
     }
 
+    /**
+     * Approve a leave request.
+     */
+    public function approve(Request $request, $id)
+    {
+        $leave = Leave::findOrFail($id);
+
+        if ($leave->status !== 'Pending') {
+            return response()->json(['success' => false, 'message' => 'Leave already processed.']);
+        }
+
+        $leave->status = 'Approved';
+        $leave->approved_by = Auth::user()->id;
+        $leave->rejected_by = null;
+        $leave->save();
+
+        return response()->json(['success' => true, 'status' => 'Approved']);
+    }
+
+    /**
+     * Reject a leave request.
+     */
+    public function reject(Request $request, $id)
+    {
+        $leave = Leave::findOrFail($id);
+
+        if ($leave->status !== 'Pending') {
+            return response()->json(['success' => false, 'message' => 'Leave already processed.']);
+        }
+
+        $leave->status = 'Rejected';
+        $leave->rejected_by = Auth::user()->id;
+        $leave->approved_by = null;
+        $leave->save();
+
+        return response()->json(['success' => true, 'status' => 'Rejected']);
+    }
 }

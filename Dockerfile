@@ -9,14 +9,14 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
-# Copy frontend source code
+# Copy all source code
 COPY . .
 
-# Build frontend
+# Build frontend (Vite)
 RUN npm run build
 
 # Verify build output
-RUN ls -al /app/dist
+RUN if [ -d "/app/public/dist" ]; then ls -al /app/public/dist; else echo "Build folder not found!"; fi
 
 # -----------------------------
 # Stage 2 - Backend (Laravel + PHP + Composer)
@@ -38,12 +38,12 @@ WORKDIR /var/www
 COPY . .
 
 # Copy frontend build from Stage 1
-COPY --from=frontend /app/dist ./public/dist
+COPY --from=frontend /app/public/dist ./public/dist
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Laravel setup
+# Laravel cache clear
 RUN php artisan config:clear \
     && php artisan route:clear \
     && php artisan view:clear

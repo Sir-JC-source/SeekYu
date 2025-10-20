@@ -99,11 +99,8 @@
                     <li class="menu-item {{ request()->routeIs('leaves.pending') ? 'active' : '' }}">
                         <a href="{{ route('leaves.pending') }}" class="menu-link"><div>Pending</div></a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('leaves.accepted') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.accepted') }}" class="menu-link"><div>Accepted</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('leaves.rejected') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.rejected') }}" class="menu-link"><div>Rejected</div></a>
+                    <li class="menu-item {{ request()->routeIs('leaves.processed') ? 'active' : '' }}">
+                        <a href="{{ route('leaves.processed') }}" class="menu-link"><div>Processed Leaves</div></a>
                     </li>
                 </ul>
             </li>
@@ -199,11 +196,8 @@
                     <li class="menu-item {{ request()->routeIs('leaves.pending') ? 'active' : '' }}">
                         <a href="{{ route('leaves.pending') }}" class="menu-link"><div>Pending</div></a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('leaves.accepted') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.accepted') }}" class="menu-link"><div>Accepted</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('leaves.rejected') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.rejected') }}" class="menu-link"><div>Rejected</div></a>
+                    <li class="menu-item {{ request()->routeIs('leaves.processed') ? 'active' : '' }}">
+                        <a href="{{ route('leaves.processed') }}" class="menu-link"><div>Processed Leaves</div></a>
                     </li>
                 </ul>
             </li>
