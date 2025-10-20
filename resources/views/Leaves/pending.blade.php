@@ -33,7 +33,6 @@
                             <th>Duration</th>
                             <th>Date Requested</th>
                             <th>Status</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -63,23 +62,6 @@
                                     };
                                 @endphp
                                 <span class="badge {{ $badgeClass }}">{{ $status }}</span>
-                            </td>
-                            <td>
-                                @if(auth()->user()->hasRole('admin') || auth()->user()->hasRole('hr-officer') || auth()->user()->hasRole('super-admin'))
-                                    @if($leave->status === 'Pending')
-                                    <div class="dropdown">
-                                        <button class="btn btn-sm btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">&#x22EE;</button>
-                                        <ul class="dropdown-menu">
-                                            <li><button class="dropdown-item text-success approve-btn" data-id="{{ $leave->id }}">Approve</button></li>
-                                            <li><button class="dropdown-item text-danger reject-btn" data-id="{{ $leave->id }}">Reject</button></li>
-                                        </ul>
-                                    </div>
-                                    @else
-                                        <span class="text-muted">Action Taken</span>
-                                    @endif
-                                @else
-                                    <span class="text-muted">No actions</span>
-                                @endif
                             </td>
                         </tr>
                         @endforeach
@@ -116,7 +98,6 @@
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function(){
     const tableRows = document.querySelectorAll('.table-row');
@@ -125,8 +106,6 @@ document.addEventListener('DOMContentLoaded', function(){
     // Show modal
     tableRows.forEach(row=>{
         row.addEventListener('click', e=>{
-            if(e.target.closest('.approve-btn') || e.target.closest('.reject-btn')) return;
-
             const modal = new bootstrap.Modal(document.getElementById('leaveModal'));
             document.getElementById('modal-requestor').textContent = row.querySelector('td:nth-child(2)').textContent;
             document.getElementById('modal-position').textContent = row.querySelector('td:nth-child(3)').textContent;
@@ -139,73 +118,17 @@ document.addEventListener('DOMContentLoaded', function(){
         });
     });
 
-    // Approve/Reject buttons
-    document.addEventListener('click', function(e){
-        const btn = e.target.closest('.approve-btn, .reject-btn');
-        if(!btn) return;
-
-        const action = btn.classList.contains('approve-btn') ? 'approve' : 'reject';
-        const leaveId = btn.dataset.id;
-        const row = document.querySelector(`.table-row[data-id="${leaveId}"]`);
-        const status = row.dataset.status;
-
-        if(status !== 'Pending'){
-            Swal.fire('Action not allowed', 'This leave has already been processed.', 'info');
-            return;
-        }
-
-        Swal.fire({
-            title: `Are you sure you want to ${action} this leave request?`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonText: 'Yes',
-            cancelButtonText: 'Cancel'
-        }).then(result=>{
-            if(result.isConfirmed){
-                const formData = new FormData();
-                formData.append('_method','PUT');
-
-                fetch(`/leaves/${action}/${leaveId}`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success){
-                        const badge = row.querySelector('td:nth-child(8) .badge');
-                        badge.textContent = data.status;
-                        badge.className = 'badge ' + (data.status==='Approved'?'bg-success':'bg-danger');
-                        row.dataset.status = data.status;
-                        applyFilter();
-                        Swal.fire('Success', `Leave has been ${data.status.toLowerCase()}.`, 'success');
-                    } else {
-                        Swal.fire('Error', data.message, 'error');
-                    }
-                })
-                .catch(err=>{
-                    Swal.fire('Error', 'Something went wrong.', 'error');
-                    console.error(err);
-                });
-            }
-        });
-    });
-
-    statusFilter.addEventListener('change', applyFilter);
-    function applyFilter(){
+    // Status filter
+    statusFilter.addEventListener('change', function(){
         const selected = statusFilter.value;
         tableRows.forEach(row=>{
             row.style.display = (selected==='All'||row.dataset.status===selected)?'':'none';
         });
-    }
+    });
 });
 </script>
 
 <style>
-/* Remove hover highlight and header background */
 #leave-table thead th {
     background-color: transparent !important;
     color: #333 !important;
