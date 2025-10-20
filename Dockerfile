@@ -4,7 +4,7 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 COPY . .
-RUN npm run build
+RUN npm run build   # Output: /app/dist
 
 # Stage 2 - Backend (Laravel + PHP + Composer)
 FROM php:8.2-fpm AS backend
@@ -19,18 +19,18 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Copy app files
+# Copy Laravel app files
 COPY . .
 
 # Copy built frontend from Stage 1
-COPY --from=frontend /app/public/dist ./public/dist
+COPY --from=frontend /app/dist ./public/dist
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
 # Laravel setup
-RUN php artisan config:clear && \
-    php artisan route:clear && \
-    php artisan view:clear
+RUN php artisan config:clear \
+    && php artisan route:clear \
+    && php artisan view:clear
 
 CMD ["php-fpm"]
