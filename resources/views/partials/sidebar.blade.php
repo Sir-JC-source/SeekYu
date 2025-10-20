@@ -106,11 +106,26 @@
             </li>
 
             {{-- Incident Reports --}}
-            <li class="menu-item {{ request()->routeIs('incident-reports.index') ? 'active' : '' }}">
-                <a href="{{ route('incident-reports.index') }}" class="menu-link">
+            <li class="menu-item {{ request()->is('incident-reports*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-alert-triangle menu-icon"></i>
                     <div>Incident Reports</div>
                 </a>
+                <ul class="menu-sub">
+                    {{-- Submit IR visible to super-admin, admin, hr-officer, head-guard, security-guard --}}
+                    @if(in_array($userRole, ['super-admin','admin','hr-officer','head-guard','security-guard']))
+                        <li class="menu-item {{ request()->routeIs('incident-reports.index') ? 'active' : '' }}">
+                            <a href="{{ route('incident-reports.index') }}" class="menu-link"><div>Submit IR</div></a>
+                        </li>
+                    @endif
+
+                    {{-- IR Logs visible only to super-admin and admin --}}
+                    @if(in_array($userRole, ['super-admin','admin']))
+                        <li class="menu-item {{ request()->routeIs('incident-reports.logs') ? 'active' : '' }}">
+                            <a href="{{ route('incident-reports.logs') }}" class="menu-link"><div>IR Logs</div></a>
+                        </li>
+                    @endif
+                </ul>
             </li>
 
             {{-- Add Admin Account --}}
@@ -203,11 +218,26 @@
             </li>
 
             {{-- Incident Reports --}}
-            <li class="menu-item {{ request()->routeIs('incident-reports.index') ? 'active' : '' }}">
-                <a href="{{ route('incident-reports.index') }}" class="menu-link">
+            <li class="menu-item {{ request()->is('incident-reports*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-alert-triangle menu-icon"></i>
                     <div>Incident Reports</div>
                 </a>
+                <ul class="menu-sub">
+                    {{-- Submit IR visible to super-admin, admin, hr-officer, head-guard, security-guard --}}
+                    @if(in_array($userRole, ['super-admin','admin','hr-officer','head-guard','security-guard']))
+                        <li class="menu-item {{ request()->routeIs('incident-reports.index') ? 'active' : '' }}">
+                            <a href="{{ route('incident-reports.index') }}" class="menu-link"><div>Submit IR</div></a>
+                        </li>
+                    @endif
+
+                    {{-- IR Logs visible only to super-admin and admin --}}
+                    @if(in_array($userRole, ['super-admin','admin']))
+                        <li class="menu-item {{ request()->routeIs('incident-reports.logs') ? 'active' : '' }}">
+                            <a href="{{ route('incident-reports.logs') }}" class="menu-link"><div>IR Logs</div></a>
+                        </li>
+                    @endif
+                </ul>
             </li>
         @endif
 
@@ -238,6 +268,19 @@
                     </li>
                 </ul>
             </li>
+
+            {{-- Incident Reports --}}
+            <li class="menu-item {{ request()->is('incident-reports*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="ti ti-alert-triangle menu-icon"></i>
+                    <div>Incident Reports</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('incident-reports.index') ? 'active' : '' }}">
+                        <a href="{{ route('incident-reports.index') }}" class="menu-link"><div>Submit IR</div></a>
+                    </li>
+                </ul>
+            </li>
         @endif
 
         {{-- Security Guard Menu --}}
@@ -251,6 +294,19 @@
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
                         <a href="{{ route('leaves.request') }}" class="menu-link"><div>Request</div></a>
+                    </li>
+                </ul>
+            </li>
+
+            {{-- Incident Reports --}}
+            <li class="menu-item {{ request()->is('incident-reports*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="ti ti-alert-triangle menu-icon"></i>
+                    <div>Incident Reports</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('incident-reports.index') ? 'active' : '' }}">
+                        <a href="{{ route('incident-reports.index') }}" class="menu-link"><div>Submit IR</div></a>
                     </li>
                 </ul>
             </li>

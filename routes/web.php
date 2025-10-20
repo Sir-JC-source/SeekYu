@@ -95,20 +95,26 @@ Route::middleware('auth')->group(function () {
         Route::get('/pending', [LeaveController::class, 'pending'])->name('pending');
         Route::get('/accepted', [LeaveController::class, 'accepted'])->name('accepted');
         Route::get('/rejected', [LeaveController::class, 'rejected'])->name('rejected');
-
-        // New route for processed leaves view
         Route::get('/processed', [LeaveController::class, 'processed'])->name('processed');
-
         Route::get('/request', [LeaveController::class, 'create'])->name('request');
         Route::post('/request/store', [LeaveController::class, 'store'])->name('request.store');
         Route::match(['put','post'],'/approve/{id}', [LeaveController::class, 'approve'])->name('approve');
         Route::match(['put','post'],'/reject/{id}', [LeaveController::class, 'reject'])->name('reject');
     });
 
-    // Incident Reports
-    Route::prefix('incident-reports')->group(function () {
-        Route::get('/', [IncidentReportController::class, 'index'])->name('incident-reports.index');
-    });
+   // Incident Reports
+Route::prefix('incident-reports')->group(function () {
+
+    // Main page for IR (so route('incident-reports.index') works)
+    Route::get('/', [IncidentReportController::class, 'create'])->name('incident-reports.index');
+
+    // Submit IR
+    Route::get('/submit', [IncidentReportController::class, 'create'])->name('incident-reports.submit');
+    Route::post('/store', [IncidentReportController::class, 'store'])->name('incident-reports.store');
+
+    // IR Logs
+    Route::get('/logs', [IncidentReportController::class, 'logs'])->name('incident-reports.logs');
+});
 
     // Admin
     Route::prefix('admin')->group(function () {

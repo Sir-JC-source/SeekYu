@@ -68,6 +68,7 @@
                         <option value="Whole Shift" {{ old('duration') == 'Whole Shift' ? 'selected' : '' }}>Whole Shift</option>
                         <option value="Half-Shift Early Out" {{ old('duration') == 'Half-Shift Early Out' ? 'selected' : '' }}>Half-Shift Early Out</option>
                         <option value="Half-Shift Late In" {{ old('duration') == 'Half-Shift Late In' ? 'selected' : '' }}>Half-Shift Late In</option>
+                        <option value="Multi-Day" {{ old('duration') == 'Multi-Day' ? 'selected' : '' }}>Multi-Day</option>
                     </select>
                     @error('duration')
                         <span class="invalid-feedback">{{ $message }}</span>
@@ -100,7 +101,7 @@
                 <div class="col-md-6 mb-3">
                     <label for="position" class="form-label">Position</label>
                     @php
-                        $role = Auth::user()->role; // or getRoleNames()->first()
+                        $role = Auth::user()->role;
                         $position = match($role) {
                             'admin' => 'Admin',
                             'hr-officer' => 'HR Officer',
@@ -112,7 +113,7 @@
                     <input type="text" class="form-control" id="position" name="position" value="{{ $position }}" readonly>
                 </div>
 
-                {{-- Leave Credits (readonly, prefilled from user) --}}
+                {{-- Leave Credits (readonly) --}}
                 <div class="col-md-6 mb-3">
                     <label for="leave_credits" class="form-label">Leave Credits</label>
                     <input type="number" class="form-control" 
@@ -121,7 +122,7 @@
                            readonly>
                 </div>
 
-                {{-- Submit Button --}}
+                {{-- Submit --}}
                 <div class="col-12 mt-3">
                     <button type="submit" class="btn btn-primary">Submit Request</button>
                     <a href="{{ route('dashboard.index') }}" class="btn btn-secondary">Cancel</a>
@@ -134,25 +135,22 @@
 
 {{-- Toast Notifications --}}
 <div class="position-fixed top-0 end-0 p-3" style="z-index:1080">
-
     @if(session('success'))
-    <div id="successToast" class="toast align-items-center text-bg-success border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body">{{ session('success') }}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        <div id="successToast" class="toast align-items-center text-bg-success border-0 show" role="alert">
+            <div class="d-flex">
+                <div class="toast-body">{{ session('success') }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
         </div>
-    </div>
     @endif
-
     @if($errors->any())
-    <div id="errorToast" class="toast align-items-center text-bg-danger border-0 show" role="alert" aria-live="assertive" aria-atomic="true">
-        <div class="d-flex">
-            <div class="toast-body"><strong>Validation Error:</strong> {{ $errors->first() }}</div>
-            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        <div id="errorToast" class="toast align-items-center text-bg-danger border-0 show" role="alert">
+            <div class="d-flex">
+                <div class="toast-body"><strong>Validation Error:</strong> {{ $errors->first() }}</div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+            </div>
         </div>
-    </div>
     @endif
-
 </div>
 @endsection
 
@@ -160,14 +158,41 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     const successToastEl = document.getElementById('successToast');
-    if (successToastEl) {
-        new bootstrap.Toast(successToastEl, { delay: 5000 }).show();
-    }
+    if (successToastEl) new bootstrap.Toast(successToastEl, { delay: 5000 }).show();
 
     const errorToastEl = document.getElementById('errorToast');
-    if (errorToastEl) {
-        new bootstrap.Toast(errorToastEl, { delay: 7000 }).show();
-    }
+    if (errorToastEl) new bootstrap.Toast(errorToastEl, { delay: 7000 }).show();
+
+    const durationEl = document.getElementById('duration');
+    const dateFromEl = document.getElementById('date_from');
+    const dateToEl = document.getElementById('date_to');
+
+    durationEl.addEventListener('change', () => {
+        const duration = durationEl.value;
+        const today = new Date().toISOString().split('T')[0];
+
+        if (duration === 'Whole Shift' || duration === 'Half-Shift Early Out' || duration === 'Half-Shift Late In') {
+            dateFromEl.value = today;
+            dateToEl.value = today;
+            dateToEl.removeAttribute('max'); // remove max for single-day
+            dateFromEl.readOnly = true;
+            dateToEl.readOnly = true;
+        } else if (duration === 'Multi-Day') {
+            dateFromEl.value = today;
+            dateToEl.value = today;
+            const maxDate = new Date();
+            maxDate.setDate(maxDate.getDate() + 5);
+            dateToEl.max = maxDate.toISOString().split('T')[0];
+            dateFromEl.readOnly = false;
+            dateToEl.readOnly = false;
+        } else {
+            dateFromEl.readOnly = false;
+            dateToEl.readOnly = false;
+        }
+    });
+
+    // Trigger on page load in case old value exists
+    durationEl.dispatchEvent(new Event('change'));
 });
 </script>
 @endsection
