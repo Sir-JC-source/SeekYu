@@ -117,7 +117,7 @@
                             {{-- Submit Button --}}
                             <div class="col-12 mt-2">
                                 <input type="hidden" name="status" value="Active">
-                                <button type="submit" class="btn btn-primary me-2">Create Employee</button>
+                                <button type="submit" class="btn btn-primary me-2">Submit</button>
                                 <a href="{{ route('employee.list') }}" class="btn btn-secondary">Cancel</a>
                             </div>
                         </div>

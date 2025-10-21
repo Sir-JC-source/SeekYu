@@ -70,11 +70,17 @@
                                         <i class="ti ti-eye"></i> View Employee Card
                                     </button>
                                 </li>
-                                <li>
-                                    <button class="dropdown-item text-danger delete-employee-btn" data-id="{{ $employee->id }}">
-                                        <i class="ti ti-trash"></i> Terminate
-                                    </button>
-                                </li>
+                                @if(!in_array($employee->employee_number, ['00000','00001','00002']))
+                                    @php
+                                        $userRole = auth()->user()->role;
+                                        $terminateText = in_array($userRole, ['super-admin','admin']) ? 'Terminate' : 'Request Termination';
+                                    @endphp
+                                    <li>
+                                        <button class="dropdown-item text-danger delete-employee-btn" data-id="{{ $employee->id }}">
+                                            <i class="ti ti-trash"></i> {{ $terminateText }}
+                                        </button>
+                                    </li>
+                                @endif
                             </ul>
                         </div>
                     </td>
@@ -112,21 +118,15 @@
   </div>
 </div>
 
-{{-- Employee Profile Modal Updated --}}
+{{-- Employee Profile Modal --}}
 <div class="modal fade" id="employeeProfileModal" tabindex="-1" aria-labelledby="employeeProfileLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow-sm" style="border-radius:12px; overflow:hidden; max-width:600px;">
       <div style="background-color:#f7f7f7; padding:20px 25px 20px 20px; position:relative;">
-          
-          {{-- Close X Button in upper right --}}
           <button type="button" class="btn-close position-absolute top-2 end-0 mt-2 me-4" data-bs-dismiss="modal" aria-label="Close"></button>
-          
-          {{-- Logo --}}
           <div class="text-center mb-3">
               <img src="{{ asset('storage/logo.png') }}" alt="Company Logo" style="height:65px; object-fit:contain;">
           </div>
-
-          {{-- Body --}}
           <div style="display:flex; gap:20px; align-items:flex-start;">
               <div style="flex-shrink:0;">
                   <img id="profileImage" src="" alt="Employee Image" 
@@ -139,8 +139,6 @@
                   <input type="text" class="form-control bg-light border-0" id="profileDate" readonly style="max-width:320px;">
               </div>
           </div>
-
-          {{-- EMPLOYEE CARD Text --}}
           <div class="text-center mt-3 fw-bold" style="color:#555;">EMPLOYEE CARD</div>
       </div>
     </div>
@@ -150,26 +148,16 @@
 
 @push('page-scripts')
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <style>
     tr.employee-row:hover { background-color: #f0f8ff; cursor: pointer; }
     .modal-content { border-radius: 12px; background-color: #fff; }
     .modal-body p { font-size: 0.875rem; color: #333; }
-    .form-control[readonly] {
-        background-color: #f1f1f1;
-        font-size: 0.9rem;
-        color: #333;
-        cursor: default;
-    }
+    .form-control[readonly] { background-color: #f1f1f1; font-size: 0.9rem; color: #333; cursor: default; }
 </style>
-
 <script>
 $(document).ready(function() {
-    var table = $('#employee-table').DataTable({
-        "order": [[ 1, "asc" ]]
-    });
+    var table = $('#employee-table').DataTable({"order": [[1,"asc"]]});
 
-    // Clickable rows to open compact modal
     $('#employee-table tbody').on('click', 'tr.employee-row', function(e) {
         if($(e.target).closest('.dropdown, .delete-employee-btn').length) return;
 
@@ -179,15 +167,12 @@ $(document).ready(function() {
         $('#modalPosition').text(row.data('position'));
         $('#modalDate').text(row.data('date'));
         var status = row.data('status');
-        var statusBadge = status === 'active' 
-            ? '<span class="badge bg-success">Active</span>' 
-            : '<span class="badge bg-secondary">Inactive</span>';
+        var statusBadge = status === 'active' ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Inactive</span>';
         $('#modalStatus').html(statusBadge);
         $('#modalImage').attr('src', row.data('image'));
         $('#employeeModal').modal('show');
     });
 
-    // View button to open new profile modal
     $(document).on('click', '.view-employee-btn', function() {
         var btn = $(this);
         $('#profileImage').attr('src', btn.data('image'));
@@ -198,14 +183,16 @@ $(document).ready(function() {
         $('#employeeProfileModal').modal('show');
     });
 
-    // Delete employee with SweetAlert2
     $(document).on('click', '.delete-employee-btn', function() {
         var employeeId = $(this).data('id');
         var row = $(this).closest('tr');
+        var isRequest = $(this).text().trim() === 'Request Termination';
+        var swalTitle = isRequest ? 'Send Termination Request?' : 'Are you sure?';
+        var swalText = isRequest ? 'Do you want to request termination for this employee?' : 'Do you really want to terminate this employee?';
 
         Swal.fire({
-            title: 'Are you sure?',
-            text: "Do you really want to terminate this employee?",
+            title: swalTitle,
+            text: swalText,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
@@ -214,21 +201,17 @@ $(document).ready(function() {
             cancelButtonText: 'No.'
         }).then((result) => {
             if (result.isConfirmed) {
-                $.ajax({
-                    url: '{{ url("employee") }}/' + employeeId,
-                    type: 'POST',
-                    data: {
-                        _method: 'DELETE',
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        table.row(row).remove().draw();
-                        Swal.fire('Deleted!', 'Employee has been deleted.', 'success');
-                    },
-                    error: function(xhr) {
-                        Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
-                    }
-                });
+                if(isRequest){
+                    Swal.fire('Requested!', 'Termination request sent.', 'success');
+                } else {
+                    $.ajax({
+                        url: '{{ url("employee") }}/' + employeeId,
+                        type: 'POST',
+                        data: {_method: 'DELETE', _token: '{{ csrf_token() }}'},
+                        success: function(){ table.row(row).remove().draw(); Swal.fire('Deleted!', 'Employee has been deleted.', 'success'); },
+                        error: function(){ Swal.fire('Error!', 'Something went wrong. Please try again.', 'error'); }
+                    });
+                }
             }
         });
     });

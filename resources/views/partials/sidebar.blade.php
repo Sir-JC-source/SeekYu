@@ -97,7 +97,7 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.pending') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.pending') }}" class="menu-link"><div>Pending</div></a>
+                        <a href="{{ route('leaves.pending') }}" class="menu-link"><div>Pending Leaves</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('leaves.processed') ? 'active' : '' }}">
                         <a href="{{ route('leaves.processed') }}" class="menu-link"><div>Processed Leaves</div></a>
@@ -206,7 +206,7 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.request') }}" class="menu-link"><div>Request</div></a>
+                        <a href="{{ route('leaves.request') }}" class="menu-link"><div>File Leave</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('leaves.pending') ? 'active' : '' }}">
                         <a href="{{ route('leaves.pending') }}" class="menu-link"><div>Pending</div></a>
@@ -264,7 +264,7 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.request') }}" class="menu-link"><div>Request</div></a>
+                        <a href="{{ route('leaves.request') }}" class="menu-link"><div>File Leave</div></a>
                     </li>
                 </ul>
             </li>
@@ -293,7 +293,7 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.request') }}" class="menu-link"><div>Request</div></a>
+                        <a href="{{ route('leaves.request') }}" class="menu-link"><div>File Leave</div></a>
                     </li>
                 </ul>
             </li>

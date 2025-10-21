@@ -15,10 +15,27 @@ return new class extends Migration
             $table->id();
             $table->string('employee_number', 5)->unique();
             $table->string('full_name');
-            $table->enum('position', ['Admin', 'HR Officer', 'Head Guard', 'Security Guard']);
+            $table->enum('position', [
+                'Super Administrator',
+                'Administrator',
+                'HR Officer',
+                'Head Guard',
+                'Security Guard'
+            ]);
             $table->date('date_hired');
             $table->enum('status', ['Active', 'Inactive'])->default('Active');
+            
+            // ✅ Added missing fields
+            $table->string('designation')->nullable();
+            $table->string('deployment_status')->default('assigned');
             $table->string('employee_image')->nullable();
+            $table->string('contact_no', 20)->default('0000000000'); // ensure not null
+            $table->string('province')->nullable();
+            $table->string('city')->nullable();
+            $table->time('shift_in')->nullable();
+            $table->time('shift_out')->nullable();
+            $table->unsignedBigInteger('assigned_head_guard_id')->nullable();
+
             $table->timestamps();
         });
     }

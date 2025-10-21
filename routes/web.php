@@ -11,6 +11,7 @@ use App\Http\Controllers\Leave\LeaveController;
 use App\Http\Controllers\IncidentReport\IncidentReportController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\JobPosting\JobPostingController;
+use App\Http\Controllers\ProfileController; // Added
 
 // Root route
 Route::get('/', function () {
@@ -102,19 +103,13 @@ Route::middleware('auth')->group(function () {
         Route::match(['put','post'],'/reject/{id}', [LeaveController::class, 'reject'])->name('reject');
     });
 
-   // Incident Reports
-Route::prefix('incident-reports')->group(function () {
-
-    // Main page for IR (so route('incident-reports.index') works)
-    Route::get('/', [IncidentReportController::class, 'create'])->name('incident-reports.index');
-
-    // Submit IR
-    Route::get('/submit', [IncidentReportController::class, 'create'])->name('incident-reports.submit');
-    Route::post('/store', [IncidentReportController::class, 'store'])->name('incident-reports.store');
-
-    // IR Logs
-    Route::get('/logs', [IncidentReportController::class, 'logs'])->name('incident-reports.logs');
-});
+    // Incident Reports
+    Route::prefix('incident-reports')->group(function () {
+        Route::get('/', [IncidentReportController::class, 'create'])->name('incident-reports.index');
+        Route::get('/submit', [IncidentReportController::class, 'create'])->name('incident-reports.submit');
+        Route::post('/store', [IncidentReportController::class, 'store'])->name('incident-reports.store');
+        Route::get('/logs', [IncidentReportController::class, 'logs'])->name('incident-reports.logs');
+    });
 
     // Admin
     Route::prefix('admin')->group(function () {
@@ -124,4 +119,12 @@ Route::prefix('incident-reports')->group(function () {
 
     // Force password change
     Route::post('/force-change-password', [LoginController::class, 'forceChangePassword'])->name('password.forceChange');
+
+    // Profile Routes (NEW)
+   Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::post('/profile/update', [ProfileController::class, 'update'])->name('employee.update-profile');
+});
+
+
 });

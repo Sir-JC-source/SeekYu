@@ -6,23 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::table('registered_users', function (Blueprint $table) {
-            $table->string('faculty_no')->nullable()->after('student_no');
+            $table->string('contact_no', 20)->nullable()->after('first_login');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::table('registered_users', function (Blueprint $table) {
-            //
+            $table->dropColumn('contact_no');
         });
     }
 };

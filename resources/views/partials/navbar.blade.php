@@ -1,7 +1,8 @@
 <nav
     class="layout-navbar container-xxl navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
-    id="layout-navbar">
-    
+    id="layout-navbar"
+    style="position: sticky; top: 0; z-index: 1030;">
+
     <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0 d-xl-none">
         <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
             <i class="ti ti-menu-2 ti-sm"></i>
@@ -15,7 +16,7 @@
             <!-- Hello message -->
             <li class="nav-item d-flex align-items-center me-3">
                 <span class="navbar-text">
-                    Hello, {{ auth()->user()->fullname }}
+                    Hello, {{ auth()->user()->employee ? auth()->user()->employee->full_name : auth()->user()->name }}
                 </span>
             </li>
 
@@ -44,7 +45,6 @@
             </li>
             <!-- /Style Switcher-->
 
-            
             <!-- Notification -->
             <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
@@ -60,7 +60,7 @@
                                 data-bs-placement="top" title="Mark all as read"><i class="ti ti-mail-opened fs-4"></i></a>
                         </div>
                     </li>
-                    <li class="dropdown-notifications-list scrollable-container">
+                    <li class="dropdown-notifications-list scrollable-container" style="max-height: 300px; overflow-y:auto;">
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item list-group-item-action dropdown-notifications-item">
                                 <!-- notifications go here -->
@@ -80,30 +80,35 @@
             <!-- User -->
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
-                    <div class="avatar avatar-online">
-                        <img src="../../assets/img/avatars/1.png" alt class="h-auto rounded-circle" />
+                    <div class="avatar avatar-online" style="width: 32px; height: 32px;">
+                        <img 
+                            src="{{ auth()->user()->employee && auth()->user()->employee->employee_image ? asset('storage/' . auth()->user()->employee->employee_image) : asset('assets/default-avatar.png') }}" 
+                            alt="User Avatar" class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
                     <li>
-                        <a class="dropdown-item" href="pages-account-settings-account.html">
+                        <a class="dropdown-item" href="javascript:void(0);">
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
-                                    <div class="avatar avatar-online">
-                                        <img src="../../assets/img/avatars/1.png" alt class="h-auto rounded-circle" />
+                                    <div class="avatar avatar-online" style="width: 32px; height: 32px;">
+                                        <img 
+                                            src="{{ auth()->user()->employee && auth()->user()->employee->employee_image ? asset('storage/' . auth()->user()->employee->employee_image) : asset('assets/default-avatar.png') }}" 
+                                            alt="User Avatar" class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <span class="fw-medium d-block">{{ auth()->user()->student_no }}</span>
+                                    <span class="fw-medium d-block">{{ auth()->user()->employee ? auth()->user()->employee->full_name : auth()->user()->name }}</span>
                                 </div>
                             </div>
                         </a>
                     </li>
                     <li><div class="dropdown-divider"></div></li>
                     <li>
-                        <a class="dropdown-item" href="pages-profile-user.html">
+                        <!-- Redirects to Profile page -->
+                        <a class="dropdown-item" href="{{ route('profile.show') }}">
                             <i class="ti ti-user-check me-2 ti-sm"></i>
-                            <span class="align-middle">My Profile</span>
+                            <span class="align-middle">My Account</span>
                         </a>
                     </li>
                     <li>
@@ -130,3 +135,6 @@
     </div>
 
 </nav>
+
+<!-- Optional spacer so sticky navbar doesn't overlap content -->
+<div style="height: 10px;"></div>

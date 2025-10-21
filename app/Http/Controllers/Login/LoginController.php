@@ -22,7 +22,6 @@ class LoginController extends Controller
 
     public function store(Request $request)
     {
-        // Validate registration form
         $request->validate([
             'fullname'    => 'required|string|max:255',
             'login_id'    => 'required|digits:5|unique:registered_users,login_id',
@@ -35,7 +34,7 @@ class LoginController extends Controller
         $user->login_id       = $request->login_id;
         $user->password       = Hash::make($request->password);
         $user->role           = $request->role;
-        $user->account_status = 'Pending';
+        $user->account_status = 'pending'; // default until approved
         $user->first_login    = true;
         $user->save();
 
@@ -55,7 +54,7 @@ class LoginController extends Controller
         $username = $request->username;
         $password = $request->password;
 
-        // SUPER ADMIN (login by fullname)
+        // SUPER ADMIN LOGIN (via fullname)
         $superAdmin = RegisteredUsers::where('fullname', $username)
             ->whereHas('roles', fn($q) => $q->where('name', 'super-admin'))
             ->first();
@@ -67,13 +66,13 @@ class LoginController extends Controller
                 ->with('success', 'Welcome Super Admin!');
         }
 
-        // FACULTY (login by faculty_no)
+        // FACULTY LOGIN
         $faculty = RegisteredUsers::where('faculty_no', $username)
             ->whereHas('roles', fn($q) => $q->where('name', 'faculty'))
             ->first();
 
         if ($faculty) {
-            if ($faculty->account_status !== 'Approved') {
+            if (!in_array(strtolower($faculty->account_status), ['approved', 'active'])) {
                 return back()->with('error', 'Your faculty account is not yet approved.');
             }
 
@@ -89,13 +88,13 @@ class LoginController extends Controller
             return redirect()->route('dashboard.index')->with('success', 'Welcome Faculty!');
         }
 
-        // STUDENT (login by student_no)
+        // STUDENT LOGIN
         $student = RegisteredUsers::where('student_no', $username)
             ->whereHas('roles', fn($q) => $q->where('name', 'student'))
             ->first();
 
         if ($student) {
-            if ($student->account_status !== 'Approved') {
+            if (!in_array(strtolower($student->account_status), ['approved', 'active'])) {
                 return back()->with('error', 'Your student account is not yet approved.');
             }
 
@@ -111,7 +110,7 @@ class LoginController extends Controller
             return redirect()->route('dashboard.index')->with('success', 'Welcome Student!');
         }
 
-        // OTHER ROLES USING 5-DIGIT LOGIN ID
+        // OTHER ROLES (Admin, HR, Head Guard, Guard, Client, Applicant)
         $otherRoles = ['admin', 'hr-officer', 'security-guard', 'head-guard', 'client', 'applicant'];
 
         $user = RegisteredUsers::where('login_id', $username)
@@ -119,7 +118,7 @@ class LoginController extends Controller
             ->first();
 
         if ($user) {
-            if ($user->account_status !== 'Approved') {
+            if (!in_array(strtolower($user->account_status), ['approved', 'active'])) {
                 return back()->with('error', 'Your account is not yet approved.');
             }
 
@@ -133,7 +132,7 @@ class LoginController extends Controller
             if ($user->first_login) session(['force_password_change' => true]);
 
             return redirect()->route('dashboard.index')
-                ->with('success', 'Welcome ' . ucfirst($user->role) . '!');
+                ->with('success', 'Welcome ' . ucfirst(str_replace('-', ' ', $user->role)) . '!');
         }
 
         return back()->with('error', 'No matching account found.');

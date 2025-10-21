@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\RegisteredUsers;
+use App\Models\Employee;
 use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Role;
 
@@ -11,25 +12,36 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
-        // Ensure the 'admin' role exists
+        // ✅ Ensure the 'admin' role exists
         $role = Role::firstOrCreate(['name' => 'admin']);
 
-        // Create the admin account
+        // ✅ Create or get Admin user
         $user = RegisteredUsers::firstOrCreate(
-            ['login_id' => '00001'], // 5-digit login ID
+            ['email' => 'admin@example.com'],
             [
-                'fullname'       => 'Administrator',
-                'email'          => 'admin@example.com', // optional email
-                'password'       => Hash::make('Admin1234'), // default password
-                'role'           => 'admin',
-                'account_status' => 'Approved',
-                'first_login'    => true,
+                'fullname'        => 'System Administrator',
+                'student_no'      => null,
+                'faculty_no'      => null,
+                'login_id'        => '00001',
+                'email'           => 'admin@example.com',
+                'address'         => 'System HQ',
+                'password'        => Hash::make('password123'),
+                'role'            => 'admin',
+                'account_status'  => 'active',
+                'profile_picture' => null,
+                'status'          => 'active',
+                'first_login'     => true,
+                'contact_no'      => '09123456789',
             ]
         );
 
-        // Assign the role
+        // ✅ Assign role
         $user->assignRole($role);
 
-        echo "Admin account created: Login ID 00001, Password Admin1234\n";
+        // ✅ Auto create Employee record
+        Employee::createFromUser($user);
+
+        $this->command->info('✅ Admin account created successfully.');
+        $this->command->info('   Login: admin@example.com | Password: password123');
     }
 }
