@@ -1,12 +1,12 @@
 @extends('Layouts.vuexy')
 
-@section('title', 'Archived Employees')
+@section('title', 'Terminated Employees')
 
 @section('content')
 <div class="container mt-4">
     <div class="card shadow-sm rounded-3">
         <div class="card-header">
-            <h5 class="mb-0">Archived Employees</h5>
+            <h5 class="mb-0">Terminated Employees</h5>
         </div>
 
         <div class="card-body">
@@ -17,8 +17,7 @@
                         <th>Full Name</th>
                         <th>Position</th>
                         <th>Date Hired</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th>Date of Termination</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -28,11 +27,12 @@
                             <td>{{ $employee->full_name }}</td>
                             <td>{{ $employee->position }}</td>
                             <td>{{ \Carbon\Carbon::parse($employee->date_hired)->format('M d, Y') }}</td>
-                            <td><span class="badge bg-secondary">Archived</span></td>
                             <td>
-                                <button class="btn btn-sm btn-success restore-btn" data-id="{{ $employee->id }}">
-                                    <i class="ti ti-refresh"></i> Restore
-                                </button>
+                                @if($employee->deleted_at)
+                                    {{ \Carbon\Carbon::parse($employee->deleted_at)->format('M d, Y') }}
+                                @else
+                                    N/A
+                                @endif
                             </td>
                         </tr>
                     @endforeach
@@ -48,49 +48,6 @@
 $(document).ready(function() {
     $('#archived-employee-table').DataTable({
         "order": [[1, "asc"]]
-    });
-
-    // AJAX Restore with SweetAlert
-    $(document).on('click', '.restore-btn', function() {
-        var employeeId = $(this).data('id');
-
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "This employee will be restored!",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#28a745',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, Restore',
-            cancelButtonText: 'No'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '/employee/restore/' + employeeId,
-                    type: 'PUT',
-                    data: {
-                        _token: '{{ csrf_token() }}'
-                    },
-                    success: function(response) {
-                        Swal.fire(
-                            'Restored!',
-                            response.message,
-                            'success'
-                        ).then(() => {
-                            // Redirect to Employee List after restore
-                            window.location.href = '{{ route("employee.list") }}';
-                        });
-                    },
-                    error: function(xhr) {
-                        Swal.fire(
-                            'Error!',
-                            xhr.responseJSON?.message || 'Something went wrong.',
-                            'error'
-                        );
-                    }
-                });
-            }
-        });
     });
 });
 </script>

@@ -46,7 +46,7 @@
                         <a href="{{ route('employee.create') }}" class="menu-link"><div>Add Employee</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('employee.archived') ? 'active' : '' }}">
-                        <a href="{{ route('employee.archived') }}" class="menu-link"><div>Archived Employees</div></a>
+                        <a href="{{ route('employee.archived') }}" class="menu-link"><div>Terminated Employees</div></a>
                     </li>
                 </ul>
             </li>
@@ -93,7 +93,7 @@
             <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-calendar-event menu-icon"></i>
-                    <div>Leave Requests</div>
+                    <div>Time Keeping</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.pending') ? 'active' : '' }}">
@@ -202,7 +202,7 @@
             <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-calendar-event menu-icon"></i>
-                    <div>Leave Requests</div>
+                    <div>Time Keeping</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
@@ -260,7 +260,7 @@
             <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-calendar-event menu-icon"></i>
-                    <div>Leave Requests</div>
+                    <div>Time Keeping</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
@@ -289,7 +289,7 @@
             <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-calendar-event menu-icon"></i>
-                    <div>Leave Requests</div>
+                    <div>Time Keeping</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">

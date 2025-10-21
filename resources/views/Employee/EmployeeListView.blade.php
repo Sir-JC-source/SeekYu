@@ -59,8 +59,20 @@
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="actionDropdown{{ $employee->id }}">
                                 <li>
+                                    <button class="dropdown-item view-employee-btn" 
+                                            data-id="{{ $employee->id }}"
+                                            data-number="{{ $employee->employee_number }}"
+                                            data-name="{{ $employee->full_name }}"
+                                            data-position="{{ $employee->position }}"
+                                            data-date="{{ \Carbon\Carbon::parse($employee->date_hired)->format('M d, Y') }}"
+                                            data-status="{{ strtolower($employee->status) }}"
+                                            data-image="{{ $employee->employee_image ? asset('storage/' . $employee->employee_image) : asset('assets/default-avatar.png') }}">
+                                        <i class="ti ti-eye"></i> View Employee Card
+                                    </button>
+                                </li>
+                                <li>
                                     <button class="dropdown-item text-danger delete-employee-btn" data-id="{{ $employee->id }}">
-                                        <i class="ti ti-trash"></i> Delete
+                                        <i class="ti ti-trash"></i> Terminate
                                     </button>
                                 </li>
                             </ul>
@@ -73,7 +85,7 @@
     </div>
 </div>
 
-{{-- Compact Centered Employee Modal --}}
+{{-- Compact Employee Modal --}}
 <div class="modal fade" id="employeeModal" tabindex="-1" aria-labelledby="employeeModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" style="max-width: 380px;">
     <div class="modal-content p-3 shadow-sm border-0 rounded-3">
@@ -99,17 +111,56 @@
     </div>
   </div>
 </div>
+
+{{-- Employee Profile Modal Updated --}}
+<div class="modal fade" id="employeeProfileModal" tabindex="-1" aria-labelledby="employeeProfileLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow-sm" style="border-radius:12px; overflow:hidden; max-width:600px;">
+      <div style="background-color:#f7f7f7; padding:20px 25px 20px 20px; position:relative;">
+          
+          {{-- Close X Button in upper right --}}
+          <button type="button" class="btn-close position-absolute top-2 end-0 mt-2 me-4" data-bs-dismiss="modal" aria-label="Close"></button>
+          
+          {{-- Logo --}}
+          <div class="text-center mb-3">
+              <img src="{{ asset('storage/logo.png') }}" alt="Company Logo" style="height:65px; object-fit:contain;">
+          </div>
+
+          {{-- Body --}}
+          <div style="display:flex; gap:20px; align-items:flex-start;">
+              <div style="flex-shrink:0;">
+                  <img id="profileImage" src="" alt="Employee Image" 
+                       style="width:150px; height:150px; object-fit:cover; border-radius:10px; border:2px solid #ddd;">
+              </div>
+              <div style="flex-grow:1; display:flex; flex-direction:column; justify-content:space-between; height:150px;">
+                  <input type="text" class="form-control bg-light border-0 mb-1" id="profileName" readonly style="max-width:320px;">
+                  <input type="text" class="form-control bg-light border-0 mb-1" id="profilePosition" readonly style="max-width:320px;">
+                  <input type="text" class="form-control bg-light border-0 mb-1" id="profileNumber" readonly style="max-width:320px;">
+                  <input type="text" class="form-control bg-light border-0" id="profileDate" readonly style="max-width:320px;">
+              </div>
+          </div>
+
+          {{-- EMPLOYEE CARD Text --}}
+          <div class="text-center mt-3 fw-bold" style="color:#555;">EMPLOYEE CARD</div>
+      </div>
+    </div>
+  </div>
+</div>
 @endsection
 
 @push('page-scripts')
-{{-- Include SweetAlert2 --}}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <style>
     tr.employee-row:hover { background-color: #f0f8ff; cursor: pointer; }
     .modal-content { border-radius: 12px; background-color: #fff; }
     .modal-body p { font-size: 0.875rem; color: #333; }
-    .modal-footer button { border-radius: 6px; }
+    .form-control[readonly] {
+        background-color: #f1f1f1;
+        font-size: 0.9rem;
+        color: #333;
+        cursor: default;
+    }
 </style>
 
 <script>
@@ -118,7 +169,7 @@ $(document).ready(function() {
         "order": [[ 1, "asc" ]]
     });
 
-    // Clickable rows to open modal
+    // Clickable rows to open compact modal
     $('#employee-table tbody').on('click', 'tr.employee-row', function(e) {
         if($(e.target).closest('.dropdown, .delete-employee-btn').length) return;
 
@@ -136,20 +187,31 @@ $(document).ready(function() {
         $('#employeeModal').modal('show');
     });
 
-    // Delete employee with SweetAlert2 confirmation
+    // View button to open new profile modal
+    $(document).on('click', '.view-employee-btn', function() {
+        var btn = $(this);
+        $('#profileImage').attr('src', btn.data('image'));
+        $('#profileName').val('Full Name: ' + btn.data('name'));
+        $('#profileNumber').val('Employee No: ' + btn.data('number'));
+        $('#profilePosition').val('Position: ' + btn.data('position'));
+        $('#profileDate').val('Date Hired: ' + btn.data('date'));
+        $('#employeeProfileModal').modal('show');
+    });
+
+    // Delete employee with SweetAlert2
     $(document).on('click', '.delete-employee-btn', function() {
         var employeeId = $(this).data('id');
         var row = $(this).closest('tr');
 
         Swal.fire({
             title: 'Are you sure?',
-            text: "Do you really want to delete this employee?",
+            text: "Do you really want to terminate this employee?",
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#d33',
             cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete it!',
-            cancelButtonText: 'No, cancel'
+            confirmButtonText: 'Yes!',
+            cancelButtonText: 'No.'
         }).then((result) => {
             if (result.isConfirmed) {
                 $.ajax({
@@ -161,18 +223,10 @@ $(document).ready(function() {
                     },
                     success: function(response) {
                         table.row(row).remove().draw();
-                        Swal.fire(
-                            'Deleted!',
-                            'Employee has been deleted.',
-                            'success'
-                        );
+                        Swal.fire('Deleted!', 'Employee has been deleted.', 'success');
                     },
                     error: function(xhr) {
-                        Swal.fire(
-                            'Error!',
-                            'Something went wrong. Please try again.',
-                            'error'
-                        );
+                        Swal.fire('Error!', 'Something went wrong. Please try again.', 'error');
                     }
                 });
             }

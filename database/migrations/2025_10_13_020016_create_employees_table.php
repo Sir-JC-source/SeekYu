@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->string('employee_number', 8)->unique();
+            $table->string('employee_number', 5)->unique();
             $table->string('full_name');
             $table->enum('position', ['Admin', 'HR Officer', 'Head Guard', 'Security Guard']);
             $table->date('date_hired');

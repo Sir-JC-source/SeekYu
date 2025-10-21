@@ -20,6 +20,9 @@ class Employee extends Model
         'date_hired',
         'status',
         'employee_image', // added for image upload
+        'contact_no',     // new field
+        'province',       // new field
+        'city',           // new field
         'shift_in',
         'shift_out',
         'designation',

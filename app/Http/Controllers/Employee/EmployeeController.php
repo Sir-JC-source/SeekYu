@@ -52,6 +52,9 @@ class EmployeeController extends Controller
             'full_name'       => 'required|string|max:255',
             'position'        => 'required|in:Admin,HR Officer,Head Guard,Security Guard',
             'date_hired'      => 'required|date|before_or_equal:today',
+            'contact_no'      => 'required|digits:11',
+            'province'        => 'required|string|max:255',
+            'city'            => 'required|string|max:255',
             'employee_image'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -60,6 +63,9 @@ class EmployeeController extends Controller
         $employee->full_name = $request->full_name;
         $employee->position = $request->position;
         $employee->date_hired = $request->date_hired;
+        $employee->contact_no = $request->contact_no;
+        $employee->province = $request->province;
+        $employee->city = $request->city;
         $employee->status = 'Active';
 
         if ($request->hasFile('employee_image')) {
@@ -88,6 +94,9 @@ class EmployeeController extends Controller
             'full_name'       => 'required|string|max:255',
             'position'        => 'required|in:Admin,HR Officer,Head Guard,Security Guard',
             'date_hired'      => 'required|date|before_or_equal:today',
+            'contact_no'      => 'required|digits:11',
+            'province'        => 'required|string|max:255',
+            'city'            => 'required|string|max:255',
             'employee_image'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
@@ -95,6 +104,9 @@ class EmployeeController extends Controller
         $employee->full_name = $request->full_name;
         $employee->position = $request->position;
         $employee->date_hired = $request->date_hired;
+        $employee->contact_no = $request->contact_no;
+        $employee->province = $request->province;
+        $employee->city = $request->city;
 
         if ($request->hasFile('employee_image')) {
             if ($employee->employee_image && Storage::disk('public')->exists($employee->employee_image)) {
