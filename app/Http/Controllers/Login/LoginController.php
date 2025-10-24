@@ -23,25 +23,36 @@ class LoginController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'fullname'    => 'required|string|max:255',
-            'login_id'    => 'required|digits:5|unique:registered_users,login_id',
-            'password'    => 'required|string|min:8|confirmed',
-            'role'        => 'required|in:admin,hr-officer,security-guard,head-guard,client,applicant,student,faculty',
+            'last_name'      => 'required|string|max:255',
+            'first_name'     => 'required|string|max:255',
+            'middle_name'    => 'nullable|string|max:255',
+            'login_id'       => 'required|digits:4|unique:registered_users,login_id',
+            'password'       => 'required|string|min:8',
+            'contact_number' => 'required|string|max:20',
+            'province'       => 'required|string|max:255',
+            'city'           => 'required|string|max:255',
+            'barangay'       => 'required|string|max:255',
         ]);
 
+        $fullname = trim($request->last_name . ', ' . $request->first_name . ($request->middle_name ? ' ' . $request->middle_name : ''));
+
         $user = new RegisteredUsers();
-        $user->fullname       = $request->fullname;
+        $user->fullname       = $fullname;
         $user->login_id       = $request->login_id;
         $user->password       = Hash::make($request->password);
-        $user->role           = $request->role;
-        $user->account_status = 'pending'; // default until approved
+        $user->contact_no     = $request->contact_number;
+        $user->province       = $request->province;
+        $user->city           = $request->city;
+        $user->barangay       = $request->barangay;
+        $user->role           = 'applicant'; // All registrants become applicants
+        $user->account_status = 'approved'; // No admin approval needed
         $user->first_login    = true;
         $user->save();
 
-        $user->assignRole($request->role);
+        $user->assignRole('applicant');
 
         return redirect()->route('login.index')
-            ->with('success', 'Registration submitted! Please wait for admin approval.');
+            ->with('success', 'Registration successful! Your Login ID is: ' . $request->login_id . '. You can now login.');
     }
 
     public function authenticate(Request $request)

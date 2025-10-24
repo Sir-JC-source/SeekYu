@@ -14,8 +14,10 @@ return new class extends Migration
             $table->string('title');
             $table->enum('position', ['Security Guard', 'Head Guard']);
             $table->text('description');
-            $table->enum('employment_type', ['Contractual', 'Full-Time']);
+            $table->enum('type_of_employment', ['Contractual', 'Full-Time']);
             $table->string('location');
+            $table->unsignedBigInteger('created_by')->nullable(); // User who created the job posting
+            $table->foreign('created_by')->references('id')->on('registered_users');
             $table->timestamps();
         });
     }

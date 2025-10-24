@@ -183,17 +183,17 @@
             <li class="menu-item {{ request()->is('applications*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-file-text menu-icon"></i>
-                    <div>Applications</div>
+                    <div>Job Applications</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('job_postings.list') ? 'active' : '' }}">
-                        <a href="{{ route('job_postings.list') }}" class="menu-link"><div>List Job Postings</div></a>
+                        <a href="{{ route('job_postings.list') }}" class="menu-link"><div>Job Postings</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('applications.rejected') ? 'active' : '' }}">
-                        <a href="{{ route('applications.rejected') }}" class="menu-link"><div>Rejected</div></a>
+                        <a href="{{ route('applications.rejected') }}" class="menu-link"><div>Rejected Applications</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('applications.shortlist') ? 'active' : '' }}">
-                        <a href="{{ route('applications.shortlist') }}" class="menu-link"><div>Shortlist</div></a>
+                        <a href="{{ route('applications.shortlist') }}" class="menu-link"><div>Shortlisted Applicants</div></a>
                     </li>
                 </ul>
             </li>
@@ -309,6 +309,17 @@
                         <a href="{{ route('incident-reports.index') }}" class="menu-link"><div>Submit IR</div></a>
                     </li>
                 </ul>
+            </li>
+        @endif
+
+        {{-- Applicant Menu --}}
+        @if($userRole === 'applicant')
+            {{-- Job Postings --}}
+            <li class="menu-item {{ request()->routeIs('applicant.jobs') ? 'active' : '' }}">
+                <a href="{{ route('applicant.jobs') }}" class="menu-link">
+                    <i class="ti ti-briefcase menu-icon"></i>
+                    <div>Job Postings</div>
+                </a>
             </li>
         @endif
 

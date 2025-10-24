@@ -11,29 +11,33 @@ use App\Http\Controllers\Leave\LeaveController;
 use App\Http\Controllers\IncidentReport\IncidentReportController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\JobPosting\JobPostingController;
-use App\Http\Controllers\ProfileController; // Added
+use App\Http\Controllers\ProfileController;
 
-// Root route
+// Root redirect to login
 Route::get('/', function () {
     return redirect()->route('login.index');
 });
 
-// Guest routes
-Route::middleware('guest')->group(function () {
-    Route::prefix('login')->group(function () {
-        Route::get('/', [LoginController::class, 'index'])->name('login.index');
-        Route::get('/register', [LoginController::class, 'register'])->name('login.register');
-        Route::post('/store', [LoginController::class, 'store'])->name('login.store');
-        Route::post('/authenticate', [LoginController::class, 'authenticate'])->name('login.authenticate');
-    });
+// ----------------------
+// 🧩 Guest Routes
+// ----------------------
+Route::middleware('guest')->prefix('login')->group(function () {
+    Route::get('/', [LoginController::class, 'index'])->name('login.index');
+    Route::get('/register', [LoginController::class, 'register'])->name('login.register');
+    Route::post('/store', [LoginController::class, 'store'])->name('login.store');
+    Route::post('/authenticate', [LoginController::class, 'authenticate'])->name('login.authenticate');
 });
 
-// Logout
+// ----------------------
+// 🔒 Logout
+// ----------------------
 Route::post('/logout', [LoginController::class, 'logout'])
     ->name('logout')
     ->middleware('auth');
 
-// Authenticated routes
+// ----------------------
+// 🧭 Authenticated Routes
+// ----------------------
 Route::middleware('auth')->group(function () {
 
     // Dashboard
@@ -41,7 +45,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
     });
 
-    // User Management
+    // ----------------------
+    // 👥 User Management
+    // ----------------------
     Route::prefix('user-management')->group(function () {
         Route::get('/', [UserManagementController::class, 'index'])->name('user-management.index');
         Route::get('/json', [UserManagementController::class, 'getUsers'])->name('user-management.json');
@@ -55,7 +61,9 @@ Route::middleware('auth')->group(function () {
         Route::delete('/{id}', [UserManagementController::class, 'destroy'])->name('user-management.destroy');
     });
 
-    // Employee Management
+    // ----------------------
+    // 👔 Employee Management
+    // ----------------------
     Route::prefix('employee')->group(function () {
         Route::get('/list', [EmployeeController::class, 'index'])->name('employee.list');
         Route::get('/create', [EmployeeController::class, 'create'])->name('employee.create');
@@ -67,7 +75,9 @@ Route::middleware('auth')->group(function () {
         Route::put('/restore/{id}', [EmployeeController::class, 'restore'])->name('employee.restore');
     });
 
-    // Security
+    // ----------------------
+    // 🛡️ Security Management
+    // ----------------------
     Route::prefix('security')->group(function () {
         Route::get('/list', [SecurityController::class, 'index'])->name('security.list');
         Route::get('/deployments', [SecurityController::class, 'deployments'])->name('security.deployments');
@@ -76,21 +86,26 @@ Route::middleware('auth')->group(function () {
         Route::put('/make-inactive/{id}', [SecurityController::class, 'makeInactive'])->name('security.makeInactive');
     });
 
-    // Applications & Job Postings
+    // ----------------------
+    // 📄 Applications & Job Postings
+    // ----------------------
     Route::prefix('applications')->group(function () {
         Route::get('/list', [ApplicationController::class, 'index'])->name('applications.list');
         Route::get('/rejected', [ApplicationController::class, 'rejected'])->name('applications.rejected');
         Route::get('/shortlist', [ApplicationController::class, 'shortlist'])->name('applications.shortlist');
 
-        // Job postings
+        // 🧾 Job Postings
         Route::prefix('job-postings')->group(function () {
             Route::get('/list', [JobPostingController::class, 'list'])->name('job_postings.list');
             Route::get('/create', [JobPostingController::class, 'create'])->name('job_postings.create');
             Route::post('/store', [JobPostingController::class, 'store'])->name('job_postings.store');
+            Route::get('/show/{id}', [JobPostingController::class, 'show'])->name('job_postings.show');
         });
     });
 
-    // Leaves
+    // ----------------------
+    // 🌴 Leave Management
+    // ----------------------
     Route::prefix('leaves')->name('leaves.')->group(function () {
         Route::get('/list', [LeaveController::class, 'index'])->name('list');
         Route::get('/pending', [LeaveController::class, 'pending'])->name('pending');
@@ -99,11 +114,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/processed', [LeaveController::class, 'processed'])->name('processed');
         Route::get('/request', [LeaveController::class, 'create'])->name('request');
         Route::post('/request/store', [LeaveController::class, 'store'])->name('request.store');
-        Route::match(['put','post'],'/approve/{id}', [LeaveController::class, 'approve'])->name('approve');
-        Route::match(['put','post'],'/reject/{id}', [LeaveController::class, 'reject'])->name('reject');
+        Route::match(['put', 'post'], '/approve/{id}', [LeaveController::class, 'approve'])->name('approve');
+        Route::match(['put', 'post'], '/reject/{id}', [LeaveController::class, 'reject'])->name('reject');
     });
 
-    // Incident Reports
+    // ----------------------
+    // ⚠️ Incident Reports
+    // ----------------------
     Route::prefix('incident-reports')->group(function () {
         Route::get('/', [IncidentReportController::class, 'create'])->name('incident-reports.index');
         Route::get('/submit', [IncidentReportController::class, 'create'])->name('incident-reports.submit');
@@ -111,20 +128,29 @@ Route::middleware('auth')->group(function () {
         Route::get('/logs', [IncidentReportController::class, 'logs'])->name('incident-reports.logs');
     });
 
-    // Admin
+    // ----------------------
+    // 🧑‍💼 Admin Routes
+    // ----------------------
     Route::prefix('admin')->group(function () {
         Route::get('/add', [AdminController::class, 'add'])->name('admin.add');
         Route::post('/store', [AdminController::class, 'store'])->name('admin.store');
     });
 
-    // Force password change
+    // ----------------------
+    // 🔐 Force Password Change
+    // ----------------------
     Route::post('/force-change-password', [LoginController::class, 'forceChangePassword'])->name('password.forceChange');
 
-    // Profile Routes (NEW)
-   Route::middleware('auth')->group(function () {
+    // ----------------------
+    // 👤 Profile Routes
+    // ----------------------
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('employee.update-profile');
-});
 
-
+    // ----------------------
+    // 🧑‍💻 Applicant Job Portal
+    // ----------------------
+    Route::prefix('applicant')->group(function () {
+        Route::get('/jobs', [JobPostingController::class, 'applicantJobs'])->name('applicant.jobs');
+    });
 });

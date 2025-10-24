@@ -16,7 +16,7 @@
             <!-- Hello message -->
             <li class="nav-item d-flex align-items-center me-3">
                 <span class="navbar-text">
-                    Hello, {{ auth()->user()->employee ? auth()->user()->employee->full_name : auth()->user()->name }}
+                    Hello, {{ auth()->user()->employee ? auth()->user()->employee->full_name : (auth()->user()->fullname ?? auth()->user()->name) }}
                 </span>
             </li>
 
@@ -81,9 +81,13 @@
             <li class="nav-item navbar-dropdown dropdown-user dropdown">
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online" style="width: 32px; height: 32px;">
-                        <img 
-                            src="{{ auth()->user()->employee && auth()->user()->employee->employee_image ? asset('storage/' . auth()->user()->employee->employee_image) : asset('assets/default-avatar.png') }}" 
-                            alt="User Avatar" class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                        @if(auth()->user()->employee && auth()->user()->employee->employee_image)
+                            <img
+                                src="{{ asset('storage/' . auth()->user()->employee->employee_image) }}"
+                                class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                        @else
+                            <i class="ti ti-user" style="font-size: 32px; color: #6c757d;"></i>
+                        @endif
                     </div>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end">
@@ -92,13 +96,17 @@
                             <div class="d-flex">
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online" style="width: 32px; height: 32px;">
-                                        <img 
-                                            src="{{ auth()->user()->employee && auth()->user()->employee->employee_image ? asset('storage/' . auth()->user()->employee->employee_image) : asset('assets/default-avatar.png') }}" 
-                                            alt="User Avatar" class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                                        @if(auth()->user()->employee && auth()->user()->employee->employee_image)
+                                            <img
+                                                src="{{ asset('storage/' . auth()->user()->employee->employee_image) }}"
+                                                class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                                        @else
+                                            <i class="ti ti-user" style="font-size: 32px; color: #6c757d;"></i>
+                                        @endif
                                     </div>
                                 </div>
                                 <div class="flex-grow-1">
-                                    <span class="fw-medium d-block">{{ auth()->user()->employee ? auth()->user()->employee->full_name : auth()->user()->name }}</span>
+                                    <span class="fw-medium d-block">{{ auth()->user()->employee ? auth()->user()->employee->full_name : (auth()->user()->fullname ?? auth()->user()->name) }}</span>
                                 </div>
                             </div>
                         </a>
