@@ -13,57 +13,76 @@ class ProfileController extends Controller
      */
     public function show()
     {
-        // Get the logged-in user's employee record
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
 
-        if (!$employee) {
-            abort(404, 'Employee record not found.');
+        // Check if user is an employee (has employee relation)
+        if ($user->employee) {
+            $profile = $user->employee;
+            return view('Profile.ShowProfileView', compact('profile'));
         }
 
-        return view('Profile.ShowProfileView', compact('employee'));
+        // Otherwise, treat as applicant (RegisteredUsers)
+        $profile = $user;
+        return view('applicant.profile', compact('profile'));
     }
 
     /**
-     * Update employee profile (Full Name and Contact No. + Avatar).
+     * Update profile (for both employees and applicants).
      */
     public function update(Request $request)
     {
-        // Get the logged-in user's employee
-        $employee = Auth::user()->employee;
+        $user = Auth::user();
 
-        if (!$employee) {
-            return response()->json(['message' => 'Employee record not found'], 404);
+        if ($user->employee) {
+            // Employee profile update
+            $profile = $user->employee;
+
+            $request->validate([
+                'full_name' => 'required|string|max:255',
+                'contact_no' => 'nullable|string|max:20',
+                'employee_image' => 'nullable|image|max:2048',
+            ]);
+
+            $profile->full_name = $request->full_name;
+            $profile->contact_no = $request->contact_no ?? $profile->contact_no;
+
+            $imageField = 'employee_image';
+            $storagePath = 'employee_images';
+        } else {
+            // Applicant profile update
+            $profile = $user;
+
+            $request->validate([
+                'fullname' => 'required|string|max:255',
+                'contact_no' => 'nullable|string|max:20',
+                'profile_picture' => 'nullable|image|max:2048',
+            ]);
+
+            $profile->fullname = $request->fullname;
+            $profile->contact_no = $request->contact_no ?? $profile->contact_no;
+
+            $imageField = 'profile_picture';
+            $storagePath = 'profile_pictures';
         }
 
-        // Validate only editable fields
-        $request->validate([
-            'full_name' => 'required|string|max:255',
-            'contact_no' => 'nullable|string|max:20',
-            'employee_image' => 'nullable|image|max:2048',
-        ]);
-
-        // Update editable fields
-        $employee->full_name = $request->full_name;
-        $employee->contact_no = $request->contact_no ?? $employee->contact_no;
-
-        // Handle avatar upload
-        if ($request->hasFile('employee_image')) {
-            // Delete old avatar if exists
-            if ($employee->employee_image && Storage::disk('public')->exists($employee->employee_image)) {
-                Storage::disk('public')->delete($employee->employee_image);
+        // Handle image upload
+        if ($request->hasFile($imageField)) {
+            // Delete old image if exists
+            if ($profile->$imageField && Storage::disk('public')->exists($profile->$imageField)) {
+                Storage::disk('public')->delete($profile->$imageField);
             }
 
-            // Store new avatar
-            $path = $request->file('employee_image')->store('employee_images', 'public');
-            $employee->employee_image = $path;
+            // Store new image
+            $path = $request->file($imageField)->store($storagePath, 'public');
+            $profile->$imageField = $path;
         }
 
-        $employee->save();
+        $profile->save();
 
         return response()->json([
             'success' => true,
             'message' => 'Profile updated successfully',
-            'employee_image' => $employee->employee_image ? asset('storage/' . $employee->employee_image) : null,
+            'profile_image' => $profile->$imageField ? asset('storage/' . $profile->$imageField) : null,
         ]);
     }
 }

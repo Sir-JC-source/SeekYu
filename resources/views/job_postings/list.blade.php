@@ -21,7 +21,9 @@
                     <th>Position</th>
                     <th>Type of Employment</th>
                     <th>Location</th>
+                    <th>Status</th>
                     <th>Created At</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -32,11 +34,29 @@
                         <td>{{ $job->position }}</td>
                         <td>{{ $job->type_of_employment }}</td>
                         <td>{{ $job->location }}</td>
+                        <td>
+                            <span class="badge {{ $job->status === 'active' ? 'bg-success' : 'bg-secondary' }}">
+                                {{ ucfirst($job->status) }}
+                            </span>
+                        </td>
                         <td>{{ $job->created_at->format('Y-m-d') }}</td>
+                        <td>
+                            <div class="btn-group" role="group">
+                                <a href="{{ route('job_postings.applications', $job->id) }}" class="btn btn-sm btn-info">View Applications</a>
+                                <div class="form-check form-switch custom-toggle d-inline-block ms-2">
+                                    <input class="form-check-input toggle-status"
+                                           type="checkbox"
+                                           id="toggle-{{ $job->id }}"
+                                           {{ $job->status === 'active' ? 'checked' : '' }}
+                                           data-job-id="{{ $job->id }}">
+                                    <label for="toggle-{{ $job->id }}"></label>
+                                </div>
+                            </div>
+                        </td>
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="6" class="text-center">No job postings found.</td>
+                        <td colspan="8" class="text-center">No job postings found.</td>
                     </tr>
                 @endforelse
             </tbody>
@@ -119,14 +139,135 @@
     </div>
 </div>
 
+@push('page-styles')
+<style>
+/* ✅ Custom Toggle Switch with Smooth Slide */
+.custom-toggle {
+    position: relative;
+    display: inline-block;
+    width: 52px;
+    height: 28px;
+}
+
+.custom-toggle .form-check-input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.custom-toggle label {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d9534f; /* red by default */
+    transition: all 0.4s ease;
+    border-radius: 34px;
+    box-shadow: 0 0 3px rgba(0,0,0,0.2);
+}
+
+.custom-toggle label::before {
+    position: absolute;
+    content: "";
+    height: 22px;
+    width: 22px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: all 0.4s ease;
+}
+
+/* When checked (ON) */
+.custom-toggle .form-check-input:checked + label {
+    background-color: #28a745; /* green when active */
+    box-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+/* Slide knob */
+.custom-toggle .form-check-input:checked + label::before {
+    transform: translateX(24px);
+}
+
+/* Hover glow */
+.custom-toggle label:hover {
+    box-shadow: 0 0 8px rgba(0,0,0,0.3);
+}
+</style>
+@endpush
+
 @push('page-scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
-    $('#job-postings-table').DataTable({
-        "order": [[0, "asc"]]
+    // Initialize DataTable
+    var table = $('#job-postings-table').DataTable({
+        "order": [[5, "desc"], [6, "desc"]]
     });
 
-    // Handle form submission via AJAX
+    // Handle toggle status
+    $(document).on('change', '.toggle-status', function() {
+        var toggle = $(this);
+        var jobId = toggle.data('job-id');
+        var isChecked = toggle.is(':checked');
+        var statusText = isChecked ? 'activate' : 'deactivate';
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to ${statusText} this job posting?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: `Yes, ${statusText} it!`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                toggle.prop('disabled', true);
+                $.ajax({
+                    url: '{{ route("job_postings.toggle-status", ":id") }}'.replace(':id', jobId),
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        _method: 'POST'
+                    },
+                    success: function(response) {
+                        var row = toggle.closest('tr');
+                        var badge = row.find('.badge');
+
+                        if (isChecked) {
+                            badge.removeClass('bg-secondary').addClass('bg-success').text('Active');
+                        } else {
+                            badge.removeClass('bg-success').addClass('bg-secondary').text('Inactive');
+                        }
+
+                        toggle.prop('disabled', false);
+
+                        Swal.fire({
+                            title: 'Success!',
+                            text: `Job posting has been ${statusText}d.`,
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        });
+                    },
+                    error: function(xhr) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Something went wrong while updating status.',
+                            icon: 'error'
+                        });
+                        toggle.prop('checked', !isChecked).prop('disabled', false);
+                    }
+                });
+            } else {
+                toggle.prop('checked', !isChecked);
+            }
+        });
+    });
+
+    // Handle Create Job via AJAX
     $('#createJobForm').on('submit', function(e) {
         e.preventDefault();
         var formData = new FormData(this);
@@ -147,7 +288,7 @@ $(document).ready(function() {
                     backgroundColor: "#4caf50",
                     close: true
                 }).showToast();
-                // Reload the page to show the new job posting
+
                 setTimeout(function() {
                     location.reload();
                 }, 1000);

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\JobPosting;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\JobPosting;
+use App\Models\JobApplication;
 use Illuminate\Support\Facades\Auth;
 
 class JobPostingController extends Controller
@@ -61,7 +62,9 @@ class JobPostingController extends Controller
      */
     public function index()
     {
-        $jobPostings = JobPosting::orderBy('created_at', 'desc')->get();
+        $jobPostings = JobPosting::orderByRaw("CASE WHEN status = 'active' THEN 1 ELSE 2 END")
+            ->orderBy('created_at', 'desc')
+            ->get();
         return view('job_postings.list', compact('jobPostings'));
     }
 
@@ -89,8 +92,10 @@ class JobPostingController extends Controller
             $query->where('position', $request->position);
         }
 
-        // Paginate 9 jobs per page
-        $jobPostings = $query->orderBy('created_at', 'desc')->paginate(9);
+        // Paginate 9 jobs per page, order by status (active first) then by created_at
+        $jobPostings = $query->orderByRaw("CASE WHEN status = 'active' THEN 1 ELSE 2 END")
+            ->orderBy('created_at', 'desc')
+            ->paginate(9);
 
         return view('applicant.jobs', compact('jobPostings'));
     }
@@ -115,5 +120,98 @@ class JobPostingController extends Controller
         return redirect()
             ->route('job_postings.list')
             ->with('success', 'Job posting deleted successfully.');
+    }
+
+    /**
+     * Toggle job status between active and inactive (Admin/HR only).
+     */
+    public function toggleStatus($id)
+    {
+        $job = JobPosting::findOrFail($id);
+
+        // Toggle status
+        $job->status = $job->status === 'active' ? 'inactive' : 'active';
+        $job->save();
+
+        $statusText = ucfirst($job->status);
+
+        return redirect()
+            ->route('job_postings.list')
+            ->with('success', "Job posting status changed to {$statusText}.");
+    }
+
+    /**
+     * Apply for a job posting (Applicants only).
+     */
+    public function apply(Request $request, $id)
+    {
+        $job = JobPosting::findOrFail($id);
+        $user = Auth::user();
+
+        // Check if user already applied
+        $existingApplication = JobApplication::where('job_posting_id', $id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($existingApplication) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You have already applied for this job.'
+            ]);
+        }
+
+        // Create application
+        JobApplication::create([
+            'job_posting_id' => $id,
+            'user_id' => $user->id,
+            'applied_at' => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Application submitted successfully!'
+        ]);
+    }
+
+    /**
+     * Show applications for a specific job posting (Admin/HR only).
+     */
+    public function showApplications($id)
+    {
+        $job = JobPosting::with('applications.user')->findOrFail($id);
+        return view('job_postings.applications', compact('job'));
+    }
+
+    /**
+     * Show applicant credentials (Admin/HR only).
+     */
+    public function showApplicantCredentials($applicationId)
+    {
+        $application = JobApplication::with('user.applicantCredential')->findOrFail($applicationId);
+        return view('job_postings.applicant-credentials', compact('application'));
+    }
+
+    /**
+     * Reject an application (Admin/HR only).
+     */
+    public function rejectApplication($id)
+    {
+        $application = JobApplication::findOrFail($id);
+        $application->status = 'rejected';
+        $application->save();
+
+        return redirect()->back()->with('success', 'Application rejected successfully.');
+    }
+
+    /**
+     * Shortlist an application (Admin/HR only).
+     */
+    public function shortlistApplication($id)
+    {
+        $application = JobApplication::findOrFail($id);
+        $application->status = 'shortlisted';
+        $application->save();
+
+        return redirect()->back()->with('success', 'Application shortlisted successfully.');
     }
 }

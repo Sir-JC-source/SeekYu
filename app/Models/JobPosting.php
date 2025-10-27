@@ -20,6 +20,7 @@ class JobPosting extends Model
         'type_of_employment',
         'location',
         'created_by', // ✅ Important: allow assigning the creator ID
+        'status',
     ];
 
     /**
@@ -40,5 +41,13 @@ class JobPosting extends Model
     public function getCreatorNameAttribute()
     {
         return $this->creator ? $this->creator->name ?? 'Unknown User' : 'Unknown User';
+    }
+
+    /**
+     * Relationship: applications for this job posting.
+     */
+    public function applications()
+    {
+        return $this->hasMany(JobApplication::class);
     }
 }

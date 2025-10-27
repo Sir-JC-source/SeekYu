@@ -321,6 +321,22 @@
                     <div>Job Postings</div>
                 </a>
             </li>
+
+            {{-- My Applications --}}
+            <li class="menu-item {{ request()->routeIs('applicant.applications') ? 'active' : '' }}">
+                <a href="{{ route('applicant.applications') }}" class="menu-link">
+                    <i class="ti ti-file-text menu-icon"></i>
+                    <div>My Applications</div>
+                </a>
+            </li>
+
+            {{-- My Credentials --}}
+            <li class="menu-item {{ request()->routeIs('applicant.credentials') ? 'active' : '' }}">
+                <a href="{{ route('applicant.credentials') }}" class="menu-link">
+                    <i class="ti ti-id menu-icon"></i>
+                    <div>My Credentials</div>
+                </a>
+            </li>
         @endif
 
         {{-- Logout Button --}}

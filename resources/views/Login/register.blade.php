@@ -180,17 +180,20 @@ body {
                     @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
                 </div>
 
-                {{-- Login ID --}}
+                {{-- Email --}}
                 <div class="mb-3">
-                    <label for="login_id" class="form-label">Login ID</label>
-                    <input type="text"
-                           class="form-control"
-                           id="login_id"
-                           name="login_id"
-                           value=""
-                           readonly
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email"
+                           class="form-control @error('email') is-invalid @enderror"
+                           id="email"
+                           name="email"
+                           placeholder="Enter your email address"
+                           value="{{ old('email') }}"
                            required>
-                    <small class="text-muted">Auto-generated 4-digit login ID</small>
+                    @error('email')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="text-muted">Your login credentials will be sent to this email</small>
                 </div>
 
                 {{-- Password --}}
@@ -230,9 +233,9 @@ body {
 
                 {{-- Location Dropdown --}}
                 <div class="mb-3">
-                    <label class="form-label">Province</label>
+                    <label class="form-label">Region/Province</label>
                     <select class="form-select mb-2" id="province" name="province" required>
-                        <option value="">Select Province</option>
+                        <option value="">Select Region/Province</option>
                     </select>
                 </div>
                 <div class="mb-3">
@@ -271,17 +274,15 @@ body {
     const citySelect = document.getElementById('city');
     const barangaySelect = document.getElementById('barangay');
 
-    // Generate 4-digit login ID
-    function generateLoginId() {
-        const loginId = Math.floor(1000 + Math.random() * 9000); // 1000-9999
-        document.getElementById('login_id').value = loginId;
-    }
+    // No longer needed - login ID is generated server-side
 
     // Load provinces on page load
     async function loadProvinces() {
         try {
             const response = await fetch('https://psgc.gitlab.io/api/provinces/');
             const provinces = await response.json();
+            // Add Metro Manila as NCR
+            provinces.push({ name: 'Metro Manila (NCR)', code: '130000000' });
             // Sort provinces alphabetically
             provinces.sort((a, b) => a.name.localeCompare(b.name));
             provinces.forEach(province => {
@@ -303,22 +304,37 @@ body {
 
         if (this.value) {
             try {
-                // Find province code by name
-                const provinceResponse = await fetch('https://psgc.gitlab.io/api/provinces/');
-                const provinces = await provinceResponse.json();
-                const selectedProvince = provinces.find(p => p.name === this.value);
-                if (selectedProvince) {
-                    const response = await fetch(`https://psgc.gitlab.io/api/provinces/${selectedProvince.code}/cities-municipalities/`);
+                if (this.value === 'Metro Manila (NCR)') {
+                    // Load NCR cities from PSGC API using region endpoint
+                    const response = await fetch('https://psgc.gitlab.io/api/regions/130000000/cities-municipalities/');
                     const cities = await response.json();
                     // Sort cities alphabetically
                     cities.sort((a, b) => a.name.localeCompare(b.name));
                     citySelect.disabled = false;
                     cities.forEach(city => {
                         const option = document.createElement('option');
-                        option.value = city.name; // Use name instead of code
+                        option.value = city.name; // Use name
                         option.textContent = city.name;
                         citySelect.appendChild(option);
                     });
+                } else {
+                    // Find province code by name
+                    const provinceResponse = await fetch('https://psgc.gitlab.io/api/provinces/');
+                    const provinces = await provinceResponse.json();
+                    const selectedProvince = provinces.find(p => p.name === this.value);
+                    if (selectedProvince) {
+                        const response = await fetch(`https://psgc.gitlab.io/api/provinces/${selectedProvince.code}/cities-municipalities/`);
+                        const cities = await response.json();
+                        // Sort cities alphabetically
+                        cities.sort((a, b) => a.name.localeCompare(b.name));
+                        citySelect.disabled = false;
+                        cities.forEach(city => {
+                            const option = document.createElement('option');
+                            option.value = city.name; // Use name instead of code
+                            option.textContent = city.name;
+                            citySelect.appendChild(option);
+                        });
+                    }
                 }
             } catch (error) {
                 console.error('Error loading cities:', error);
@@ -335,14 +351,11 @@ body {
 
         if (this.value) {
             try {
-                // Find city code by name
                 const provinceValue = provinceSelect.value;
-                const provinceResponse = await fetch('https://psgc.gitlab.io/api/provinces/');
-                const provinces = await provinceResponse.json();
-                const selectedProvince = provinces.find(p => p.name === provinceValue);
-                if (selectedProvince) {
-                    const citiesResponse = await fetch(`https://psgc.gitlab.io/api/provinces/${selectedProvince.code}/cities-municipalities/`);
-                    const cities = await citiesResponse.json();
+                if (provinceValue === 'Metro Manila (NCR)') {
+                    // Load barangays for NCR cities
+                    const regionResponse = await fetch('https://psgc.gitlab.io/api/regions/130000000/cities-municipalities/');
+                    const cities = await regionResponse.json();
                     const selectedCity = cities.find(c => c.name === this.value);
                     if (selectedCity) {
                         const response = await fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCity.code}/barangays/`);
@@ -352,10 +365,33 @@ body {
                         barangaySelect.disabled = false;
                         barangays.forEach(barangay => {
                             const option = document.createElement('option');
-                            option.value = barangay.name; // Use name instead of code
+                            option.value = barangay.name;
                             option.textContent = barangay.name;
                             barangaySelect.appendChild(option);
                         });
+                    }
+                } else {
+                    // Find city code by name
+                    const provinceResponse = await fetch('https://psgc.gitlab.io/api/provinces/');
+                    const provinces = await provinceResponse.json();
+                    const selectedProvince = provinces.find(p => p.name === provinceValue);
+                    if (selectedProvince) {
+                        const citiesResponse = await fetch(`https://psgc.gitlab.io/api/provinces/${selectedProvince.code}/cities-municipalities/`);
+                        const cities = await citiesResponse.json();
+                        const selectedCity = cities.find(c => c.name === this.value);
+                        if (selectedCity) {
+                            const response = await fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCity.code}/barangays/`);
+                            const barangays = await response.json();
+                            // Sort barangays alphabetically
+                            barangays.sort((a, b) => a.name.localeCompare(b.name));
+                            barangaySelect.disabled = false;
+                            barangays.forEach(barangay => {
+                                const option = document.createElement('option');
+                                option.value = barangay.name; // Use name instead of code
+                                option.textContent = barangay.name;
+                                barangaySelect.appendChild(option);
+                            });
+                        }
                     }
                 }
             } catch (error) {
@@ -367,9 +403,8 @@ body {
         }
     });
 
-    // Initialize provinces and generate login ID on load
+    // Initialize provinces on load
     loadProvinces();
-    generateLoginId();
 </script>
 
 @endsection

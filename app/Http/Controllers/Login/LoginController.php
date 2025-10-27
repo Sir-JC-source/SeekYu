@@ -26,7 +26,7 @@ class LoginController extends Controller
             'last_name'      => 'required|string|max:255',
             'first_name'     => 'required|string|max:255',
             'middle_name'    => 'nullable|string|max:255',
-            'login_id'       => 'required|digits:4|unique:registered_users,login_id',
+            'email'          => 'required|email|unique:registered_users,email',
             'password'       => 'required|string|min:8',
             'contact_number' => 'required|string|max:20',
             'province'       => 'required|string|max:255',
@@ -36,23 +36,35 @@ class LoginController extends Controller
 
         $fullname = trim($request->last_name . ', ' . $request->first_name . ($request->middle_name ? ' ' . $request->middle_name : ''));
 
+        // Generate unique 4-digit login ID
+        do {
+            $loginId = str_pad(mt_rand(1000, 9999), 4, '0', STR_PAD_LEFT);
+        } while (RegisteredUsers::where('login_id', $loginId)->exists());
+
         $user = new RegisteredUsers();
         $user->fullname       = $fullname;
-        $user->login_id       = $request->login_id;
+        $user->email          = $request->email;
+        $user->login_id       = $loginId;
         $user->password       = Hash::make($request->password);
         $user->contact_no     = $request->contact_number;
         $user->province       = $request->province;
         $user->city           = $request->city;
         $user->barangay       = $request->barangay;
         $user->role           = 'applicant'; // All registrants become applicants
-        $user->account_status = 'approved'; // No admin approval needed
+        $user->account_status = 'pending'; // Pending email verification
         $user->first_login    = true;
         $user->save();
 
         $user->assignRole('applicant');
 
+        // Generate verification URL
+        $verificationUrl = route('email.verify', ['id' => $user->id, 'token' => sha1($user->email . $user->created_at)]);
+
+        // Send email with credentials and verification link
+        \Mail::to($user->email)->send(new \App\Mail\LoginCredentialsMail($user, $verificationUrl));
+
         return redirect()->route('login.index')
-            ->with('success', 'Registration successful! Your Login ID is: ' . $request->login_id . '. You can now login.');
+            ->with('success', 'Registration successful! Please check your email for login credentials and verification link.');
     }
 
     public function authenticate(Request $request)
@@ -133,6 +145,11 @@ class LoginController extends Controller
                 return back()->with('error', 'Your account is not yet approved.');
             }
 
+            // Check if email is verified (only for applicants)
+            if ($user->role === 'applicant' && !$user->email_verified_at) {
+                return back()->with('error', 'Please verify your email address before logging in.');
+            }
+
             if (!Hash::check($password, $user->password)) {
                 return back()->with('error', 'Invalid password.');
             }
@@ -172,5 +189,28 @@ class LoginController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login.index')->with('success', 'You have been logged out successfully.');
+    }
+
+    public function verifyEmail(Request $request, $id, $token)
+    {
+        $user = RegisteredUsers::findOrFail($id);
+
+        // Verify token
+        $expectedToken = sha1($user->email . $user->created_at);
+        if ($token !== $expectedToken) {
+            return redirect()->route('login.index')->with('error', 'Invalid verification link.');
+        }
+
+        // Check if already verified
+        if ($user->email_verified_at) {
+            return redirect()->route('login.index')->with('info', 'Email already verified. You can now login.');
+        }
+
+        // Mark as verified
+        $user->email_verified_at = now();
+        $user->account_status = 'approved';
+        $user->save();
+
+        return redirect()->route('login.index')->with('success', 'Email verified successfully! You can now login with your credentials.');
     }
 }

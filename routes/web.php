@@ -11,6 +11,7 @@ use App\Http\Controllers\Leave\LeaveController;
 use App\Http\Controllers\IncidentReport\IncidentReportController;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\JobPosting\JobPostingController;
+use App\Http\Controllers\Applicant\ApplicantCredentialController;
 use App\Http\Controllers\ProfileController;
 
 // Root redirect to login
@@ -27,6 +28,9 @@ Route::middleware('guest')->prefix('login')->group(function () {
     Route::post('/store', [LoginController::class, 'store'])->name('login.store');
     Route::post('/authenticate', [LoginController::class, 'authenticate'])->name('login.authenticate');
 });
+
+// Email verification route (accessible to guests)
+Route::get('/email/verify/{id}/{token}', [LoginController::class, 'verifyEmail'])->name('email.verify');
 
 // ----------------------
 // 🔒 Logout
@@ -100,6 +104,11 @@ Route::middleware('auth')->group(function () {
             Route::get('/create', [JobPostingController::class, 'create'])->name('job_postings.create');
             Route::post('/store', [JobPostingController::class, 'store'])->name('job_postings.store');
             Route::get('/show/{id}', [JobPostingController::class, 'show'])->name('job_postings.show');
+            Route::post('/toggle-status/{id}', [JobPostingController::class, 'toggleStatus'])->name('job_postings.toggle-status');
+            Route::get('/applications/{id}', [JobPostingController::class, 'showApplications'])->name('job_postings.applications');
+            Route::post('/applications/reject/{id}', [JobPostingController::class, 'rejectApplication'])->name('job_postings.applications.reject');
+            Route::post('/applications/shortlist/{id}', [JobPostingController::class, 'shortlistApplication'])->name('job_postings.applications.shortlist');
+            Route::get('/applicant-credentials/{applicationId}', [JobPostingController::class, 'showApplicantCredentials'])->name('job_postings.applicant-credentials');
         });
     });
 
@@ -152,5 +161,9 @@ Route::middleware('auth')->group(function () {
     // ----------------------
     Route::prefix('applicant')->group(function () {
         Route::get('/jobs', [JobPostingController::class, 'applicantJobs'])->name('applicant.jobs');
+        Route::post('/jobs/apply/{id}', [JobPostingController::class, 'apply'])->name('applicant.jobs.apply');
+        Route::get('/applications', [ApplicantCredentialController::class, 'applications'])->name('applicant.applications');
+        Route::get('/credentials', [ApplicantCredentialController::class, 'index'])->name('applicant.credentials');
+        Route::post('/credentials/store', [ApplicantCredentialController::class, 'store'])->name('applicant.credentials.store');
     });
 });

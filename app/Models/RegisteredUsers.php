@@ -47,6 +47,22 @@ class RegisteredUsers extends Authenticatable
     }
 
     /**
+     * Relationship: job applications by this user.
+     */
+    public function jobApplications()
+    {
+        return $this->hasMany(JobApplication::class, 'user_id');
+    }
+
+    /**
+     * Relationship: applicant credentials for this user.
+     */
+    public function applicantCredential()
+    {
+        return $this->hasOne(ApplicantCredential::class, 'user_id');
+    }
+
+    /**
      * 🧠 Automatically create an Employee record when a new internal user is created.
      */
     protected static function booted()

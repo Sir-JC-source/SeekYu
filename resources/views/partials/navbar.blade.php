@@ -85,6 +85,10 @@
                             <img
                                 src="{{ asset('storage/' . auth()->user()->employee->employee_image) }}"
                                 class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                        @elseif(auth()->user()->profile_picture)
+                            <img
+                                src="{{ asset('storage/' . auth()->user()->profile_picture) }}"
+                                class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
                         @else
                             <i class="ti ti-user" style="font-size: 32px; color: #6c757d;"></i>
                         @endif
@@ -99,6 +103,10 @@
                                         @if(auth()->user()->employee && auth()->user()->employee->employee_image)
                                             <img
                                                 src="{{ asset('storage/' . auth()->user()->employee->employee_image) }}"
+                                                class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                                        @elseif(auth()->user()->profile_picture)
+                                            <img
+                                                src="{{ asset('storage/' . auth()->user()->profile_picture) }}"
                                                 class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
                                         @else
                                             <i class="ti ti-user" style="font-size: 32px; color: #6c757d;"></i>
