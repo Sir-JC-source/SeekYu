@@ -3,96 +3,137 @@
 @section('title', 'Applicant Credentials')
 
 @section('content')
-<div class="container-fluid">
+<div class="container-xxl flex-grow-1 container-p-y">
     <div class="row justify-content-center">
-        <div class="col-md-10">
-            <div class="card">
-                <div class="card-header">
-                    <h4 class="card-title">Applicant Credentials</h4>
-                </div>
+        <div class="col-xl-10 col-lg-12">
+            <!-- Page Header -->
+            <div class="card mb-4">
                 <div class="card-body">
-                    @if(session('success'))
-                        <div class="alert alert-success">
-                            {{ session('success') }}
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h4 class="card-title mb-1">Applicant Credentials</h4>
+                            <p class="card-subtitle text-muted mb-0">Complete your professional profile to enhance your job applications</p>
                         </div>
-                    @endif
+                        <div class="avatar avatar-xl">
+                            <div class="avatar-initial bg-primary rounded">
+                                <i class="ti ti-id ti-lg text-white"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                    <form action="{{ route('applicant.credentials.store') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="ti ti-check-circle me-2"></i>
+                    {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            @endif
 
-                        <!-- Nav tabs -->
-                        <ul class="nav nav-tabs" id="credentials-tabs" role="tablist">
+            <form action="{{ route('applicant.credentials.store') }}" method="POST" enctype="multipart/form-data" id="credentialsForm">
+                @csrf
+
+                <!-- Progress Indicator -->
+        
+
+                <!-- Enhanced Nav tabs -->
+                <div class="card">
+                    <div class="card-header border-bottom-0 bg-light">
+                        <ul class="nav nav-pills nav-fill" id="credentials-tabs" role="tablist">
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="role-specific-tab" data-bs-toggle="tab" data-bs-target="#role-specific" type="button" role="tab" aria-controls="role-specific" aria-selected="true">Role Specific Details</button>
+                                <button class="nav-link active d-flex align-items-center" id="role-specific-tab" data-bs-toggle="tab" data-bs-target="#role-specific" type="button" role="tab" aria-controls="role-specific" aria-selected="true">
+                                    <i class="ti ti-certificate me-2"></i>
+                                    <span>Professional Details</span>
+                                </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="work-history-tab" data-bs-toggle="tab" data-bs-target="#work-history" type="button" role="tab" aria-controls="work-history" aria-selected="false">Work History</button>
+                                <button class="nav-link d-flex align-items-center" id="work-history-tab" data-bs-toggle="tab" data-bs-target="#work-history" type="button" role="tab" aria-controls="work-history" aria-selected="false">
+                                    <i class="ti ti-building me-2"></i>
+                                    <span>Work Experience</span>
+                                </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="skills-tab" data-bs-toggle="tab" data-bs-target="#skills" type="button" role="tab" aria-controls="skills" aria-selected="false">Skills</button>
+                                <button class="nav-link d-flex align-items-center" id="skills-tab" data-bs-toggle="tab" data-bs-target="#skills" type="button" role="tab" aria-controls="skills" aria-selected="false">
+                                    <i class="ti ti-tools me-2"></i>
+                                    <span>Skills & Expertise</span>
+                                </button>
                             </li>
                             <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="upload-documents-tab" data-bs-toggle="tab" data-bs-target="#upload-documents" type="button" role="tab" aria-controls="upload-documents" aria-selected="false">Upload Documents</button>
+                                <button class="nav-link d-flex align-items-center" id="upload-documents-tab" data-bs-toggle="tab" data-bs-target="#upload-documents" type="button" role="tab" aria-controls="upload-documents" aria-selected="false">
+                                    <i class="ti ti-file-upload me-2"></i>
+                                    <span>Documents</span>
+                                </button>
                             </li>
                         </ul>
+                    </div>
 
                         <!-- Tab panes -->
                         <div class="tab-content" id="credentials-tab-content">
                             <!-- Role Specific Details Tab -->
                             <div class="tab-pane fade show active" id="role-specific" role="tabpanel" aria-labelledby="role-specific-tab">
-                                <div class="mt-3">
-                                    <div class="row">
+                                <div class="card-body">
+                                    <div class="row g-4">
                                         <!-- License Information -->
-                                        <div class="col-md-6">
-                                            <h5></h5>
-                                            <div class="form-group">
-                                                <label for="license_no">License Number</label>
-                                                <input type="text" class="form-control" id="license_no" name="license_no"
-                                                       value="{{ old('license_no', $credentials?->license_no ?? '') }}">
-                                                @error('license_no')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div>
+                                        <div class="col-lg-6">
+                                            <div class="card h-100 border-0 bg-light">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <i class="ti ti-license text-primary ti-lg me-2"></i>
+                                                        <h6 class="card-title mb-0">License Information</h6>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="license_no" class="form-label fw-semibold">License Number</label>
+                                                        <input type="text" class="form-control form-control-lg" id="license_no" name="license_no"
+                                                               value="{{ old('license_no', $credentials?->license_no ?? '') }}"
+                                                               placeholder="Enter your license number">
+                                                        @error('license_no')
+                                                            <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
 
-                                            <div class="form-group">
-                                                <label for="license_expiration_date">License Expiration Date</label>
-                                                <input type="date" class="form-control" id="license_expiration_date" name="license_expiration_date"
-                                                       value="{{ old('license_expiration_date', $credentials?->license_expiration_date?->format('Y-m-d') ?? '') }}">
-                                                @error('license_expiration_date')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
+                                                    <div class="mb-3">
+                                                        <label for="license_expiration_date" class="form-label fw-semibold">License Expiration Date</label>
+                                                        <input type="date" class="form-control form-control-lg" id="license_expiration_date" name="license_expiration_date"
+                                                               value="{{ old('license_expiration_date', $credentials?->license_expiration_date?->format('Y-m-d') ?? '') }}">
+                                                        @error('license_expiration_date')
+                                                            <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <!-- Certifications -->
-                                        <div class="col-md-6">
-                                            <h5></h5>
-                                            <div class="form-group">
-                                                <label for="certifications">Certifications</label>
-                                                <textarea class="form-control" id="certifications" name="certifications" rows="3">{{ old('certifications', is_string($credentials?->certifications) ? $credentials->certifications : '') }}</textarea>
-                                                @error('certifications')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
+                                        <!-- Certifications & Experience -->
+                                        <div class="col-lg-6">
+                                            <div class="card h-100 border-0 bg-light">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <i class="ti ti-award text-success ti-lg me-2"></i>
+                                                        <h6 class="card-title mb-0">Certifications & Experience</h6>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="certifications" class="form-label fw-semibold">Certifications</label>
+                                                        <textarea class="form-control form-control-lg" id="certifications" name="certifications" rows="3"
+                                                                  placeholder="List your certifications (one per line)">{{ old('certifications', is_string($credentials?->certifications) ? $credentials->certifications : '') }}</textarea>
+                                                        @error('certifications')
+                                                            <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+
+                                                    <div class="mb-3">
+                                                        <label for="years_of_experience" class="form-label fw-semibold">Years of Experience</label>
+                                                        <input type="number" class="form-control form-control-lg" id="years_of_experience" name="years_of_experience" min="0"
+                                                               value="{{ old('years_of_experience', $credentials?->years_of_experience ?? '') }}"
+                                                               placeholder="Enter years of experience">
+                                                        @error('years_of_experience')
+                                                            <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
+                                                        @enderror
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-
-                                    <!-- Experience -->
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h5></h5>
-                                            <div class="form-group">
-                                                <label for="years_of_experience">Years of Experience</label>
-                                                <input type="number" class="form-control" id="years_of_experience" name="years_of_experience" min="0"
-                                                       value="{{ old('years_of_experience', $credentials?->years_of_experience ?? '') }}">
-                                                @error('years_of_experience')
-                                                    <div class="text-danger">{{ $message }}</div>
-                                                @enderror
-                                            </div>
-                                        </div>
-                                    </div>
-
-
                                 </div>
                             </div>
 
@@ -241,7 +282,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary mt-3">Save Credentials</button>
+                        <button type="submit" class="btn btn-primary mt-3" id="saveButton" disabled>Save Credentials</button>
                     </form>
                 </div>
             </div>
@@ -253,6 +294,33 @@
 document.addEventListener('DOMContentLoaded', function() {
     let workHistoryIndex = {{ count(old('work_history', $credentials->work_history ?? [])) }};
     let skillIndex = {{ count(old('skills', $credentials->skills ?? [])) }};
+    let hasChanges = false;
+    const saveButton = document.getElementById('saveButton');
+    const form = document.getElementById('credentialsForm');
+
+    // Function to check if form has changes
+    function checkForChanges() {
+        const inputs = form.querySelectorAll('input, textarea, select');
+        let changed = false;
+
+        inputs.forEach(input => {
+            if (input.type === 'file') {
+                if (input.files.length > 0) {
+                    changed = true;
+                }
+            } else if (input.value !== input.defaultValue) {
+                changed = true;
+            }
+        });
+
+        hasChanges = changed;
+        saveButton.disabled = !hasChanges;
+        saveButton.textContent = hasChanges ? 'Save Changes' : 'Save Credentials';
+    }
+
+    // Add event listeners to all form inputs
+    form.addEventListener('input', checkForChanges);
+    form.addEventListener('change', checkForChanges);
 
     // Add work history
     document.getElementById('add-work-history').addEventListener('click', function() {
@@ -298,12 +366,14 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         container.insertAdjacentHTML('beforeend', html);
         workHistoryIndex++;
+        checkForChanges();
     });
 
     // Remove work history
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-work-history')) {
             e.target.closest('.work-history-item').remove();
+            checkForChanges();
         }
     });
 
@@ -318,14 +388,38 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         container.insertAdjacentHTML('beforeend', html);
         skillIndex++;
+        checkForChanges();
     });
 
     // Remove skill
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-skill')) {
             e.target.closest('.skill-item').remove();
+            checkForChanges();
         }
     });
+
+    // Initialize completion progress
+    function updateCompletionProgress() {
+        const totalFields = 4; // license_no, license_expiration_date, certifications, years_of_experience
+        let completedFields = 0;
+
+        if (document.getElementById('license_no').value.trim()) completedFields++;
+        if (document.getElementById('license_expiration_date').value) completedFields++;
+        if (document.getElementById('certifications').value.trim()) completedFields++;
+        if (document.getElementById('years_of_experience').value) completedFields++;
+
+        const percentage = Math.round((completedFields / totalFields) * 100);
+        document.getElementById('completionProgress').style.width = percentage + '%';
+        document.getElementById('completionBadge').textContent = percentage + '% Complete';
+    }
+
+    // Update progress on input
+    form.addEventListener('input', updateCompletionProgress);
+    form.addEventListener('change', updateCompletionProgress);
+
+    // Initial progress update
+    updateCompletionProgress();
 });
 </script>
 @endsection

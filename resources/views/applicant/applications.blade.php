@@ -30,7 +30,7 @@
                                             <td>
                                                 <div>
                                                     <h6 class="mb-0">{{ $application->jobPosting->title }}</h6>
-                                                    <small class="text-muted">{{ $application->jobPosting->company_name ?? 'Company Name' }}</small>
+                                                   
                                                 </div>
                                             </td>
                                             <td>{{ $application->jobPosting->position }}</td>
