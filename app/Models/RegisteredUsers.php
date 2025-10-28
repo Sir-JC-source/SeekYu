@@ -27,6 +27,8 @@ class RegisteredUsers extends Authenticatable
         'status',
         'first_login',
         'contact_no', // ✅ added
+        'last_login',
+        'leave_credits',
     ];
 
     protected $hidden = [
@@ -36,6 +38,10 @@ class RegisteredUsers extends Authenticatable
 
     protected $casts = [
         'first_login' => 'boolean',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+        'last_login' => 'datetime',
+        'email_verified_at' => 'datetime',
     ];
 
     /**

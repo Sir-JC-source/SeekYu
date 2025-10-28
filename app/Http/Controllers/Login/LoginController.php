@@ -157,6 +157,10 @@ class LoginController extends Controller
             Auth::login($user, $request->has('remember'));
             $request->session()->regenerate();
 
+            // Update last_login timestamp
+            $user->last_login = now();
+            $user->save();
+
             if ($user->first_login) session(['force_password_change' => true]);
 
             return redirect()->route('dashboard.index')

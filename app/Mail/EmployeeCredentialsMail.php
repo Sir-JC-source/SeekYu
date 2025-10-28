@@ -10,7 +10,7 @@ use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 use App\Models\RegisteredUsers;
 
-class LoginCredentialsMail extends Mailable
+class EmployeeCredentialsMail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -21,7 +21,7 @@ class LoginCredentialsMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(RegisteredUsers $user, string $verificationUrl, string $password = null)
+    public function __construct(RegisteredUsers $user, string $verificationUrl, string $password)
     {
         $this->user = $user;
         $this->verificationUrl = $verificationUrl;
@@ -34,7 +34,7 @@ class LoginCredentialsMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Login Credentials - SeekYu HRIS',
+            subject: 'Your Employee Account Credentials - SeekYu HRIS',
         );
     }
 
@@ -44,7 +44,7 @@ class LoginCredentialsMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.login-credentials',
+            view: 'emails.employee-credentials',
         );
     }
 

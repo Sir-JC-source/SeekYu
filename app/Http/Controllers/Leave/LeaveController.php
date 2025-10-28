@@ -23,7 +23,38 @@ class LeaveController extends Controller
      */
     public function pending()
     {
-        $leaves = Leave::where('status', 'Pending')->orderBy('created_at', 'desc')->get();
+        $user = Auth::user();
+        $role = $user->role;
+
+        $query = Leave::where('status', 'Pending');
+
+        // Filter based on user role
+        switch ($role) {
+            case 'hr-officer':
+                // HR Officer can see leaves from security-guard and head-guard
+                $query->whereHas('user', function ($q) {
+                    $q->whereIn('role', ['security-guard', 'head-guard']);
+                });
+                break;
+            case 'admin':
+                // Admin can see leaves from hr-officer, security-guard, and head-guard
+                $query->whereHas('user', function ($q) {
+                    $q->whereIn('role', ['hr-officer', 'security-guard', 'head-guard']);
+                });
+                break;
+            case 'super-admin':
+                // Super Admin can see leaves from admin and hr-officer
+                $query->whereHas('user', function ($q) {
+                    $q->whereIn('role', ['admin', 'hr-officer']);
+                });
+                break;
+            default:
+                // Other roles see nothing
+                $query->whereRaw('1 = 0');
+                break;
+        }
+
+        $leaves = $query->orderBy('created_at', 'desc')->get();
         return view('leaves.pending', compact('leaves'));
     }
 
@@ -87,30 +118,42 @@ class LeaveController extends Controller
         $validated = $request->validate([
             'leave_type' => 'required|in:Sick Leave,Vacation Leave',
             'reason' => 'required|string|max:1000',
-            'duration' => 'required|in:Whole Shift,Half-Shift Early Out,Half-Shift Late In',
-            'date_from' => 'required|date',
+            'duration' => 'required|in:Whole Shift,Half-Shift Early Out,Half-Shift Late In,Multi-Day',
+            'date_from' => 'required|date|after_or_equal:today',
             'date_to' => 'required|date|after_or_equal:date_from',
             'position' => 'required|string|max:50',
         ]);
 
         $user = Auth::user();
 
+        // Calculate credits and adjust date_to based on duration
+        $creditCalculation = $this->calculateCredits(
+            $validated['duration'],
+            $validated['date_from'],
+            $validated['date_to']
+        );
+
+        // Check if user has sufficient credits
+        if ($user->leave_credits < $creditCalculation['credits']) {
+            return redirect()->back()->withErrors(['leave_credits' => 'Insufficient leave credits. You have ' . $user->leave_credits . ' credits but need ' . $creditCalculation['credits'] . ' credits for this leave request.'])->withInput();
+        }
+
         Leave::create([
-            'requestor' => $user->fullname,
+            'requestor' => $user->employee->full_name ?? $user->fullname,
             'leave_type' => $validated['leave_type'],
             'reason' => $validated['reason'],
             'duration' => $validated['duration'],
             'date_from' => $validated['date_from'],
-            'date_to' => $validated['date_to'],
+            'date_to' => $creditCalculation['date_to'],
             'position' => $validated['position'],
             'status' => 'Pending',
-            'leave_credits' => $user->leave_credits ?? 5,
+            'leave_credits' => $creditCalculation['credits'],
             'approved_by' => null,
             'rejected_by' => null,
             'user_id' => $user->id,
         ]);
 
-        return redirect()->route('leaves.list')->with('success', 'Leave request submitted successfully.');
+        return redirect()->route('leaves.request')->with('success', 'Leave request submitted successfully.');
     }
 
     /**
@@ -123,6 +166,24 @@ class LeaveController extends Controller
         if ($leave->status !== 'Pending') {
             return response()->json(['success' => false, 'message' => 'Leave already processed.']);
         }
+
+        // Use the calculateCredits function to get the correct credits to deduct
+        $creditCalculation = $this->calculateCredits(
+            $leave->duration,
+            $leave->date_from,
+            $leave->date_to
+        );
+        $daysToDeduct = $creditCalculation['credits'];
+
+        // Check if user has sufficient credits
+        $user = $leave->user;
+        if ($user->leave_credits < $daysToDeduct) {
+            return response()->json(['success' => false, 'message' => 'Insufficient leave credits.']);
+        }
+
+        // Deduct credits and approve leave
+        $user->leave_credits -= $daysToDeduct;
+        $user->save();
 
         $leave->status = 'Approved';
         $leave->approved_by = Auth::user()->id;
@@ -149,5 +210,40 @@ class LeaveController extends Controller
         $leave->save();
 
         return response()->json(['success' => true, 'status' => 'Rejected']);
+    }
+
+    /**
+     * Calculate credits and adjust date_to based on duration.
+     */
+    private function calculateCredits($duration, $date_from, $date_to)
+    {
+        $dateFrom = \Carbon\Carbon::parse($date_from);
+        $dateTo = \Carbon\Carbon::parse($date_to);
+
+        switch ($duration) {
+            case 'Whole Shift':
+                return [
+                    'credits' => 1,
+                    'date_to' => $dateFrom->toDateString()
+                ];
+            case 'Half-Shift Early Out':
+            case 'Half-Shift Late In':
+                return [
+                    'credits' => 0.5,
+                    'date_to' => $dateFrom->toDateString()
+                ];
+            case 'Multi-Day':
+                $days = $dateFrom->diffInDays($dateTo) + 1;
+                $credits = max(2, min(10, $days)); // Clamp between 2 and 10
+                return [
+                    'credits' => $credits,
+                    'date_to' => $dateTo->toDateString()
+                ];
+            default:
+                return [
+                    'credits' => 0,
+                    'date_to' => $dateTo->toDateString()
+                ];
+        }
     }
 }

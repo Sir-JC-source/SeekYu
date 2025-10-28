@@ -8,6 +8,7 @@ use App\Models\RegisteredUsers;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\SendStudentCredentialsMail;
 use App\Mail\SendFacultyMemberCredentialsMail;
+use App\Mail\LoginCredentialsMail;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Spatie\Permission\Models\Role;
@@ -21,15 +22,16 @@ class UserManagementController extends Controller
 
     public function getUsers(Request $request)
     {
-        $query = RegisteredUsers::where('account_status', 'Approved');
+        $query = RegisteredUsers::where('account_status', 'active')
+            ->whereIn('role', ['admin', 'hr-officer', 'head-guard', 'security-guard']);
 
         $totalData = $query->count();
 
         // Search filter
         if ($search = $request->input('search.value')) {
-            $query->where('fullname', 'like', "%{$search}%");
-            $query->orWhere('student_no', 'like', "%{$search}%");
-            $query->orWhere('email', 'like', "%{$search}%");
+            $query->where('fullname', 'like', "%{$search}%")
+                  ->orWhere('login_id', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
         }
 
         $totalFiltered = $query->count();
@@ -38,7 +40,7 @@ class UserManagementController extends Controller
         if ($request->has('order')) {
             $orderColIndex = $request->input('order.0.column');
             $orderDir = $request->input('order.0.dir');
-            $columns = ['fullname', 'role', 'student_no', 'email', 'address', 'status'];
+            $columns = ['fullname', 'role', 'login_id', 'email', 'last_login', 'status'];
             $query->orderBy($columns[$orderColIndex], $orderDir);
         }
 
@@ -50,29 +52,24 @@ class UserManagementController extends Controller
 
         $data = $users->map(function ($user) {
             return [
+                'employee_no' => $user->login_id ?? 'N/A',
+                'login_id' => $user->login_id ?? 'N/A',
                 'fullname' => $user->fullname,
-                'student_no'  => $user->student_no ?? 'N/A',
-                'faculty_no'  => $user->faculty_no ?? 'N/A',
-                'email'        => $user->email,
-                'address'     => $user->address ?? 'N/A',
-                'role'        => '<span class="badge bg-label-primary">'
-                                    . e($user->role) .
-                                '</span>',
-                'account_status'       => '<span class="badge bg-label-success">'
-                                    . e($user->account_status) .
-                                '</span>',
-                'action'       => '
+                'user_type' => '<span class="badge bg-label-primary">' . e($user->role) . '</span>',
+                'status' => '<span class="badge bg-label-' . ($user->status === 'active' ? 'success' : 'danger') . '">' . e($user->status) . '</span>',
+                'created_at' => $user->created_at->format('M d, Y H:i'),
+                'last_login' => $user->last_login ? $user->last_login->format('M d, Y H:i') : 'Never',
+                'action' => '
                     <div class="dropdown">
                         <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
                             <i class="ti ti-dots-vertical"></i>
                         </button>
                         <div class="dropdown-menu">
-                            <a class="dropdown-item" href="' . route('user-management.edit', $user->id) . '">
-                                <i class="ti ti-pencil me-1"></i> Edit
+                            <a class="dropdown-item" href="javascript:void(0);" onclick="resetPassword(' . $user->id . ')">
+                                <i class="ti ti-refresh me-1"></i> Reset Password
                             </a>
-                            <a class="dropdown-item text-danger" href="javascript:void(0);" 
-                            onclick="deleteUser(\'' . route('user-management.destroy', $user->id) . '\')" >
-                                <i class="ti ti-trash me-1"></i> Delete
+                            <a class="dropdown-item text-warning" href="javascript:void(0);" onclick="deactivateUser(' . $user->id . ')">
+                                <i class="ti ti-user-x me-1"></i> Deactivate
                             </a>
                         </div>
                     </div>'
@@ -80,10 +77,75 @@ class UserManagementController extends Controller
         });
 
         return response()->json([
-            'draw'            => intval($request->input('draw')),
-            'recordsTotal'    => $totalData,
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $totalData,
             'recordsFiltered' => $totalFiltered,
-            'data'            => $data
+            'data' => $data
+        ]);
+    }
+
+    public function getNonEmployees(Request $request)
+    {
+        $query = RegisteredUsers::whereIn('account_status', ['active', 'approved'])
+            ->whereIn('role', ['applicant']);
+
+        $totalData = $query->count();
+
+        // Search filter
+        if ($search = $request->input('search.value')) {
+            $query->where('fullname', 'like', "%{$search}%")
+                  ->orWhere('student_no', 'like', "%{$search}%")
+                  ->orWhere('faculty_no', 'like', "%{$search}%")
+                  ->orWhere('email', 'like', "%{$search}%");
+        }
+
+        $totalFiltered = $query->count();
+
+        // Ordering
+        if ($request->has('order')) {
+            $orderColIndex = $request->input('order.0.column');
+            $orderDir = $request->input('order.0.dir');
+            $columns = ['fullname', 'role', 'student_no', 'faculty_no', 'email', 'last_login', 'status'];
+            $query->orderBy($columns[$orderColIndex], $orderDir);
+        }
+
+        // Pagination
+        $users = $query
+                ->offset($request->input('start'))
+                ->limit($request->input('length'))
+                ->get();
+
+        $data = $users->map(function ($user) {
+            return [
+                'login_id' => $user->login_id ?? 'N/A',
+                'fullname' => $user->fullname,
+                'user_type' => '<span class="badge bg-label-primary">' . e($user->role) . '</span>',
+                'created_at' => $user->created_at->format('M d, Y H:i'),
+                'last_login' => $user->last_login ? $user->last_login->format('M d, Y H:i') : 'Never',
+                'status' => '<span class="badge bg-label-' . ($user->status === 'active' ? 'success' : 'danger') . '">' . e($user->status) . '</span>',
+                'email_verified_at' => $user->email_verified_at ? $user->email_verified_at->format('M d, Y H:i') : 'Not Verified',
+                'action' => '
+                    <div class="dropdown">
+                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i class="ti ti-dots-vertical"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="javascript:void(0);" onclick="resetPassword(' . $user->id . ')">
+                                <i class="ti ti-refresh me-1"></i> Reset Password
+                            </a>
+                            <a class="dropdown-item text-warning" href="javascript:void(0);" onclick="deactivateUser(' . $user->id . ')">
+                                <i class="ti ti-user-x me-1"></i> Deactivate
+                            </a>
+                        </div>
+                    </div>'
+            ];
+        });
+
+        return response()->json([
+            'draw' => intval($request->input('draw')),
+            'recordsTotal' => $totalData,
+            'recordsFiltered' => $totalFiltered,
+            'data' => $data
         ]);
     }
 
@@ -305,6 +367,45 @@ class UserManagementController extends Controller
         $user->delete();
 
         return response()->json(['message' => 'User deleted successfully.'], 200);
+    }
+
+    public function deactivateUser($id)
+    {
+        try {
+            $user = RegisteredUsers::findOrFail($id);
+            $user->status = 'inactive';
+            $user->save();
+
+            return response()->json(['success' => true, 'message' => 'User deactivated successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to deactivate user.'], 500);
+        }
+    }
+
+    public function resetPassword($id)
+    {
+        try {
+            $user = RegisteredUsers::findOrFail($id);
+
+            // Generate a random 8-character password
+            $plainPassword = Str::random(8);
+
+            // Save hashed password
+            $user->password = Hash::make($plainPassword);
+            $user->first_login = true; // Force password change on next login
+            $user->save();
+
+            // Send credentials email
+            Mail::to($user->email)->send(new LoginCredentialsMail(
+                $user->fullname,
+                $user->login_id ?? $user->student_no ?? $user->faculty_no ?? $user->email,
+                $plainPassword
+            ));
+
+            return response()->json(['success' => true, 'message' => 'Password reset and credentials sent successfully.']);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Failed to reset password.'], 500);
+        }
     }
 
 }

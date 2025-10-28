@@ -28,6 +28,12 @@ class Employee extends Model
         'designation',
         'assigned_head_guard_id',
         'deployment_status',
+        'first_name',
+        'middle_name',
+        'last_name',
+        'age',
+        'barangay',
+        'email',
     ];
 
     /**

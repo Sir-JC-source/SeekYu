@@ -92,9 +92,15 @@ class JobPostingController extends Controller
             $query->where('position', $request->position);
         }
 
+        // Left join with job_applications to check if user has applied
+        $query->leftJoin('job_applications', function($join) {
+            $join->on('job_postings.id', '=', 'job_applications.job_posting_id')
+                 ->where('job_applications.user_id', '=', Auth::id());
+        })->addSelect('job_postings.*', 'job_applications.id as applied_id');
+
         // Paginate 9 jobs per page, order by status (active first) then by created_at
-        $jobPostings = $query->orderByRaw("CASE WHEN status = 'active' THEN 1 ELSE 2 END")
-            ->orderBy('created_at', 'desc')
+        $jobPostings = $query->orderByRaw("CASE WHEN job_postings.status = 'active' THEN 1 ELSE 2 END")
+            ->orderBy('job_postings.created_at', 'desc')
             ->paginate(9);
 
         return view('applicant.jobs', compact('jobPostings'));

@@ -35,7 +35,9 @@
                                 <p class="mb-2"><strong>Type:</strong> {{ $job->type_of_employment }}</p>
                                 <p class="mb-3"><strong>Location:</strong> {{ $job->location }}</p>
                                 <p class="text-muted small">Posted: {{ $job->created_at->format('M d, Y') }}</p>
-                                @if($job->status === 'active')
+                                @if($job->applied_id)
+                                    <span class="badge bg-success w-100">Application Submitted </span>
+                                @elseif($job->status === 'active')
                                     <button type="button" class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#jobModal{{ $job->id }}">Apply Now</button>
                                 @else
                                     <button class="btn btn-secondary w-100" disabled>Application Closed</button>

@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Employee;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Employee;
+use App\Models\RegisteredUsers;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\EmployeeCredentialsMail;
 
 class EmployeeController extends Controller
 {
@@ -48,33 +51,92 @@ class EmployeeController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'employee_number' => 'required|digits:8|unique:employees,employee_number',
-            'full_name'       => 'required|string|max:255',
-            'position'        => 'required|in:Admin,HR Officer,Head Guard,Security Guard',
-            'date_hired'      => 'required|date|before_or_equal:today',
-            'contact_no'      => 'required|digits:11',
+            'first_name'      => 'required|string|max:255',
+            'middle_name'     => 'nullable|string|max:255',
+            'last_name'       => 'required|string|max:255',
+            'age'             => 'required|integer|min:18|max:100',
             'province'        => 'required|string|max:255',
             'city'            => 'required|string|max:255',
+            'barangay'        => 'required|string|max:255',
+            'email'           => 'required|email|unique:registered_users,email',
+            'date_hired'      => 'required|date|before_or_equal:today',
+            'position'        => 'required|in:Administrator,HR Officer,Security Guard,Head Guard',
+            'employee_number' => 'required|digits:8|unique:employees,employee_number',
+            'login_id'        => 'required|string|max:255|unique:registered_users,login_id',
+            'password'        => 'required|string|min:10',
             'employee_image'  => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        $employee = new Employee();
-        $employee->employee_number = $request->employee_number;
-        $employee->full_name = $request->full_name;
-        $employee->position = $request->position;
-        $employee->date_hired = $request->date_hired;
-        $employee->contact_no = $request->contact_no;
-        $employee->province = $request->province;
-        $employee->city = $request->city;
-        $employee->status = 'Active';
+        try {
+            // Map position to role
+            $roleMapping = [
+                'Administrator' => 'admin',
+                'HR Officer' => 'hr-officer',
+                'Security Guard' => 'security-guard',
+                'Head Guard' => 'head-guard',
+            ];
+            $role = $roleMapping[$request->position] ?? 'employee';
 
-        if ($request->hasFile('employee_image')) {
-            $employee->employee_image = $request->file('employee_image')->store('employees', 'public');
+            // Create Registered User
+            $user = RegisteredUsers::create([
+                'fullname' => trim($request->first_name . ' ' . ($request->middle_name ? $request->middle_name . ' ' : '') . $request->last_name),
+                'email' => $request->email,
+                'login_id' => $request->login_id,
+                'password' => bcrypt($request->password),
+                'role' => $role,
+                'account_status' => 'pending',
+                'status' => 'active',
+                'first_login' => true,
+                'contact_no' => '', // Will be updated if needed
+                'province' => $request->province,
+                'city' => $request->city,
+                'address' => $request->barangay,
+            ]);
+
+            // Create Employee
+            $employee = new Employee();
+            $employee->employee_number = $request->employee_number;
+            $employee->full_name = $user->fullname;
+            $employee->position = $request->position;
+            $employee->date_hired = $request->date_hired;
+            $employee->contact_no = $user->contact_no;
+            $employee->province = $request->province;
+            $employee->city = $request->city;
+            $employee->status = 'Active';
+            $employee->first_name = $request->first_name;
+            $employee->middle_name = $request->middle_name;
+            $employee->last_name = $request->last_name;
+            $employee->age = $request->age;
+            $employee->barangay = $request->barangay;
+            $employee->email = $request->email;
+
+            if ($request->hasFile('employee_image')) {
+                $employee->employee_image = $request->file('employee_image')->store('employees', 'public');
+            }
+
+            $employee->save();
+
+            // Send verification email
+            try {
+                $verificationUrl = route('email.verify', ['id' => $user->id, 'token' => sha1($user->email . $user->created_at)]);
+                \Mail::to($user->email)->send(new EmployeeCredentialsMail($user, $verificationUrl, $request->password));
+            } catch (\Exception $e) {
+                // Log email failure but don't fail the entire operation
+                \Log::error('Failed to send login credentials email: ' . $e->getMessage());
+                return redirect()->route('employee.list')->with('success', 'Employee created successfully. However, there was an issue sending the login credentials email. Please contact the employee directly with their credentials.');
+            }
+
+            return redirect()->route('employee.list')->with('success', 'Employee created successfully. Login credentials sent to email.');
+
+        } catch (\Exception $e) {
+            \Log::error('Employee creation failed: ' . $e->getMessage());
+
+            // Clean up any partial data if needed
+            // Note: Since we're using database transactions implicitly through Laravel,
+            // if any step fails, the previous steps should be rolled back
+
+            return redirect()->back()->with('error', 'Failed to create employee. Please try again or contact support if the problem persists.')->withInput();
         }
-
-        $employee->save();
-
-        return redirect()->route('employee.list')->with('success', 'Employee created successfully.');
     }
 
     // Edit Employee view

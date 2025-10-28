@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\JobPosting\JobPostingController;
 use App\Http\Controllers\Applicant\ApplicantCredentialController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Shift\ShiftController;
 
 // Root redirect to login
 Route::get('/', function () {
@@ -55,6 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::prefix('user-management')->group(function () {
         Route::get('/', [UserManagementController::class, 'index'])->name('user-management.index');
         Route::get('/json', [UserManagementController::class, 'getUsers'])->name('user-management.json');
+        Route::get('/json-non-employees', [UserManagementController::class, 'getNonEmployees'])->name('user-management.json.non-employees');
+        Route::post('/deactivate/{id}', [UserManagementController::class, 'deactivateUser'])->name('user-management.deactivate');
+        Route::post('/reset-password/{id}', [UserManagementController::class, 'resetPassword'])->name('user-management.reset-password');
         Route::get('/json-approval', [UserManagementController::class, 'getUsersForApproval'])->name('user-management.json.approval');
         Route::get('/pending-approval', [UserManagementController::class, 'forApprovalIndex'])->name('user-management.pending-approval');
         Route::get('/users/approve/{id}', [UserManagementController::class, 'approveUser'])->name('user-management.approve');
@@ -88,6 +92,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/deploy/{id}', [SecurityController::class, 'showDeployForm'])->name('security.deploy.form');
         Route::post('/deploy/{id}', [SecurityController::class, 'storeDeployment'])->name('security.deploy.store');
         Route::put('/make-inactive/{id}', [SecurityController::class, 'makeInactive'])->name('security.makeInactive');
+    });
+
+    // ----------------------
+    // 📅 Guard Scheduling
+    // ----------------------
+    Route::prefix('guard-scheduling')->group(function () {
+        Route::get('/assign', [SecurityController::class, 'assignSchedule'])->name('guard-scheduling.assign');
+        Route::get('/assign/{guard}', [SecurityController::class, 'showGuardSchedule'])->name('guard-scheduling.assign.guard');
+        Route::post('/assign/{guard}/store', [SecurityController::class, 'storeSchedule'])->name('guard-scheduling.assign.store');
+        Route::get('/deploy', [SecurityController::class, 'deploy'])->name('guard-scheduling.deploy');
+        Route::get('/list', [SecurityController::class, 'guardList'])->name('guard-scheduling.list');
     });
 
     // ----------------------
@@ -166,4 +181,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/credentials', [ApplicantCredentialController::class, 'index'])->name('applicant.credentials');
         Route::post('/credentials/store', [ApplicantCredentialController::class, 'store'])->name('applicant.credentials.store');
     });
+
 });
+
+

@@ -15,12 +15,12 @@ use App\Mail\AdminCredentialsMail;
 class AdminController extends Controller
 {
     /**
-     * Show Add Admin Account page
+     * Show Admin Accounts page
      */
     public function add()
     {
-        // Get all employees with position 'Admin'
-        $admins = Employee::where('position', 'Admin')->get();
+        // Get all users with admin roles and their employee data
+        $admins = \App\Models\RegisteredUsers::whereIn('role', ['super-admin', 'admin'])->with('employee')->get();
         return view('Admin.AdminAddView', compact('admins'));
     }
 

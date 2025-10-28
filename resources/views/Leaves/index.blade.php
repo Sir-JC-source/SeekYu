@@ -16,11 +16,11 @@
                 {{-- Requestor (readonly) --}}
                 <div class="col-md-6 mb-3">
                     <label for="requestor" class="form-label">Requestor</label>
-                    <input type="text" 
-                           class="form-control @error('requestor') is-invalid @enderror" 
-                           id="requestor" 
-                           name="requestor" 
-                           value="{{ Auth::user()->fullname }}" 
+                    <input type="text"
+                           class="form-control @error('requestor') is-invalid @enderror"
+                           id="requestor"
+                           name="requestor"
+                           value="{{ Auth::user()->employee->full_name ?? Auth::user()->fullname }}"
                            readonly>
                     @error('requestor')
                         <span class="invalid-feedback">{{ $message }}</span>
@@ -60,14 +60,15 @@
                 {{-- Duration --}}
                 <div class="col-md-6 mb-3">
                     <label for="duration" class="form-label">Duration</label>
-                    <select class="form-select @error('duration') is-invalid @enderror" 
-                            id="duration" 
-                            name="duration" 
+                    <select class="form-select @error('duration') is-invalid @enderror"
+                            id="duration"
+                            name="duration"
                             required>
                         <option value="">Select Duration</option>
                         <option value="Whole Shift" {{ old('duration') == 'Whole Shift' ? 'selected' : '' }}>Whole Shift</option>
                         <option value="Half-Shift Early Out" {{ old('duration') == 'Half-Shift Early Out' ? 'selected' : '' }}>Half-Shift Early Out</option>
                         <option value="Half-Shift Late In" {{ old('duration') == 'Half-Shift Late In' ? 'selected' : '' }}>Half-Shift Late In</option>
+                        <option value="Multi-Day" {{ old('duration') == 'Multi-Day' ? 'selected' : '' }}>Multi-Day</option>
                     </select>
                     @error('duration')
                         <span class="invalid-feedback">{{ $message }}</span>
@@ -77,9 +78,9 @@
                 {{-- Date From --}}
                 <div class="col-md-3 mb-3">
                     <label for="date_from" class="form-label">Date From</label>
-                    <input type="date" class="form-control @error('date_from') is-invalid @enderror" 
-                           id="date_from" name="date_from" 
-                           value="{{ old('date_from') }}" required>
+                    <input type="date" class="form-control @error('date_from') is-invalid @enderror"
+                           id="date_from" name="date_from"
+                           value="{{ old('date_from') }}" required min="{{ \Carbon\Carbon::today()->toDateString() }}">
                     @error('date_from')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
@@ -88,9 +89,9 @@
                 {{-- Date To --}}
                 <div class="col-md-3 mb-3">
                     <label for="date_to" class="form-label">Date To</label>
-                    <input type="date" class="form-control @error('date_to') is-invalid @enderror" 
-                           id="date_to" name="date_to" 
-                           value="{{ old('date_to') }}" required>
+                    <input type="date" class="form-control @error('date_to') is-invalid @enderror"
+                           id="date_to" name="date_to"
+                           value="{{ old('date_to') }}" required min="{{ \Carbon\Carbon::today()->toDateString() }}">
                     @error('date_to')
                         <span class="invalid-feedback">{{ $message }}</span>
                     @enderror
@@ -117,7 +118,7 @@
                     <label for="leave_credits" class="form-label">Leave Credits</label>
                     <input type="number" class="form-control" 
                            id="leave_credits" name="leave_credits" 
-                           value="{{ old('leave_credits', Auth::user()->leave_credits ?? 5) }}" 
+                           value="{{ old('leave_credits', Auth::user()->leave_credits ?? 10) }}"
                            readonly>
                 </div>
 
@@ -168,6 +169,84 @@ document.addEventListener('DOMContentLoaded', function () {
     if (errorToastEl) {
         new bootstrap.Toast(errorToastEl, { delay: 7000 }).show();
     }
+
+    // Elements
+    const durationSelect = document.getElementById('duration');
+    const dateFromInput = document.getElementById('date_from');
+    const dateToInput = document.getElementById('date_to');
+    const leaveCreditsInput = document.getElementById('leave_credits');
+    const submitButton = document.querySelector('button[type="submit"]');
+
+    // User leave credits
+    const userLeaveCredits = {{ Auth::user()->leave_credits ?? 10 }};
+
+    // Function to calculate required credits
+    function calculateRequiredCredits(duration, dateFrom, dateTo) {
+        if (!dateFrom || !dateTo) return 0;
+
+        const fromDate = new Date(dateFrom);
+        const toDate = new Date(dateTo);
+        const daysDiff = Math.ceil((toDate - fromDate) / (1000 * 60 * 60 * 24)) + 1;
+
+        switch (duration) {
+            case 'Whole Shift':
+                return 1;
+            case 'Half-Shift Early Out':
+            case 'Half-Shift Late In':
+                return 0.5;
+            case 'Multi-Day':
+                return Math.min(Math.max(daysDiff, 2), 10);
+            default:
+                return 0;
+        }
+    }
+
+    // Function to update date_to for single-day leaves
+    function updateDateTo() {
+        const duration = durationSelect.value;
+        const dateFrom = dateFromInput.value;
+
+        if ((duration === 'Whole Shift' || duration === 'Half-Shift Early Out' || duration === 'Half-Shift Late In') && dateFrom) {
+            dateToInput.value = dateFrom;
+            dateToInput.disabled = true;
+        } else {
+            dateToInput.disabled = false;
+        }
+    }
+
+    // Function to validate credits
+    function validateCredits() {
+        const duration = durationSelect.value;
+        const dateFrom = dateFromInput.value;
+        const dateTo = dateToInput.value;
+        const requiredCredits = calculateRequiredCredits(duration, dateFrom, dateTo);
+
+        if (requiredCredits > userLeaveCredits) {
+            alert(`Insufficient leave credits. You have ${userLeaveCredits} credits but need ${requiredCredits} credits for this leave request.`);
+            submitButton.disabled = true;
+        } else {
+            submitButton.disabled = false;
+        }
+    }
+
+    // Event listeners
+    durationSelect.addEventListener('change', function() {
+        updateDateTo();
+        validateCredits();
+    });
+
+    dateFromInput.addEventListener('change', function() {
+        updateDateTo();
+        validateCredits();
+    });
+
+    dateToInput.addEventListener('change', function() {
+        validateCredits();
+    });
+
+    // Initial setup
+    updateDateTo();
+    validateCredits();
 });
 </script>
 @endsection

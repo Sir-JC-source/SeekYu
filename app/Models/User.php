@@ -15,6 +15,7 @@ class User extends Authenticatable
         'email',
         'password',
         'employee_id', // Add this if your users table has a foreign key to employees
+        'role',
     ];
 
     protected $hidden = [

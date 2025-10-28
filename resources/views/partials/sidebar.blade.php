@@ -32,6 +32,14 @@
                 </a>
             </li>
 
+            {{-- User Management --}}
+            <li class="menu-item {{ request()->routeIs('user-management.index') ? 'active' : '' }}">
+                <a href="{{ route('user-management.index') }}" class="menu-link">
+                    <i class="ti ti-users menu-icon"></i>
+                    <div>User Management</div>
+                </a>
+            </li>
+
             {{-- Employee Management --}}
             <li class="menu-item {{ request()->is('employee*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -51,21 +59,7 @@
                 </ul>
             </li>
 
-            {{-- Security Guard Tracking --}}
-            <li class="menu-item {{ request()->is('security*') ? 'active open' : '' }}">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="ti ti-shield-check menu-icon"></i>
-                    <div>Security Guard Tracking</div>
-                </a>
-                <ul class="menu-sub">
-                    <li class="menu-item {{ request()->routeIs('security.list') ? 'active' : '' }}">
-                        <a href="{{ route('security.list') }}" class="menu-link"><div>List of Guards</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('security.deployments') ? 'active' : '' }}">
-                        <a href="{{ route('security.deployments') }}" class="menu-link"><div>Deployments</div></a>
-                    </li>
-                </ul>
-            </li>
+
 
             {{-- Applications --}}
             <li class="menu-item {{ request()->is('applications*') ? 'active open' : '' }}">
@@ -147,6 +141,14 @@
                 </a>
             </li>
 
+            {{-- User Management --}}
+            <li class="menu-item {{ request()->routeIs('user-management.index') ? 'active' : '' }}">
+                <a href="{{ route('user-management.index') }}" class="menu-link">
+                    <i class="ti ti-users menu-icon"></i>
+                    <div>User Management</div>
+                </a>
+            </li>
+
             {{-- Employee Management --}}
             <li class="menu-item {{ request()->is('employee*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
@@ -163,21 +165,7 @@
                 </ul>
             </li>
 
-            {{-- Security Guard Tracking --}}
-            <li class="menu-item {{ request()->is('security*') ? 'active open' : '' }}">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="ti ti-shield-check menu-icon"></i>
-                    <div>Security Guard Tracking</div>
-                </a>
-                <ul class="menu-sub">
-                    <li class="menu-item {{ request()->routeIs('security.list') ? 'active' : '' }}">
-                        <a href="{{ route('security.list') }}" class="menu-link"><div>List of Guards</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('security.deployments') ? 'active' : '' }}">
-                        <a href="{{ route('security.deployments') }}" class="menu-link"><div>Deployments</div></a>
-                    </li>
-                </ul>
-            </li>
+
 
             {{-- Applications --}}
             <li class="menu-item {{ request()->is('applications*') ? 'active open' : '' }}">
@@ -194,6 +182,25 @@
                     </li>
                     <li class="menu-item {{ request()->routeIs('applications.shortlist') ? 'active' : '' }}">
                         <a href="{{ route('applications.shortlist') }}" class="menu-link"><div>Shortlisted Applicants</div></a>
+                    </li>
+                </ul>
+            </li>
+
+            {{-- Guard Scheduling --}}
+            <li class="menu-item {{ request()->is('guard-scheduling*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="ti ti-calendar-time menu-icon"></i>
+                    <div>Guard Scheduling</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('guard-scheduling.assign') ? 'active' : '' }}">
+                        <a href="{{ route('guard-scheduling.assign') }}" class="menu-link"><div>Assign Schedule</div></a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('guard-scheduling.deploy') ? 'active' : '' }}">
+                        <a href="{{ route('guard-scheduling.deploy') }}" class="menu-link"><div>Deploy Guard</div></a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('guard-scheduling.list') ? 'active' : '' }}">
+                        <a href="{{ route('guard-scheduling.list') }}" class="menu-link"><div>Guard List</div></a>
                     </li>
                 </ul>
             </li>
@@ -243,18 +250,7 @@
 
         {{-- Head Guard Menu --}}
         @if($userRole === 'head-guard')
-            {{-- Security Guard Tracking --}}
-            <li class="menu-item {{ request()->is('security*') ? 'active open' : '' }}">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="ti ti-shield-check menu-icon"></i>
-                    <div>Security Guard Tracking</div>
-                </a>
-                <ul class="menu-sub">
-                    <li class="menu-item {{ request()->routeIs('security.list') ? 'active' : '' }}">
-                        <a href="{{ route('security.list') }}" class="menu-link"><div>List of Guards</div></a>
-                    </li>
-                </ul>
-            </li>
+
 
             {{-- Leave Requests --}}
             <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
@@ -285,6 +281,8 @@
 
         {{-- Security Guard Menu --}}
         @if($userRole === 'security-guard')
+
+
             {{-- Leave Requests --}}
             <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
