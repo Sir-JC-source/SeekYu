@@ -16,7 +16,7 @@
             <!-- Hello message -->
             <li class="nav-item d-flex align-items-center me-3">
                 <span class="navbar-text">
-                    Hello, {{ auth()->user()->employee ? auth()->user()->employee->full_name : (auth()->user()->fullname ?? auth()->user()->name) }}
+                    Hello, {{ auth()->user()->employee ? auth()->user()->employee->full_name . ' (' . auth()->user()->employee->position . ')' : (auth()->user()->fullname ?? auth()->user()->name) }}
                 </span>
             </li>
 

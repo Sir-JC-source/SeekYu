@@ -50,6 +50,7 @@ Route::middleware('auth')->group(function () {
     // Dashboard
     Route::prefix('dashboard')->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard.index');
+        Route::get('/attendance-trends', [DashboardController::class, 'getAttendanceTrends'])->name('dashboard.attendance-trends');
     });
 
     // ----------------------

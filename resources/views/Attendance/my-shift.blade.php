@@ -26,7 +26,7 @@
                     <!-- Today's Shift -->
                     <div class="mb-4">
                         <div class="card border-primary shadow-sm">
-                            <div class="card-header bg-primary text-white">
+                            <div class="card-header text-white">
                                 <h6 class="mb-0">
                                     <i class="ti ti-calendar me-1"></i>
                                     Today's Shift ({{ \Carbon\Carbon::today('Asia/Manila')->format('l, M j, Y') }})

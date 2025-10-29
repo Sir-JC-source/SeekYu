@@ -23,7 +23,48 @@ class DashboardController extends Controller
         if ($user->hasRole(['super-admin', 'admin', 'hr-officer'])) {
             $kpiData = $this->calculateKPIs();
             $attendanceKpiData = $this->calculateAttendanceKPIs();
-            return view('Dashboard.dashboard', compact('kpiData', 'attendanceKpiData'));
+            $attendanceTrends = $this->calculateAttendanceTrends(6, 'monthly');
+
+            // Get summary data for dashboard cards
+            $totalEmployees = RegisteredUsers::whereIn('role', ['faculty-member', 'security-guard', 'head-guard'])
+                ->whereIn('account_status', ['approved', 'active'])
+                ->count();
+
+            $activeEmployees = RegisteredUsers::whereIn('role', ['faculty-member', 'security-guard', 'head-guard'])
+                ->where('account_status', 'active')
+                ->count();
+
+            $totalGuards = RegisteredUsers::whereIn('role', ['security-guard', 'head-guard'])
+                ->whereIn('account_status', ['approved', 'active'])
+                ->count();
+
+            $activeGuards = RegisteredUsers::whereIn('role', ['security-guard', 'head-guard'])
+                ->where('account_status', 'active')
+                ->count();
+
+            $pendingLeaves = Leave::where('status', 'pending')->count();
+            $approvedLeaves = Leave::where('status', 'approved')->count();
+            $rejectedLeaves = Leave::where('status', 'rejected')->count();
+
+            $totalIncidents = IncidentReport::count();
+            $pendingIncidents = 0; // No status column in incident_reports table
+            $resolvedIncidents = 0; // No status column in incident_reports table
+
+            return view('Dashboard.dashboard', compact(
+                'kpiData',
+                'attendanceKpiData',
+                'attendanceTrends',
+                'totalEmployees',
+                'activeEmployees',
+                'totalGuards',
+                'activeGuards',
+                'pendingLeaves',
+                'approvedLeaves',
+                'rejectedLeaves',
+                'totalIncidents',
+                'pendingIncidents',
+                'resolvedIncidents'
+            ));
         }
 
         return view('Dashboard.dashboard');
@@ -175,6 +216,151 @@ class DashboardController extends Controller
             'undertime_shifts' => $undertimeShifts,
             'average_hours' => $averageHours,
         ];
+    }
+
+    public function calculateAttendanceTrends($months = 6, $grouping = 'monthly')
+    {
+        $trends = [];
+        $guardEmployeeIds = Employee::whereHas('registeredUser', function ($query) {
+            $query->whereIn('role', ['security-guard', 'head-guard'])
+                  ->whereIn('account_status', ['approved', 'active']);
+        })->pluck('id');
+
+        $periods = $this->getPeriods($months, $grouping);
+
+        foreach ($periods as $period) {
+            $startDate = $period['start'];
+            $endDate = $period['end'];
+            $label = $period['label'];
+
+            // Total scheduled shifts for the period
+            $totalShifts = Schedule::whereIn('guard_id', $guardEmployeeIds)
+                ->whereBetween('schedule_date', [$startDate, $endDate])
+                ->count();
+
+            // Completed shifts for the period
+            $completedShifts = Attendance::whereIn('employee_id', $guardEmployeeIds)
+                ->whereNotNull('shift_in_time')
+                ->whereNotNull('shift_out_time')
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->count();
+
+            // Late arrivals - calculate based on schedule comparison
+            $lateShifts = 0;
+            $undertimeShifts = 0;
+
+            $attendancesWithSchedules = Attendance::whereIn('employee_id', $guardEmployeeIds)
+                ->whereNotNull('shift_in_time')
+                ->whereNotNull('shift_out_time')
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->with('employee.schedules')
+                ->get();
+
+            foreach ($attendancesWithSchedules as $attendance) {
+                $schedule = $attendance->employee->schedules->where('schedule_date', $attendance->attendance_date)->first();
+                if ($schedule) {
+                    $scheduledIn = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_in, 'Asia/Manila');
+                    $scheduledOut = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_out, 'Asia/Manila');
+                    $actualIn = Carbon::parse($attendance->shift_in_time, 'Asia/Manila');
+                    $actualOut = Carbon::parse($attendance->shift_out_time, 'Asia/Manila');
+
+                    if ($actualIn->gt($scheduledIn)) {
+                        $lateShifts++;
+                    }
+                    if ($actualOut->lt($scheduledOut)) {
+                        $undertimeShifts++;
+                    }
+                }
+            }
+
+            // Total hours and average hours worked
+            $totalHours = Attendance::whereIn('employee_id', $guardEmployeeIds)
+                ->whereNotNull('shift_in_time')
+                ->whereNotNull('shift_out_time')
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->sum('total_hours');
+            $avgHours = $completedShifts > 0 ? $totalHours / $completedShifts : 0;
+
+            // Attendance issues rate
+            $totalAttendanceRecords = Attendance::whereIn('employee_id', $guardEmployeeIds)
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->count();
+            $issuesRate = $totalAttendanceRecords > 0 ? round((($lateShifts + $undertimeShifts) / $totalAttendanceRecords) * 100, 1) : 0;
+
+            // Guard productivity (avg hours per guard)
+            $activeGuards = Attendance::whereIn('employee_id', $guardEmployeeIds)
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->distinct('employee_id')
+                ->count('employee_id');
+            $productivity = $activeGuards > 0 ? $totalHours / $activeGuards : 0;
+
+            $trends[] = [
+                'period' => $label,
+                'total_shifts' => $totalShifts,
+                'completed_shifts' => $completedShifts,
+                'late_shifts' => $lateShifts,
+                'undertime_shifts' => $undertimeShifts,
+                'avg_hours' => round($avgHours, 1),
+                'issues_rate' => $issuesRate,
+                'productivity' => $productivity,
+            ];
+        }
+
+        return $trends;
+    }
+
+    private function getPeriods($months, $grouping)
+    {
+        $periods = [];
+        $now = Carbon::now();
+
+        if ($grouping === 'monthly') {
+            for ($i = $months - 1; $i >= 0; $i--) {
+                $date = $now->copy()->subMonths($i);
+                $periods[] = [
+                    'start' => $date->copy()->startOfMonth(),
+                    'end' => $date->copy()->endOfMonth(),
+                    'label' => $date->format('M Y')
+                ];
+            }
+        } elseif ($grouping === 'quarterly') {
+            $quarters = ceil($months / 3);
+            for ($i = $quarters - 1; $i >= 0; $i--) {
+                $date = $now->copy()->subMonths($i * 3);
+                $periods[] = [
+                    'start' => $date->copy()->startOfQuarter(),
+                    'end' => $date->copy()->endOfQuarter(),
+                    'label' => 'Q' . $date->quarter . ' ' . $date->year
+                ];
+            }
+        } elseif ($grouping === 'yearly') {
+            $years = ceil($months / 12);
+            for ($i = $years - 1; $i >= 0; $i--) {
+                $date = $now->copy()->subYears($i);
+                $periods[] = [
+                    'start' => $date->copy()->startOfYear(),
+                    'end' => $date->copy()->endOfYear(),
+                    'label' => $date->year
+                ];
+            }
+        }
+
+        return $periods;
+    }
+
+    public function getAttendanceTrends(Request $request)
+    {
+        $user = Auth::user();
+        if (!$user->hasRole(['super-admin', 'admin', 'hr-officer'])) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $months = $request->get('months', 6);
+        $grouping = $request->get('grouping', 'monthly');
+
+        $trends = $this->calculateAttendanceTrends($months, $grouping);
+
+        return response()->json($trends);
     }
 
     private function getPerformanceRating($score)

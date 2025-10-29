@@ -287,8 +287,8 @@ class AttendanceController extends Controller
             if ($schedule) {
                 $scheduledIn = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_in, 'Asia/Manila');
                 $scheduledOut = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_out, 'Asia/Manila');
-                $actualIn = $attendance->shift_in_time->setTimezone('Asia/Manila');
-                $actualOut = $attendance->shift_out_time->setTimezone('Asia/Manila');
+                $actualIn = Carbon::parse($attendance->shift_in_time, 'Asia/Manila');
+                $actualOut = Carbon::parse($attendance->shift_out_time, 'Asia/Manila');
 
                 if ($actualIn->gt($scheduledIn)) {
                     $lateShifts++;
