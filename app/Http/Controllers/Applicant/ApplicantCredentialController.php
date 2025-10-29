@@ -85,6 +85,11 @@ class ApplicantCredentialController extends Controller
             $data
         );
 
-        return redirect()->back()->with('success', 'Credentials saved successfully!');
+        // Award gamification points for completing credentials
+        $gamificationController = new \App\Http\Controllers\GamificationController();
+        $gamificationController->addPoints($user, 25);
+        $gamificationController->addBadge($user, 'Credential Master');
+
+        return redirect()->back()->with('success', 'Credentials saved successfully! You earned 25 points!');
     }
 }

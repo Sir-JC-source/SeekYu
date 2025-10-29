@@ -15,6 +15,7 @@ use App\Http\Controllers\Applicant\ApplicantCredentialController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Shift\ShiftController;
 use App\Http\Controllers\Attendance\AttendanceController;
+use App\Http\Controllers\GamificationController;
 
 
 // Root redirect to login
@@ -154,6 +155,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/submit', [IncidentReportController::class, 'create'])->name('incident-reports.submit');
         Route::post('/store', [IncidentReportController::class, 'store'])->name('incident-reports.store');
         Route::get('/logs', [IncidentReportController::class, 'logs'])->name('incident-reports.logs');
+        Route::post('/{id}/update-status', [IncidentReportController::class, 'updateStatus'])->name('incident-reports.update-status');
     });
 
     // ----------------------
@@ -200,6 +202,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/applications', [ApplicantCredentialController::class, 'applications'])->name('applicant.applications');
         Route::get('/credentials', [ApplicantCredentialController::class, 'index'])->name('applicant.credentials');
         Route::post('/credentials/store', [ApplicantCredentialController::class, 'store'])->name('applicant.credentials.store');
+        Route::get('/gamification', [GamificationController::class, 'index'])->name('applicant.gamification');
     });
 
 });

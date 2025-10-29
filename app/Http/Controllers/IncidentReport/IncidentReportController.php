@@ -33,11 +33,86 @@ class IncidentReportController extends Controller
             $report->parties()->create($party);
         }
 
-        return redirect()->route('incident-reports.logs')->with('success', 'Incident report submitted successfully!');
+        return redirect()->route('incident-reports.submit')->with('success', 'Incident report submitted successfully!');
     }
 
-    public function logs() {
-        $reports = IncidentReport::with('parties')->latest()->get();
-        return view('IncidentReports.logs', compact('reports'));
+    public function logs(Request $request) {
+        $query = IncidentReport::with('parties');
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('incident_name', 'like', "%{$search}%")
+                  ->orWhere('incident_description', 'like', "%{$search}%")
+                  ->orWhere('location', 'like', "%{$search}%");
+            });
+        }
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('date_of_incident', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('date_of_incident', '<=', $request->date_to);
+        }
+
+        // Location filter
+        if ($request->filled('location')) {
+            $query->where('location', $request->location);
+        }
+
+        // Status filter
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Quick filters
+        if ($request->filled('quick_filter')) {
+            switch ($request->quick_filter) {
+                case 'today':
+                    $query->whereDate('date_of_incident', today());
+                    break;
+                case 'week':
+                    $query->whereBetween('date_of_incident', [now()->startOfWeek(), now()->endOfWeek()]);
+                    break;
+                case 'month':
+                    $query->whereMonth('date_of_incident', now()->month)
+                          ->whereYear('date_of_incident', now()->year);
+                    break;
+            }
+        }
+
+        // Get statistics
+        $totalReports = IncidentReport::count();
+        $resolvedReports = IncidentReport::where('status', 'resolved')->count();
+        $pendingReports = IncidentReport::where('status', 'pending')->count();
+        $investigatingReports = IncidentReport::where('status', 'investigating')->count();
+
+        // Get unique locations for filter dropdown
+        $locations = IncidentReport::distinct()->pluck('location')->filter()->values();
+
+        // Paginate results
+        $reports = $query->latest()->paginate($request->get('per_page', 12));
+
+        return view('IncidentReports.logs', compact(
+            'reports',
+            'totalReports',
+            'resolvedReports',
+            'pendingReports',
+            'investigatingReports',
+            'locations'
+        ));
+    }
+
+    public function updateStatus(Request $request, $id) {
+        $request->validate([
+            'status' => 'required|in:pending,investigating,resolved',
+        ]);
+
+        $report = IncidentReport::findOrFail($id);
+        $report->update(['status' => $request->status]);
+
+        return response()->json(['success' => true, 'message' => 'Status updated successfully']);
     }
 }

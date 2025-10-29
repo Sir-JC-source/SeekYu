@@ -29,6 +29,12 @@ class RegisteredUsers extends Authenticatable
         'contact_no', // ✅ added
         'last_login',
         'leave_credits',
+        'points',
+        'level',
+        'badges',
+        'province',
+        'city',
+        'barangay',
     ];
 
     protected $hidden = [
@@ -42,6 +48,9 @@ class RegisteredUsers extends Authenticatable
         'updated_at' => 'datetime',
         'last_login' => 'datetime',
         'email_verified_at' => 'datetime',
+        'points' => 'integer',
+        'level' => 'integer',
+        'badges' => 'array',
     ];
 
     /**
@@ -58,6 +67,14 @@ class RegisteredUsers extends Authenticatable
     public function jobApplications()
     {
         return $this->hasMany(JobApplication::class, 'user_id');
+    }
+
+    /**
+     * Get the count of applications submitted by this user.
+     */
+    public function getApplicationsCountAttribute()
+    {
+        return $this->jobApplications()->count();
     }
 
     /**

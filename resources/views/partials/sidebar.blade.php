@@ -360,6 +360,15 @@
                     <div>My Credentials</div>
                 </a>
             </li>
+
+            
+            {{-- Gamification --}}
+            <li class="menu-item {{ request()->routeIs('applicant.gamification') ? 'active' : '' }}">
+                <a href="{{ route('applicant.gamification') }}" class="menu-link">
+                    <i class="ti ti-trophy menu-icon"></i>
+                    <div>Gamification</div>
+                </a>
+            </li>
         @endif
 
         {{-- Logout Button --}}

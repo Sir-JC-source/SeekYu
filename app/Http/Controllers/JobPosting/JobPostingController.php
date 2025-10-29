@@ -173,9 +173,13 @@ class JobPostingController extends Controller
             'applied_at' => now(),
         ]);
 
+        // Award gamification points for job application
+        $gamificationController = new \App\Http\Controllers\GamificationController();
+        $gamificationController->awardApplicationPoints($user->id);
+
         return response()->json([
             'success' => true,
-            'message' => 'Application submitted successfully!'
+            'message' => 'Application submitted successfully! You earned 10 points!'
         ]);
     }
 
@@ -218,6 +222,10 @@ class JobPostingController extends Controller
         $application->status = 'shortlisted';
         $application->save();
 
-        return redirect()->back()->with('success', 'Application shortlisted successfully.');
+        // Award gamification points for shortlisting
+        $gamificationController = new \App\Http\Controllers\GamificationController();
+        $gamificationController->awardShortlistPoints($application->user_id);
+
+        return redirect()->back()->with('success', 'Application shortlisted successfully. Applicant earned 100 points!');
     }
 }

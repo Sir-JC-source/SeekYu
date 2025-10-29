@@ -10,11 +10,16 @@ class IncidentReport extends Model
     use HasFactory;
 
     protected $fillable = [
-        'incident_name', 
-        'date_of_incident', 
-        'location', 
-        'specific_area', 
-        'incident_description'
+        'incident_name',
+        'date_of_incident',
+        'location',
+        'specific_area',
+        'incident_description',
+        'status'
+    ];
+
+    protected $casts = [
+        'date_of_incident' => 'date',
     ];
 
     public function parties() {
