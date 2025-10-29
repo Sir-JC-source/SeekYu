@@ -22,20 +22,18 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <form action="{{ route('guard-scheduling.assign.store', ['guard' => $guard->id]) }}" method="POST">
-                        @csrf
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <label class="form-label">Start Month</label>
-                                <input type="text" class="form-control" value="{{ $startDate->format('F Y') }}" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">End Month</label>
-                                <input type="text" class="form-control" value="{{ $endDate->format('F Y') }}" readonly>
-                            </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Start Month</label>
+                            <input type="text" class="form-control" value="{{ $startDate->format('F Y') }}" readonly>
                         </div>
+                        <div class="col-md-6">
+                            <label class="form-label">End Month</label>
+                            <input type="text" class="form-control" value="{{ $endDate->format('F Y') }}" readonly>
+                        </div>
+                    </div>
 
-                        <div class="calendar-container">
+                    <div class="calendar-container">
                             @php
                                 $currentMonth = $startDate->copy();
                                 $currentDate = $currentMonth->copy()->startOfMonth();
@@ -89,44 +87,11 @@
                                                     </div>
                                                 @endif
                                             @else
-                                                <input type="hidden" name="schedules[{{ $index }}][date]" value="{{ $dateKey }}">
-                                                <div class="schedule-inputs">
-                                                    <select class="form-control form-control-sm mb-1 shift-in-input"
-                                                            name="schedules[{{ $index }}][shift_in]">
-                                                        <option value=""> Select Time </option>
-                                                        @for($hour = 0; $hour < 24; $hour++)
-                                                            @for($minute = 0; $minute < 60; $minute += 30)
-                                                                @php
-                                                                    $timeValue = sprintf('%02d:%02d', $hour, $minute);
-                                                                    $displayTime = date('g:i A', strtotime($timeValue));
-                                                                @endphp
-                                                                <option value="{{ $timeValue }}" {{ $schedule && $schedule->shift_in && date('H:i', strtotime($schedule->shift_in)) == $timeValue ? 'selected' : '' }}>
-                                                                    {{ $displayTime }}
-                                                                </option>
-                                                            @endfor
-                                                        @endfor
-                                                    </select>
-                                                    <select class="form-control form-control-sm shift-out-input"
-                                                            name="schedules[{{ $index }}][shift_out]">
-                                                        <option value=""> Select Time </option>
-                                                        @for($hour = 0; $hour < 24; $hour++)
-                                                            @for($minute = 0; $minute < 60; $minute += 30)
-                                                                @php
-                                                                    $timeValue = sprintf('%02d:%02d', $hour, $minute);
-                                                                    $displayTime = date('g:i A', strtotime($timeValue));
-                                                                @endphp
-                                                                <option value="{{ $timeValue }}" {{ $schedule && $schedule->shift_out && date('H:i', strtotime($schedule->shift_out)) == $timeValue ? 'selected' : '' }}>
-                                                                    {{ $displayTime }}
-                                                                </option>
-                                                            @endfor
-                                                        @endfor
-                                                    </select>
-                                                </div>
                                                 @if($schedule)
-                                                    <button type="button" class="btn btn-xs btn-outline-danger remove-schedule mt-1"
-                                                            data-date="{{ $dateKey }}">
-                                                        ×
-                                                    </button>
+                                                    <div class="schedule-display">
+                                                        <div class="shift-time">In: {{ $schedule->shift_in ? date('g:i A', strtotime($schedule->shift_in)) : 'N/A' }}</div>
+                                                        <div class="shift-time">Out: {{ $schedule->shift_out ? date('g:i A', strtotime($schedule->shift_out)) : 'N/A' }}</div>
+                                                    </div>
                                                 @endif
                                             @endif
                                         @endif
@@ -139,11 +104,7 @@
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-between mt-3">
-                            <button type="button" class="btn btn-secondary" onclick="clearAllSchedules()">Clear All</button>
-                            <button type="submit" class="btn btn-primary">Save Schedules</button>
-                        </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -246,110 +207,5 @@
 }
 </style>
 
-@if(session('success'))
-<script>
-Swal.fire({
-    icon: 'success',
-    title: 'Success',
-    text: '{{ session('success') }}',
-    timer: 3000,
-    showConfirmButton: false
-});
-</script>
-@endif
 
-@if(session('error'))
-<script>
-Swal.fire({
-    icon: 'error',
-    title: 'Error',
-    text: '{{ session('error') }}',
-    timer: 3000,
-    showConfirmButton: false
-});
-</script>
-@endif
-
-<script>
-function clearAllSchedules() {
-    Swal.fire({
-        title: 'Are you sure?',
-        text: 'Are you sure you want to clear all schedules for this guard?',
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Yes, clear all!',
-        cancelButtonText: 'Cancel'
-    }).then((result) => {
-        if (result.isConfirmed) {
-            document.querySelectorAll('select.shift-in-input').forEach(select => {
-                select.value = '';
-            });
-            document.querySelectorAll('select.shift-out-input').forEach(select => {
-                select.value = '';
-            });
-            // Submit the form to save changes
-            document.querySelector('form').submit();
-        }
-    });
-}
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle remove schedule buttons
-    document.querySelectorAll('.remove-schedule').forEach(button => {
-        button.addEventListener('click', function() {
-            const date = this.getAttribute('data-date');
-            const dayElement = this.closest('.calendar-day');
-            const shiftInInput = dayElement.querySelector('.shift-in-input');
-            const shiftOutInput = dayElement.querySelector('.shift-out-input');
-
-            Swal.fire({
-                title: 'Are you sure?',
-                text: 'Remove schedule for ' + date + '?',
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#3085d6',
-                confirmButtonText: 'Yes, remove!',
-                cancelButtonText: 'Cancel'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    if (shiftInInput) shiftInInput.value = '';
-                    if (shiftOutInput) shiftOutInput.value = '';
-                    // Submit the form to save changes
-                    dayElement.closest('form').submit();
-                }
-            });
-        });
-    });
-
-    // Auto-generate shift out when shift in is selected
-    document.addEventListener('change', function(e) {
-        if (e.target.classList.contains('shift-in-input')) {
-            const shiftInValue = e.target.value;
-            if (shiftInValue) {
-                const [hours, minutes] = shiftInValue.split(':').map(Number);
-                const shiftInDate = new Date();
-                shiftInDate.setHours(hours, minutes, 0, 0);
-
-                // Add 12 hours
-                shiftInDate.setHours(shiftInDate.getHours() + 12);
-
-                const shiftOutHours = shiftInDate.getHours().toString().padStart(2, '0');
-                const shiftOutMinutes = shiftInDate.getMinutes().toString().padStart(2, '0');
-                const shiftOutValue = `${shiftOutHours}:${shiftOutMinutes}`;
-
-                const dayElement = e.target.closest('.calendar-day');
-                const shiftOutInput = dayElement.querySelector('.shift-out-input');
-                if (shiftOutInput) {
-                    shiftOutInput.value = shiftOutValue;
-                }
-            }
-        }
-    });
-
-    // Month navigation is now handled via links above
-});
-</script>
 @endsection

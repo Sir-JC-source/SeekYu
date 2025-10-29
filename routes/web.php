@@ -106,6 +106,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/assign/{guard}/store', [SecurityController::class, 'storeSchedule'])->name('guard-scheduling.assign.store');
         Route::get('/deploy', [SecurityController::class, 'deploy'])->name('guard-scheduling.deploy');
         Route::get('/list', [SecurityController::class, 'guardList'])->name('guard-scheduling.list');
+        Route::get('/view-all', [SecurityController::class, 'viewAllSchedules'])->name('guard-scheduling.view-all');
     });
 
     // ----------------------

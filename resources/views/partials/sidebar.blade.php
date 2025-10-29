@@ -279,6 +279,14 @@
                 </ul>
             </li>
 
+            {{-- View Security Guard Schedules --}}
+            <li class="menu-item {{ request()->routeIs('guard-scheduling.view-all') ? 'active' : '' }}">
+                <a href="{{ route('guard-scheduling.view-all') }}" class="menu-link">
+                    <i class="ti ti-calendar-time menu-icon"></i>
+                    <div>View Security Guard Schedules</div>
+                </a>
+            </li>
+
             {{-- Incident Reports --}}
             <li class="menu-item {{ request()->is('incident-reports*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">

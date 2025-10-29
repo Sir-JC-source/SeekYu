@@ -276,4 +276,19 @@ class SecurityController extends Controller
         // Reuse the existing index method for guard list
         return $this->index();
     }
+
+    /**
+     * View all Security Guard Schedules
+     */
+    public function viewAllSchedules()
+    {
+        $guards = Employee::with(['assignedHeadGuard', 'schedules' => function ($query) {
+            $query->orderBy('schedule_date');
+        }])
+        ->where('position', 'Security Guard')
+        ->where('status', 'Active')
+        ->get();
+
+        return view('Security.ViewAllSchedules', compact('guards'));
+    }
 }
