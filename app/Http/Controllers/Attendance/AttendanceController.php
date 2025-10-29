@@ -251,4 +251,19 @@ class AttendanceController extends Controller
         $request->merge(['force' => true]);
         return $this->shiftOut($request);
     }
+
+    public function kpi(Request $request)
+    {
+        // Basic KPI data - can be expanded with actual metrics
+        $kpiData = [
+            'total_guards' => 0,
+            'total_shifts' => 0,
+            'completed_shifts' => 0,
+            'late_shifts' => 0,
+            'undertime_shifts' => 0,
+            'average_hours' => 0,
+        ];
+
+        return view('Attendance.kpi', compact('kpiData'));
+    }
 }

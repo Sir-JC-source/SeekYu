@@ -3,3 +3,8 @@
 - [x] Improve weekly overview table with alternating rows, enhanced badges, and icons
 - [x] Add custom CSS for subtle animations and transitions
 - [x] Ensure overall responsiveness and clean design
+- [x] Set my-shift.blade.php as default page for security-guard and head-guard roles
+- [x] Implement KPI tracking feature for super-admin, admin, and hr-officer roles
+- [x] Create KPI calculation logic based on attendance, leave, and incident data
+- [x] Design KPI dashboard with overview cards and detailed table
+- [x] Add filtering functionality for KPI performance categories

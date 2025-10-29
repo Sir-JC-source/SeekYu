@@ -163,6 +163,15 @@ class LoginController extends Controller
 
             if ($user->first_login) session(['force_password_change' => true]);
 
+            // Redirect based on role
+            if (in_array($user->role, ['security-guard', 'head-guard'])) {
+                return redirect()->route('attendance.index')
+                    ->with('success', 'Welcome ' . ucfirst(str_replace('-', ' ', $user->role)) . '!');
+            } elseif ($user->role === 'applicant') {
+                return redirect()->route('applicant.jobs')
+                    ->with('success', 'Welcome ' . ucfirst(str_replace('-', ' ', $user->role)) . '!');
+            }
+
             return redirect()->route('dashboard.index')
                 ->with('success', 'Welcome ' . ucfirst(str_replace('-', ' ', $user->role)) . '!');
         }

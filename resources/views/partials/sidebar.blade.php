@@ -59,6 +59,30 @@
                 </ul>
             </li>
 
+             {{-- Security Guard Management --}}
+            <li class="menu-item {{ request()->is('guard-scheduling*') ? 'active open' : '' }}">
+                <a href="javascript:void(0);" class="menu-link menu-toggle">
+                    <i class="ti ti-calendar-time menu-icon"></i>
+                    <div>Security Guard Management</div>
+                </a>
+                <ul class="menu-sub">
+                    <li class="menu-item {{ request()->routeIs('guard-scheduling.assign') ? 'active' : '' }}">
+                        <a href="{{ route('guard-scheduling.assign') }}" class="menu-link"><div>Assign Schedule</div></a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('guard-scheduling.deploy') ? 'active' : '' }}">
+                        <a href="{{ route('guard-scheduling.deploy') }}" class="menu-link"><div>Deploy Guard</div></a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('guard-scheduling.list') ? 'active' : '' }}">
+                        <a href="{{ route('guard-scheduling.list') }}" class="menu-link"><div>Guard List</div></a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('attendance-kpi.index') ? 'active' : '' }}">
+                        <a href="{{ route('attendance-kpi.index') }}" class="menu-link">
+                            <div>Attendance KPI</div>
+                        </a>
+                    </li>
+            </li>
+            </ul>
+            </li>
 
 
             {{-- Applications --}}
@@ -69,16 +93,13 @@
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('job_postings.list') ? 'active' : '' }}">
-                        <a href="{{ route('job_postings.list') }}" class="menu-link"><div>List of Job Postings</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('job_postings.create') ? 'active' : '' }}">
-                        <a href="{{ route('job_postings.create') }}" class="menu-link"><div>Create Job Posting</div></a>
+                        <a href="{{ route('job_postings.list') }}" class="menu-link"><div>Job Postings</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('applications.rejected') ? 'active' : '' }}">
-                        <a href="{{ route('applications.rejected') }}" class="menu-link"><div>Rejected</div></a>
+                        <a href="{{ route('applications.rejected') }}" class="menu-link"><div>Rejected Applications</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('applications.shortlist') ? 'active' : '' }}">
-                        <a href="{{ route('applications.shortlist') }}" class="menu-link"><div>Shortlist</div></a>
+                        <a href="{{ route('applications.shortlist') }}" class="menu-link"><div>Shortlisted Applicants</div></a>
                     </li>
                 </ul>
             </li>
@@ -107,7 +128,7 @@
                 </a>
                 <ul class="menu-sub">
                     {{-- Submit IR visible to super-admin, admin, hr-officer, head-guard, security-guard --}}
-                    @if(in_array($userRole, ['super-admin','admin','hr-officer','head-guard','security-guard']))
+                    @if(in_array($userRole, ['admin','hr-officer','head-guard','security-guard']))
                         <li class="menu-item {{ request()->routeIs('incident-reports.index') ? 'active' : '' }}">
                             <a href="{{ route('incident-reports.index') }}" class="menu-link"><div>Submit IR</div></a>
                         </li>
@@ -120,14 +141,6 @@
                         </li>
                     @endif
                 </ul>
-            </li>
-
-            {{-- Add Admin Account --}}
-            <li class="menu-item {{ request()->routeIs('admin.add') ? 'active' : '' }}">
-                <a href="{{ route('admin.add') }}" class="menu-link">
-                    <i class="ti ti-user-plus menu-icon"></i>
-                    <div>Add Admin Account</div>
-                </a>
             </li>
         @endif
 
@@ -202,7 +215,13 @@
                     <li class="menu-item {{ request()->routeIs('guard-scheduling.list') ? 'active' : '' }}">
                         <a href="{{ route('guard-scheduling.list') }}" class="menu-link"><div>Guard List</div></a>
                     </li>
-                </ul>
+                    <li class="menu-item {{ request()->routeIs('attendance-kpi.index') ? 'active' : '' }}">
+                        <a href="{{ route('attendance-kpi.index') }}" class="menu-link">
+                            <div>Attendance KPI</div>
+                        </a>
+                    </li>
+            </li>
+            </ul>
             </li>
 
             {{-- Leave Requests --}}
@@ -216,7 +235,7 @@
                         <a href="{{ route('leaves.request') }}" class="menu-link"><div>File Leave</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('leaves.pending') ? 'active' : '' }}">
-                        <a href="{{ route('leaves.pending') }}" class="menu-link"><div>Pending</div></a>
+                        <a href="{{ route('leaves.pending') }}" class="menu-link"><div>Pending Leaves</div></a>
                     </li>
                     <li class="menu-item {{ request()->routeIs('leaves.processed') ? 'active' : '' }}">
                         <a href="{{ route('leaves.processed') }}" class="menu-link"><div>Processed Leaves</div></a>

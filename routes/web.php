@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Shift\ShiftController;
 use App\Http\Controllers\Attendance\AttendanceController;
 
+
 // Root redirect to login
 Route::get('/', function () {
     return redirect()->route('login.index');
@@ -183,6 +184,9 @@ Route::middleware('auth')->group(function () {
         // ✅ Added Force Shift Out Route
         Route::post('/force-shift-out', [AttendanceController::class, 'forceShiftOut'])
             ->name('attendance.force-shift-out');
+
+        // Attendance KPI Route
+        Route::get('/kpi', [AttendanceController::class, 'kpi'])->name('attendance-kpi.index');
     });
 
     // ----------------------
