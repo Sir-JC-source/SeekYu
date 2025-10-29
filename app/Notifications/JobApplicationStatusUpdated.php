@@ -3,11 +3,10 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use App\Models\JobApplication;
 
-class JobApplicationStatusUpdated extends Notification implements ShouldQueue
+class JobApplicationStatusUpdated extends Notification
 {
     use Queueable;
 
@@ -32,6 +31,7 @@ class JobApplicationStatusUpdated extends Notification implements ShouldQueue
      */
     public function via(object $notifiable): array
     {
+        // No queue used — database only
         return ['database'];
     }
 
@@ -42,17 +42,26 @@ class JobApplicationStatusUpdated extends Notification implements ShouldQueue
      */
     public function toArray(object $notifiable): array
     {
+        $jobTitle = optional($this->application->jobPosting)->title ?? 'Job Posting';
+        $company = optional($this->application->jobPosting)->company ?? 'Company';
+        $oldStatus = ucfirst($this->oldStatus);
+        $newStatus = ucfirst($this->newStatus);
+
+        $message = "Your application for '{$jobTitle}' has been updated from {$oldStatus} to {$newStatus}.";
+
+        // ✅ Use route() safely with fallback to prevent errors if route not found
+        $url = route('applicant.applications', [], false) ?? url('/applicant/applications');
+
         return [
-            'type' => 'job_application',
-            'job_title' => optional($this->application->jobPosting)->title ?? 'Job Posting',
-            'company' => optional($this->application->jobPosting)->company ?? 'Company',
-            'old_status' => ucfirst($this->oldStatus),
-            'new_status' => ucfirst($this->newStatus),
+            'type' => 'job_application_status_update',
+            'job_title' => $jobTitle,
+            'company' => $company,
+            'old_status' => $oldStatus,
+            'new_status' => $newStatus,
             'application_id' => $this->application->id,
             'job_posting_id' => $this->application->job_posting_id,
-            'message' => "Your application for '" . (optional($this->application->jobPosting)->title ?? 'Job Posting') . 
-                         "' has been updated from {$this->oldStatus} to {$this->newStatus}.",
-            'url' => url('/applicant/applications'),
+            'message' => $message,
+            'url' => $url,
         ];
     }
 }

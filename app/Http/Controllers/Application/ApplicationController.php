@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Application;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\JobApplication;
+use App\Notifications\JobApplicationStatusUpdated;
 
 class ApplicationController extends Controller
 {
@@ -55,18 +56,26 @@ class ApplicationController extends Controller
             'status' => 'required|in:pending,shortlisted,rejected,hired',
         ]);
 
-        $application = JobApplication::findOrFail($id);
+        $application = JobApplication::with('user', 'jobPosting')->findOrFail($id);
         $oldStatus = $application->status;
         $newStatus = $request->status;
 
-        // Only send notification if status actually changed
+        // ✅ Only process if status actually changed
         if ($oldStatus !== $newStatus) {
             $application->update(['status' => $newStatus]);
 
-            // Notify the applicant
-            $application->user->notify(new \App\Notifications\JobApplicationStatusUpdated($application, $oldStatus, $newStatus));
+            // ✅ Make sure user relation exists before notifying
+            if ($application->user) {
+                // Send notification instantly (not queued)
+                $application->user->notify(
+                    new JobApplicationStatusUpdated($application, $oldStatus, $newStatus)
+                );
+            }
         }
 
-        return response()->json(['success' => true, 'message' => 'Application status updated successfully']);
+        return response()->json([
+            'success' => true,
+            'message' => 'Application status updated successfully.',
+        ]);
     }
 }

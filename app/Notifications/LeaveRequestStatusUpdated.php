@@ -3,12 +3,10 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use App\Models\Leave;
 
-class LeaveRequestStatusUpdated extends Notification implements ShouldQueue
+class LeaveRequestStatusUpdated extends Notification
 {
     use Queueable;
 
@@ -37,33 +35,37 @@ class LeaveRequestStatusUpdated extends Notification implements ShouldQueue
     }
 
     /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
-    {
-        return (new MailMessage)
-                    ->line('Your leave request status has been updated.')
-                    ->action('View Leave Requests', url('/leaves'))
-                    ->line('Thank you for using our application!');
-    }
-
-    /**
      * Get the array representation of the notification.
      *
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {
+        $approverName = $this->leave->approver
+            ? ($this->leave->approver->employee->full_name ?? $this->leave->approver->fullname)
+            : null;
+
+        $rejecterName = $this->leave->rejecter
+            ? ($this->leave->rejecter->employee->full_name ?? $this->leave->rejecter->fullname)
+            : null;
+
+        $actionBy = $this->newStatus === 'Approved' ? $approverName : $rejecterName;
+        $actionWord = $this->newStatus === 'Approved' ? 'approved' : 'rejected';
+
+        // ✅ Safe fallback for URL — avoids "route not defined" error
+        $url = route('leaves.pending', [], false) ?? url('/leaves');
+
         return [
-            'type' => 'leave_request',
-            'leave_type' => ucfirst($this->leave->duration),
+            'type' => 'leave_status_update',
+            'leave_type' => ucfirst($this->leave->leave_type),
             'old_status' => ucfirst($this->oldStatus),
             'new_status' => ucfirst($this->newStatus),
             'leave_id' => $this->leave->id,
-            'start_date' => $this->leave->start_date,
-            'end_date' => $this->leave->end_date,
-            'message' => "Your {$this->leave->duration} leave request from {$this->leave->start_date} to {$this->leave->end_date} has been {$this->newStatus}.",
-            'url' => route('leaves.index'),
+            'date_from' => $this->leave->date_from,
+            'date_to' => $this->leave->date_to,
+            'action_by' => $actionBy,
+            'message' => "Your {$this->leave->leave_type} leave request from {$this->leave->date_from} to {$this->leave->date_to} has been {$actionWord} by {$actionBy}.",
+            'url' => $url,
         ];
     }
 }

@@ -43,21 +43,23 @@
                     </li>
                 </ul>
             </li>
-            <!-- /Style Switcher-->
+            <!-- /Style Switcher -->
 
             <!-- Notification -->
             <li class="nav-item dropdown-notifications navbar-dropdown dropdown me-3 me-xl-1">
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
-                    data-bs-auto-close="outside" aria-expanded="false">
+                   data-bs-auto-close="outside" aria-expanded="false">
                     <i class="ti ti-bell ti-md"></i>
-                    <span class="badge bg-danger rounded-pill badge-notifications">{{ auth()->user()->unreadNotifications->count() }}</span>
+                    @if(auth()->user()->unreadNotifications->count() > 0)
+                        <span class="badge bg-danger rounded-pill badge-notifications">{{ auth()->user()->unreadNotifications->count() }}</span>
+                    @endif
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end py-0">
                     <li class="dropdown-menu-header border-bottom">
                         <div class="dropdown-header d-flex align-items-center py-3">
                             <h5 class="text-body mb-0 me-auto">Notification</h5>
                             <a href="javascript:void(0)" class="dropdown-notifications-all text-body" data-bs-toggle="tooltip"
-                                data-bs-placement="top" title="Mark all as read" onclick="markAllAsRead()"><i class="ti ti-mail-opened fs-4"></i></a>
+                               data-bs-placement="top" title="Mark all as read" onclick="markAllAsRead()"><i class="ti ti-mail-opened fs-4"></i></a>
                         </div>
                     </li>
                     <li class="dropdown-notifications-list scrollable-container" style="max-height: 300px; overflow-y:auto;">
@@ -67,16 +69,40 @@
                                     <div class="d-flex">
                                         <div class="flex-shrink-0 me-3">
                                             <div class="avatar">
-                                                <span class="avatar-initial rounded-circle bg-label-warning">
-                                                    <i class="ti ti-alert-triangle"></i>
+                                                <span class="avatar-initial rounded-circle
+                                                    @if($notification->data['type'] === 'leave_submitted') bg-label-info
+                                                    @elseif($notification->data['type'] === 'leave_status_update') bg-label-success
+                                                    @elseif($notification->data['type'] === 'job_application_status_update') bg-label-primary
+                                                    @else bg-label-warning
+                                                    @endif">
+                                                    @if($notification->data['type'] === 'leave_submitted')
+                                                        <i class="ti ti-calendar-plus"></i>
+                                                    @elseif($notification->data['type'] === 'leave_status_update')
+                                                        <i class="ti ti-calendar-check"></i>
+                                                    @elseif($notification->data['type'] === 'job_application_status_update')
+                                                        <i class="ti ti-briefcase"></i>
+                                                    @else
+                                                        <i class="ti ti-alert-triangle"></i>
+                                                    @endif
                                                 </span>
                                             </div>
                                         </div>
                                         <div class="flex-grow-1">
-                                            <h6 class="mb-1">{{ $notification->data['incident_name'] ?? 'Incident Report Update' }}</h6>
-                                            <p class="mb-0">
-                                                Status changed from {{ ucfirst($notification->data['old_status']) }} to {{ ucfirst($notification->data['new_status']) }}
-                                            </p>
+                                            @if($notification->data['type'] === 'leave_submitted')
+                                                <h6 class="mb-1">New Leave Request</h6>
+                                                <p class="mb-0">{{ $notification->data['message'] }}</p>
+                                            @elseif($notification->data['type'] === 'leave_status_update')
+                                                <h6 class="mb-1">Leave Request Update</h6>
+                                                <p class="mb-0">{{ $notification->data['message'] }}</p>
+                                            @elseif($notification->data['type'] === 'job_application_status_update')
+                                                <h6 class="mb-1">Job Application Update</h6>
+                                                <p class="mb-0">{{ $notification->data['message'] }}</p>
+                                            @else
+                                                <h6 class="mb-1">{{ $notification->data['incident_name'] ?? 'Incident Report Update' }}</h6>
+                                                <p class="mb-0">
+                                                    Status changed from {{ ucfirst($notification->data['old_status']) }} to {{ ucfirst($notification->data['new_status']) }}
+                                                </p>
+                                            @endif
                                             <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
                                         </div>
                                         <div class="flex-shrink-0 dropdown-notifications-actions">
@@ -99,7 +125,7 @@
                     </li>
                     <li class="dropdown-menu-footer border-top">
                         <a href="javascript:void(0)"
-                            class="dropdown-item d-flex justify-content-center text-primary p-2 h-px-40 mb-1 align-items-center">
+                           class="dropdown-item d-flex justify-content-center text-primary p-2 h-px-40 mb-1 align-items-center">
                             View all notifications
                         </a>
                     </li>
@@ -112,13 +138,9 @@
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown">
                     <div class="avatar avatar-online" style="width: 32px; height: 32px;">
                         @if(auth()->user()->employee && auth()->user()->employee->employee_image)
-                            <img
-                                src="{{ asset('storage/' . auth()->user()->employee->employee_image) }}"
-                                class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                            <img src="{{ asset('storage/' . auth()->user()->employee->employee_image) }}" class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
                         @elseif(auth()->user()->profile_picture)
-                            <img
-                                src="{{ asset('storage/' . auth()->user()->profile_picture) }}"
-                                class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                            <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}" class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
                         @else
                             <i class="ti ti-user" style="font-size: 32px; color: #6c757d;"></i>
                         @endif
@@ -131,13 +153,9 @@
                                 <div class="flex-shrink-0 me-3">
                                     <div class="avatar avatar-online" style="width: 32px; height: 32px;">
                                         @if(auth()->user()->employee && auth()->user()->employee->employee_image)
-                                            <img
-                                                src="{{ asset('storage/' . auth()->user()->employee->employee_image) }}"
-                                                class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                                            <img src="{{ asset('storage/' . auth()->user()->employee->employee_image) }}" class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
                                         @elseif(auth()->user()->profile_picture)
-                                            <img
-                                                src="{{ asset('storage/' . auth()->user()->profile_picture) }}"
-                                                class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
+                                            <img src="{{ asset('storage/' . auth()->user()->profile_picture) }}" class="h-auto rounded-circle" style="width: 32px; height: 32px; object-fit: cover;" />
                                         @else
                                             <i class="ti ti-user" style="font-size: 32px; color: #6c757d;"></i>
                                         @endif
@@ -151,17 +169,16 @@
                     </li>
                     <li><div class="dropdown-divider"></div></li>
                     <li>
-                        <!-- Redirects to Profile page -->
                         <a class="dropdown-item" href="{{ route('profile.show') }}">
                             <i class="ti ti-user-check me-2 ti-sm"></i>
                             <span class="align-middle">My Account</span>
                         </a>
                     </li>
-                    
                     <li><div class="dropdown-divider"></div></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST" style="display: inline;">
                             @csrf
+                            <button type="submit" class="dropdown-item" style="background: none; border
                             <button type="submit" class="dropdown-item"
                                 style="background: none; border: none; padding: 0; width: 100%; text-align: left;">
                                 <i class="ti ti-logout me-2 ti-sm"></i>

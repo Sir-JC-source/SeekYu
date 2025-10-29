@@ -136,7 +136,7 @@ class LeaveController extends Controller
             return redirect()->back()->withErrors(['leave_credits' => 'Insufficient leave credits. You have ' . $user->leave_credits . ' credits but need ' . $credits . ' credits for this leave request.'])->withInput();
         }
 
-        Leave::create([
+        $leave = Leave::create([
             'requestor' => $user->employee->full_name ?? $user->fullname,
             'leave_type' => $validated['leave_type'],
             'reason' => $validated['reason'],
@@ -149,6 +149,33 @@ class LeaveController extends Controller
             'rejected_by' => null,
             'user_id' => $user->id,
         ]);
+
+        // Send notifications based on user's role
+        $role = $user->role;
+        $recipients = collect();
+
+        switch ($role) {
+            case 'admin':
+                // Notify all super-admins
+                $recipients = $recipients->merge(\App\Models\RegisteredUsers::where('role', 'super-admin')->get());
+                break;
+            case 'hr-officer':
+                // Notify all super-admins and admins
+                $recipients = $recipients->merge(\App\Models\RegisteredUsers::where('role', 'super-admin')->get());
+                $recipients = $recipients->merge(\App\Models\RegisteredUsers::where('role', 'admin')->get());
+                break;
+            case 'security-guard':
+            case 'head-guard':
+                // Notify all hr-officers and admins
+                $recipients = $recipients->merge(\App\Models\RegisteredUsers::where('role', 'hr-officer')->get());
+                $recipients = $recipients->merge(\App\Models\RegisteredUsers::where('role', 'admin')->get());
+                break;
+        }
+
+        // Send notification to each recipient
+        foreach ($recipients as $recipient) {
+            $recipient->notify(new \App\Notifications\LeaveRequestSubmitted($leave));
+        }
 
         return redirect()->route('leaves.request')->with('success', 'Leave request submitted successfully.');
     }
