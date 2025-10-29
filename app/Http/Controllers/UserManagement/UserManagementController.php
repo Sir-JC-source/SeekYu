@@ -23,7 +23,8 @@ class UserManagementController extends Controller
     public function getUsers(Request $request)
     {
         $query = RegisteredUsers::where('account_status', 'active')
-            ->whereIn('role', ['admin', 'hr-officer', 'head-guard', 'security-guard']);
+            ->whereIn('role', ['admin', 'hr-officer', 'head-guard', 'security-guard'])
+            ->with('employee');
 
         $totalData = $query->count();
 
@@ -54,7 +55,7 @@ class UserManagementController extends Controller
             return [
                 'employee_no' => $user->login_id ?? 'N/A',
                 'login_id' => $user->login_id ?? 'N/A',
-                'fullname' => $user->fullname,
+                'fullname' => $user->employee->full_name ?? $user->fullname,
                 'user_type' => '<span class="badge bg-label-primary">' . e($user->role) . '</span>',
                 'status' => '<span class="badge bg-label-' . ($user->status === 'active' ? 'success' : 'danger') . '">' . e($user->status) . '</span>',
                 'created_at' => $user->created_at->format('M d, Y H:i'),

@@ -4,20 +4,7 @@
 
 @section('content')
 <div class="row">
-    <!-- Header Card -->
-    <div class="col-12 mb-4">
-        <div class="card bg-gradient-primary text-white">
-            <div class="card-body text-center py-5">
-                <div class="avatar avatar-xl mx-auto mb-3">
-                    <div class="avatar-initial bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
-                        <i class="ti ti-calendar-event text-white" style="font-size: 32px;"></i>
-                    </div>
-                </div>
-                <h3 class="card-title text-white mb-1">Request Leave</h3>
-                <p class="card-text opacity-75 mb-0">Submit your leave application for approval</p>
-            </div>
-        </div>
-    </div>
+   
 
     <!-- Leave Request Form -->
     <div class="col-xl-8 col-lg-7 col-md-7">

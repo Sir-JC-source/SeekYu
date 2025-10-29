@@ -253,7 +253,7 @@
 
 
             {{-- Leave Requests --}}
-            <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
+            <li class="menu-item {{ request()->is('leaves*') || request()->is('attendance*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-calendar-event menu-icon"></i>
                     <div>Time Keeping</div>
@@ -261,6 +261,9 @@
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
                         <a href="{{ route('leaves.request') }}" class="menu-link"><div>File Leave</div></a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('attendance.index') ? 'active' : '' }}">
+                        <a href="{{ route('attendance.index') }}" class="menu-link"><div>My Shift</div></a>
                     </li>
                 </ul>
             </li>
@@ -284,7 +287,7 @@
 
 
             {{-- Leave Requests --}}
-            <li class="menu-item {{ request()->is('leaves*') ? 'active open' : '' }}">
+            <li class="menu-item {{ request()->is('leaves*') || request()->is('attendance*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-calendar-event menu-icon"></i>
                     <div>Time Keeping</div>
@@ -292,6 +295,9 @@
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('leaves.request') ? 'active' : '' }}">
                         <a href="{{ route('leaves.request') }}" class="menu-link"><div>File Leave</div></a>
+                    </li>
+                    <li class="menu-item {{ request()->routeIs('attendance.index') ? 'active' : '' }}">
+                        <a href="{{ route('attendance.index') }}" class="menu-link"><div>My Shift</div></a>
                     </li>
                 </ul>
             </li>

@@ -14,6 +14,7 @@ use App\Http\Controllers\JobPosting\JobPostingController;
 use App\Http\Controllers\Applicant\ApplicantCredentialController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Shift\ShiftController;
+use App\Http\Controllers\Attendance\AttendanceController;
 
 // Root redirect to login
 Route::get('/', function () {
@@ -172,6 +173,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('employee.update-profile');
 
     // ----------------------
+    // ⏰ Attendance Management
+    // ----------------------
+    Route::prefix('attendance')->group(function () {
+        Route::get('/', [AttendanceController::class, 'index'])->name('attendance.index');
+        Route::post('/shift-in', [AttendanceController::class, 'shiftIn'])->name('attendance.shift-in');
+        Route::post('/shift-out', [AttendanceController::class, 'shiftOut'])->name('attendance.shift-out');
+
+        // ✅ Added Force Shift Out Route
+        Route::post('/force-shift-out', [AttendanceController::class, 'forceShiftOut'])
+            ->name('attendance.force-shift-out');
+    });
+
+    // ----------------------
     // 🧑‍💻 Applicant Job Portal
     // ----------------------
     Route::prefix('applicant')->group(function () {
@@ -183,5 +197,3 @@ Route::middleware('auth')->group(function () {
     });
 
 });
-
-
