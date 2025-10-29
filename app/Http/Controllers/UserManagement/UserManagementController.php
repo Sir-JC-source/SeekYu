@@ -398,7 +398,7 @@ class UserManagementController extends Controller
 
             // Send credentials email
             Mail::to($user->email)->send(new LoginCredentialsMail(
-                $user->fullname,
+                $user,
                 $user->login_id ?? $user->student_no ?? $user->faculty_no ?? $user->email,
                 $plainPassword
             ));

@@ -118,7 +118,6 @@ class LeaveController extends Controller
         $validated = $request->validate([
             'leave_type' => 'required|in:Sick Leave,Vacation Leave',
             'reason' => 'required|string|max:1000',
-            'duration' => 'required|in:Whole Shift,Half-Shift Early Out,Half-Shift Late In,Multi-Day',
             'date_from' => 'required|date|after_or_equal:today',
             'date_to' => 'required|date|after_or_equal:date_from',
             'position' => 'required|string|max:50',
@@ -126,28 +125,26 @@ class LeaveController extends Controller
 
         $user = Auth::user();
 
-        // Calculate credits and adjust date_to based on duration
-        $creditCalculation = $this->calculateCredits(
-            $validated['duration'],
-            $validated['date_from'],
-            $validated['date_to']
-        );
+        // Calculate credits based on date range (number of days)
+        $dateFrom = \Carbon\Carbon::parse($validated['date_from']);
+        $dateTo = \Carbon\Carbon::parse($validated['date_to']);
+        $days = $dateFrom->diffInDays($dateTo) + 1; // Inclusive of both dates
+        $credits = max(1, min(10, $days)); // Clamp between 1 and 10 credits
 
         // Check if user has sufficient credits
-        if ($user->leave_credits < $creditCalculation['credits']) {
-            return redirect()->back()->withErrors(['leave_credits' => 'Insufficient leave credits. You have ' . $user->leave_credits . ' credits but need ' . $creditCalculation['credits'] . ' credits for this leave request.'])->withInput();
+        if ($user->leave_credits < $credits) {
+            return redirect()->back()->withErrors(['leave_credits' => 'Insufficient leave credits. You have ' . $user->leave_credits . ' credits but need ' . $credits . ' credits for this leave request.'])->withInput();
         }
 
         Leave::create([
             'requestor' => $user->employee->full_name ?? $user->fullname,
             'leave_type' => $validated['leave_type'],
             'reason' => $validated['reason'],
-            'duration' => $validated['duration'],
             'date_from' => $validated['date_from'],
-            'date_to' => $creditCalculation['date_to'],
+            'date_to' => $validated['date_to'],
             'position' => $validated['position'],
             'status' => 'Pending',
-            'leave_credits' => $creditCalculation['credits'],
+            'leave_credits' => $credits,
             'approved_by' => null,
             'rejected_by' => null,
             'user_id' => $user->id,
@@ -167,13 +164,8 @@ class LeaveController extends Controller
             return response()->json(['success' => false, 'message' => 'Leave already processed.']);
         }
 
-        // Use the calculateCredits function to get the correct credits to deduct
-        $creditCalculation = $this->calculateCredits(
-            $leave->duration,
-            $leave->date_from,
-            $leave->date_to
-        );
-        $daysToDeduct = $creditCalculation['credits'];
+        // Calculate credits based on the leave's duration attribute (calculated from dates)
+        $daysToDeduct = $leave->duration;
 
         // Check if user has sufficient credits
         $user = $leave->user;
@@ -189,6 +181,9 @@ class LeaveController extends Controller
         $leave->approved_by = Auth::user()->id;
         $leave->rejected_by = null;
         $leave->save();
+
+        // Notify the user
+        $user->notify(new \App\Notifications\LeaveRequestStatusUpdated($leave, 'Pending', 'Approved'));
 
         return response()->json(['success' => true, 'status' => 'Approved']);
     }
@@ -209,41 +204,11 @@ class LeaveController extends Controller
         $leave->approved_by = null;
         $leave->save();
 
+        // Notify the user
+        $leave->user->notify(new \App\Notifications\LeaveRequestStatusUpdated($leave, 'Pending', 'Rejected'));
+
         return response()->json(['success' => true, 'status' => 'Rejected']);
     }
 
-    /**
-     * Calculate credits and adjust date_to based on duration.
-     */
-    private function calculateCredits($duration, $date_from, $date_to)
-    {
-        $dateFrom = \Carbon\Carbon::parse($date_from);
-        $dateTo = \Carbon\Carbon::parse($date_to);
 
-        switch ($duration) {
-            case 'Whole Shift':
-                return [
-                    'credits' => 1,
-                    'date_to' => $dateFrom->toDateString()
-                ];
-            case 'Half-Shift Early Out':
-            case 'Half-Shift Late In':
-                return [
-                    'credits' => 0.5,
-                    'date_to' => $dateFrom->toDateString()
-                ];
-            case 'Multi-Day':
-                $days = $dateFrom->diffInDays($dateTo) + 1;
-                $credits = max(2, min(10, $days)); // Clamp between 2 and 10
-                return [
-                    'credits' => $credits,
-                    'date_to' => $dateTo->toDateString()
-                ];
-            default:
-                return [
-                    'credits' => 0,
-                    'date_to' => $dateTo->toDateString()
-                ];
-        }
-    }
 }

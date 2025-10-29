@@ -162,7 +162,7 @@
                                     <button type="button" class="btn btn-outline-secondary btn-lg prev-tab" data-prev="miscellaneous">
                                         <i class="bx bx-chevron-left me-1"></i>Previous
                                     </button>
-                                    <button type="submit" class="btn btn-success btn-lg">
+                                    <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
                                         <i class="bx bx-check me-1"></i>Submit & Create Employee
                                     </button>
                                 </div>
@@ -423,7 +423,23 @@
         });
     });
 
-    // Toast Notifications
+    // Form submission with toast notification
+    document.getElementById('employeeForm').addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submitBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i>Creating Employee...';
+
+        // Show immediate toast notification
+        Toastify({
+            text: "Creating employee... Please wait.",
+            duration: 3000,
+            gravity: "top",
+            position: "right",
+            backgroundColor: "#007bff",
+        }).showToast();
+    });
+
+    // Toast Notifications for session messages
     @if(session('success'))
     Toastify({
         text: "{{ session('success') }}",

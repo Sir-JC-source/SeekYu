@@ -57,6 +57,9 @@
     <!-- Dropzone CSS -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/libs/dropzone/dropzone.css') }}" />
 
+    <!-- Toastify CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+
     <!-- Page CSS (per-view) -->
     <link rel="stylesheet" href="{{ asset('assets/vendor/css/pages/cards-advance.css') }}" />
     @stack('vendor-styles')
@@ -150,6 +153,80 @@
     
     <!-- Page Scripts Stack -->
     @stack('page-scripts')
+
+    <!-- Toastify JS -->
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <!-- Notification Scripts -->
+    <script>
+        function markAsRead(notificationId) {
+            fetch(`/notifications/mark-as-read/${notificationId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Remove the notification from the dropdown
+                    const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
+                    if (notificationElement) {
+                        notificationElement.closest('.dropdown-notifications-item').remove();
+                    }
+                    // Update the badge count
+                    updateNotificationBadge();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function markAllAsRead() {
+            fetch('/notifications/mark-all-as-read', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear all notifications from the dropdown
+                    const notificationList = document.querySelector('.list-group-flush');
+                    notificationList.innerHTML = `
+                        <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                            <div class="text-center py-3">
+                                <i class="ti ti-bell-off mb-2" style="font-size: 2rem; color: #ccc;"></i>
+                                <p class="mb-0 text-muted">No new notifications</p>
+                            </div>
+                        </li>
+                    `;
+                    // Update the badge count
+                    updateNotificationBadge();
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        function updateNotificationBadge() {
+            fetch('/notifications/unread-count')
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.querySelector('.badge-notifications');
+                if (badge) {
+                    badge.textContent = data.count;
+                    if (data.count == 0) {
+                        badge.style.display = 'none';
+                    } else {
+                        badge.style.display = 'inline-block';
+                    }
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
 
 </body>
 </html>

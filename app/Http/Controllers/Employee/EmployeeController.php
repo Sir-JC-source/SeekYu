@@ -84,7 +84,7 @@ class EmployeeController extends Controller
                 'login_id' => $request->login_id,
                 'password' => bcrypt($request->password),
                 'role' => $role,
-                'account_status' => 'pending',
+                'account_status' => 'active',
                 'status' => 'active',
                 'first_login' => true,
                 'contact_no' => '', // Will be updated if needed

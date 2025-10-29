@@ -111,7 +111,21 @@ class IncidentReportController extends Controller
         ]);
 
         $report = IncidentReport::findOrFail($id);
-        $report->update(['status' => $request->status]);
+        $oldStatus = $report->status;
+        $newStatus = $request->status;
+
+        // Only send notification if status actually changed
+        if ($oldStatus !== $newStatus) {
+            $report->update(['status' => $newStatus]);
+
+            // Get users to notify based on roles (admins and security personnel)
+            $usersToNotify = \App\Models\User::whereIn('role', ['Super Admin', 'Admin', 'HR Officer', 'Security Guard', 'Head Guard'])->get();
+
+            // Send notification to each user
+            foreach ($usersToNotify as $user) {
+                $user->notify(new \App\Notifications\IncidentReportStatusUpdated($report, $oldStatus, $newStatus));
+            }
+        }
 
         return response()->json(['success' => true, 'message' => 'Status updated successfully']);
     }

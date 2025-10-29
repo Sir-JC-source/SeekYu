@@ -45,4 +45,28 @@ class ApplicationController extends Controller
 
         return view('applications.shortlist', compact('applications'));
     }
+
+    /**
+     * Update application status.
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|in:pending,shortlisted,rejected,hired',
+        ]);
+
+        $application = JobApplication::findOrFail($id);
+        $oldStatus = $application->status;
+        $newStatus = $request->status;
+
+        // Only send notification if status actually changed
+        if ($oldStatus !== $newStatus) {
+            $application->update(['status' => $newStatus]);
+
+            // Notify the applicant
+            $application->user->notify(new \App\Notifications\JobApplicationStatusUpdated($application, $oldStatus, $newStatus));
+        }
+
+        return response()->json(['success' => true, 'message' => 'Application status updated successfully']);
+    }
 }

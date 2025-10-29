@@ -60,11 +60,14 @@
                             <div class="form-floating">
                                 <input type="text" class="form-control" id="contactNo" name="contact_no"
                                        value="{{ auth()->user()->employee ? auth()->user()->employee->contact_no : '' }}" readonly
-                                       placeholder="Contact Number">
+                                       placeholder="Contact Number" maxlength="11" pattern="^09\d{9}$">
                                 <label for="contactNo">Contact Number</label>
                                 <button type="button" class="btn btn-sm btn-icon btn-text-secondary rounded-pill position-absolute top-50 end-0 translate-middle-y me-2 edit-btn" data-target="#contactNo" style="z-index: 5;">
                                     <i class="ti ti-pencil ti-sm"></i>
                                 </button>
+                                <div class="invalid-feedback">
+                                    Contact number must be exactly 11 digits starting with 09.
+                                </div>
                             </div>
                         </div>
 

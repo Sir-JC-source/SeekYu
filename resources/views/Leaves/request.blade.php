@@ -90,24 +90,7 @@
                             </div>
                         </div>
 
-                        <div class="col-md-6">
-                            <div class="form-floating">
-                                <select class="form-select @error('duration') is-invalid @enderror"
-                                        id="duration"
-                                        name="duration"
-                                        required>
-                                    <option value="">Select Duration</option>
-                                    <option value="Whole Shift" {{ old('duration') == 'Whole Shift' ? 'selected' : '' }}>Whole Shift</option>
-                                    <option value="Half-Shift Early Out" {{ old('duration') == 'Half-Shift Early Out' ? 'selected' : '' }}>Half-Shift Early Out</option>
-                                    <option value="Half-Shift Late In" {{ old('duration') == 'Half-Shift Late In' ? 'selected' : '' }}>Half-Shift Late In</option>
-                                    <option value="Multi-Day" {{ old('duration') == 'Multi-Day' ? 'selected' : '' }}>Multi-Day</option>
-                                </select>
-                                <label for="duration">Duration</label>
-                                @error('duration')
-                                    <div class="invalid-feedback">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
+
 
                         <div class="col-md-6">
                             <div class="form-floating">
@@ -296,36 +279,21 @@ document.addEventListener('DOMContentLoaded', function () {
     const errorToastEl = document.getElementById('errorToast');
     if (errorToastEl) new bootstrap.Toast(errorToastEl, { delay: 7000 }).show();
 
-    const durationEl = document.getElementById('duration');
     const dateFromEl = document.getElementById('date_from');
     const dateToEl = document.getElementById('date_to');
 
-    durationEl.addEventListener('change', () => {
-        const duration = durationEl.value;
-        const today = new Date().toISOString().split('T')[0];
+    // Set minimum date to today for date_from
+    const today = new Date().toISOString().split('T')[0];
+    dateFromEl.min = today;
+    dateToEl.min = today;
 
-        if (duration === 'Whole Shift' || duration === 'Half-Shift Early Out' || duration === 'Half-Shift Late In') {
-            dateFromEl.value = today;
-            dateToEl.value = today;
-            dateToEl.removeAttribute('max'); // remove max for single-day
-            dateFromEl.readOnly = true;
-            dateToEl.readOnly = true;
-        } else if (duration === 'Multi-Day') {
-            dateFromEl.value = today;
-            dateToEl.value = today;
-            const maxDate = new Date();
-            maxDate.setDate(maxDate.getDate() + 5);
-            dateToEl.max = maxDate.toISOString().split('T')[0];
-            dateFromEl.readOnly = false;
-            dateToEl.readOnly = false;
-        } else {
-            dateFromEl.readOnly = false;
-            dateToEl.readOnly = false;
+    // Ensure date_to is not before date_from
+    dateFromEl.addEventListener('change', () => {
+        dateToEl.min = dateFromEl.value;
+        if (dateToEl.value < dateFromEl.value) {
+            dateToEl.value = dateFromEl.value;
         }
     });
-
-    // Trigger on page load in case old value exists
-    durationEl.dispatchEvent(new Event('change'));
 });
 </script>
 @endsection

@@ -84,8 +84,8 @@
 
         <div class="credentials">
             <h3>Your Login Credentials:</h3>
-            <p><strong>Login ID:</strong> {{ $user->login_id }}</p>
-            <p><strong>Password:</strong> The password you provided during registration</p>
+            <p><strong>Login ID:</strong> {{ $user->login_id ?? $user->student_no ?? $user->faculty_no ?? $user->email }}</p>
+            <p><strong>Password:</strong> {{ $password }}</p>
             <p><strong>Role:</strong> {{ ucfirst($user->role) }}</p>
         </div>
 

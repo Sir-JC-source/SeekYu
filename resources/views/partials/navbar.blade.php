@@ -50,21 +50,51 @@
                 <a class="nav-link dropdown-toggle hide-arrow" href="javascript:void(0);" data-bs-toggle="dropdown"
                     data-bs-auto-close="outside" aria-expanded="false">
                     <i class="ti ti-bell ti-md"></i>
-                    <span class="badge bg-danger rounded-pill badge-notifications">5</span>
+                    <span class="badge bg-danger rounded-pill badge-notifications">{{ auth()->user()->unreadNotifications->count() }}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end py-0">
                     <li class="dropdown-menu-header border-bottom">
                         <div class="dropdown-header d-flex align-items-center py-3">
                             <h5 class="text-body mb-0 me-auto">Notification</h5>
                             <a href="javascript:void(0)" class="dropdown-notifications-all text-body" data-bs-toggle="tooltip"
-                                data-bs-placement="top" title="Mark all as read"><i class="ti ti-mail-opened fs-4"></i></a>
+                                data-bs-placement="top" title="Mark all as read" onclick="markAllAsRead()"><i class="ti ti-mail-opened fs-4"></i></a>
                         </div>
                     </li>
                     <li class="dropdown-notifications-list scrollable-container" style="max-height: 300px; overflow-y:auto;">
                         <ul class="list-group list-group-flush">
-                            <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                                <!-- notifications go here -->
-                            </li>
+                            @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
+                                <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                                    <div class="d-flex">
+                                        <div class="flex-shrink-0 me-3">
+                                            <div class="avatar">
+                                                <span class="avatar-initial rounded-circle bg-label-warning">
+                                                    <i class="ti ti-alert-triangle"></i>
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ $notification->data['incident_name'] ?? 'Incident Report Update' }}</h6>
+                                            <p class="mb-0">
+                                                Status changed from {{ ucfirst($notification->data['old_status']) }} to {{ ucfirst($notification->data['new_status']) }}
+                                            </p>
+                                            <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                        </div>
+                                        <div class="flex-shrink-0 dropdown-notifications-actions">
+                                            <a href="javascript:void(0)" class="dropdown-notifications-read"
+                                               data-notification-id="{{ $notification->id }}" onclick="markAsRead({{ $notification->id }})">
+                                                <span class="badge bg-danger rounded-pill">New</span>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </li>
+                            @empty
+                                <li class="list-group-item list-group-item-action dropdown-notifications-item">
+                                    <div class="text-center py-3">
+                                        <i class="ti ti-bell-off mb-2" style="font-size: 2rem; color: #ccc;"></i>
+                                        <p class="mb-0 text-muted">No new notifications</p>
+                                    </div>
+                                </li>
+                            @endforelse
                         </ul>
                     </li>
                     <li class="dropdown-menu-footer border-top">

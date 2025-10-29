@@ -15,7 +15,6 @@ class Leave extends Model
         'requestor',
         'leave_type',
         'reason',
-        'duration',
         'date_from',
         'date_to',
         'position',
@@ -38,5 +37,18 @@ class Leave extends Model
     public function rejecter()
     {
         return $this->belongsTo(RegisteredUsers::class, 'rejected_by');
+    }
+
+    /**
+     * Get the duration attribute dynamically calculated from date_from and date_to.
+     */
+    public function getDurationAttribute()
+    {
+        if ($this->date_from && $this->date_to) {
+            $from = \Carbon\Carbon::parse($this->date_from);
+            $to = \Carbon\Carbon::parse($this->date_to);
+            return $from->diffInDays($to) + 1; // Inclusive of both dates
+        }
+        return 0;
     }
 }

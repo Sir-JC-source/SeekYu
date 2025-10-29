@@ -218,6 +218,16 @@ class SecurityController extends Controller
     {
         $guard = Employee::findOrFail($guardId);
 
+        // Check if this is a removal request
+        if ($request->has('remove_date')) {
+            $removeDate = $request->remove_date;
+            Schedule::where('guard_id', $guardId)
+                   ->where('schedule_date', $removeDate)
+                   ->delete();
+
+            return back()->with('success', 'Schedule removed successfully!');
+        }
+
         $request->validate([
             'schedules' => 'required|array',
             'schedules.*.date' => 'required|date',
@@ -287,6 +297,7 @@ class SecurityController extends Controller
         }])
         ->where('position', 'Security Guard')
         ->where('status', 'Active')
+        ->whereNull('deleted_at') // Exclude soft-deleted employees
         ->get();
 
         return view('Security.ViewAllSchedules', compact('guards'));

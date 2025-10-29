@@ -39,7 +39,7 @@ class ProfileController extends Controller
 
             $request->validate([
                 'full_name' => 'required|string|max:255',
-                'contact_no' => 'nullable|string|max:20',
+                'contact_no' => 'nullable|string|regex:/^09\d{9}$/',
                 'employee_image' => 'nullable|image|max:2048',
             ]);
 

@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Shift\ShiftController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\GamificationController;
+use App\Http\Controllers\NotificationController;
 
 
 // Root redirect to login
@@ -203,6 +204,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/credentials', [ApplicantCredentialController::class, 'index'])->name('applicant.credentials');
         Route::post('/credentials/store', [ApplicantCredentialController::class, 'store'])->name('applicant.credentials.store');
         Route::get('/gamification', [GamificationController::class, 'index'])->name('applicant.gamification');
+    });
+
+    // ----------------------
+    // 🔔 Notifications
+    // ----------------------
+    Route::prefix('notifications')->group(function () {
+        Route::post('/mark-as-read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+        Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
+        Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
     });
 
 });

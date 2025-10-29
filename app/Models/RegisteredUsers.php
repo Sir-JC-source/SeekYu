@@ -87,6 +87,7 @@ class RegisteredUsers extends Authenticatable
 
     /**
      * 🧠 Automatically create an Employee record when a new internal user is created.
+     * Also, soft-delete the Employee record when the user is deleted.
      */
     protected static function booted()
     {
@@ -94,7 +95,16 @@ class RegisteredUsers extends Authenticatable
             $employeeRoles = ['super-admin', 'admin', 'hr-officer', 'head-guard', 'security-guard'];
 
             if (in_array($user->role, $employeeRoles)) {
+                // Assign the role using Spatie
+                $user->assignRole($user->role);
                 \App\Models\Employee::createFromUser($user);
+            }
+        });
+
+        static::deleting(function ($user) {
+            // Soft-delete the associated Employee record if it exists
+            if ($user->employee) {
+                $user->employee->delete();
             }
         });
     }

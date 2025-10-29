@@ -138,8 +138,8 @@ class AttendanceController extends Controller
             'shift_out' => $todayAttendance?->shift_out_time ? Carbon::parse($todayAttendance->shift_out_time, 'Asia/Manila')->format('h:i A') : null,
             'total_hours' => $todayTotalHoursDecimal,
             'total_hours_display' => $todayTotalHoursFormatted,
-            'can_shift_in' => !$todayAttendance || !$todayAttendance->shift_in_time,
-            'can_shift_out' => $todayAttendance && $todayAttendance->shift_in_time && !$todayAttendance->shift_out_time,
+            'can_shift_in' => $todaySchedule && (!$todayAttendance || !$todayAttendance->shift_in_time),
+            'can_shift_out' => $todaySchedule && $todayAttendance && $todayAttendance->shift_in_time && !$todayAttendance->shift_out_time,
         ];
 
         return view('Attendance.my-shift', compact('weeklyData', 'todayData', 'weekStart'));

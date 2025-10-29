@@ -80,7 +80,7 @@
 
         <p>Dear {{ $user->fullname }},</p>
 
-        <p>Welcome to SeekYu HRIS! Your employee account has been created by an administrator. To complete your account setup and access the system, please verify your email address by clicking the button below.</p>
+        <p>Welcome to SeekYu HRIS! Your employee account has been created by an administrator. Your account is now active and you can log in using the credentials below.</p>
 
         <div class="credentials">
             <h3>Your Login Credentials:</h3>
@@ -94,7 +94,7 @@
         </div>
 
         <div class="warning">
-            <strong>Important:</strong> You will not be able to log in until you verify your email address. Please check your spam/junk folder if you don't see this email in your inbox. Keep your login credentials secure and do not share them with others.
+            <strong>Important:</strong> Please verify your email address to complete your account setup. You can log in immediately, but email verification is recommended for security. Please check your spam/junk folder if you don't see this email in your inbox. Keep your login credentials secure and do not share them with others.
         </div>
 
         <p>If you did not expect to receive this email, please contact your system administrator.</p>
