@@ -63,6 +63,14 @@ class Employee extends Model
     }
 
     /**
+     * Relationship: Employee has many schedules.
+     */
+    public function schedules()
+    {
+        return $this->hasMany(Schedule::class, 'guard_id');
+    }
+
+    /**
      * 🔥 Automatically create an Employee record from a Registered User.
      */
     public static function createFromUser($user)

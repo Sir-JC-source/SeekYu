@@ -127,12 +127,7 @@
                             <span class="align-middle">My Account</span>
                         </a>
                     </li>
-                    <li>
-                        <a class="dropdown-item" href="pages-faq.html">
-                            <i class="ti ti-help me-2 ti-sm"></i>
-                            <span class="align-middle">FAQ</span>
-                        </a>
-                    </li>
+                    
                     <li><div class="dropdown-divider"></div></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST" style="display: inline;">

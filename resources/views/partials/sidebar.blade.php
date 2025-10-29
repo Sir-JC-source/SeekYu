@@ -75,11 +75,7 @@
                     <li class="menu-item {{ request()->routeIs('guard-scheduling.list') ? 'active' : '' }}">
                         <a href="{{ route('guard-scheduling.list') }}" class="menu-link"><div>Guard List</div></a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('attendance-kpi.index') ? 'active' : '' }}">
-                        <a href="{{ route('attendance-kpi.index') }}" class="menu-link">
-                            <div>Attendance KPI</div>
-                        </a>
-                    </li>
+                   
             </li>
             </ul>
             </li>
@@ -203,7 +199,7 @@
             <li class="menu-item {{ request()->is('guard-scheduling*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-calendar-time menu-icon"></i>
-                    <div>Guard Scheduling</div>
+                    <div>Security Guard Management</div>
                 </a>
                 <ul class="menu-sub">
                     <li class="menu-item {{ request()->routeIs('guard-scheduling.assign') ? 'active' : '' }}">
@@ -215,11 +211,7 @@
                     <li class="menu-item {{ request()->routeIs('guard-scheduling.list') ? 'active' : '' }}">
                         <a href="{{ route('guard-scheduling.list') }}" class="menu-link"><div>Guard List</div></a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('attendance-kpi.index') ? 'active' : '' }}">
-                        <a href="{{ route('attendance-kpi.index') }}" class="menu-link">
-                            <div>Attendance KPI</div>
-                        </a>
-                    </li>
+                
             </li>
             </ul>
             </li>

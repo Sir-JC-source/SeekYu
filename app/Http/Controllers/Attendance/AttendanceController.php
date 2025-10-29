@@ -254,14 +254,67 @@ class AttendanceController extends Controller
 
     public function kpi(Request $request)
     {
-        // Basic KPI data - can be expanded with actual metrics
+        // Get guard employee IDs (security-guard and head-guard roles)
+        $guardEmployeeIds = Employee::whereHas('registeredUser', function ($query) {
+            $query->whereIn('role', ['security-guard', 'head-guard'])
+                  ->whereIn('account_status', ['approved', 'active']);
+        })->pluck('id');
+
+        // Total Guards
+        $totalGuards = $guardEmployeeIds->count();
+
+        // Total Shifts (scheduled shifts for guards)
+        $totalShifts = Schedule::whereIn('guard_id', $guardEmployeeIds)->count();
+
+        // Completed Shifts (attendances with both in and out times)
+        $completedShifts = Attendance::whereIn('employee_id', $guardEmployeeIds)
+            ->whereNotNull('shift_in_time')
+            ->whereNotNull('shift_out_time')
+            ->count();
+
+        // Late and Undertime calculations
+        $lateShifts = 0;
+        $undertimeShifts = 0;
+
+        $attendancesWithSchedules = Attendance::whereIn('employee_id', $guardEmployeeIds)
+            ->whereNotNull('shift_in_time')
+            ->whereNotNull('shift_out_time')
+            ->with('employee.schedules')
+            ->get();
+
+        foreach ($attendancesWithSchedules as $attendance) {
+            $schedule = $attendance->employee->schedules->where('schedule_date', $attendance->attendance_date)->first();
+            if ($schedule) {
+                $scheduledIn = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_in, 'Asia/Manila');
+                $scheduledOut = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_out, 'Asia/Manila');
+                $actualIn = $attendance->shift_in_time->setTimezone('Asia/Manila');
+                $actualOut = $attendance->shift_out_time->setTimezone('Asia/Manila');
+
+                if ($actualIn->gt($scheduledIn)) {
+                    $lateShifts++;
+                }
+                if ($actualOut->lt($scheduledOut)) {
+                    $undertimeShifts++;
+                }
+            }
+        }
+
+        // Average Hours (from completed attendances)
+        $averageHours = Attendance::whereIn('employee_id', $guardEmployeeIds)
+            ->whereNotNull('shift_in_time')
+            ->whereNotNull('shift_out_time')
+            ->where('total_hours', '>', 0)
+            ->avg('total_hours') ?? 0;
+
+        $averageHours = round($averageHours, 2);
+
         $kpiData = [
-            'total_guards' => 0,
-            'total_shifts' => 0,
-            'completed_shifts' => 0,
-            'late_shifts' => 0,
-            'undertime_shifts' => 0,
-            'average_hours' => 0,
+            'total_guards' => $totalGuards,
+            'total_shifts' => $totalShifts,
+            'completed_shifts' => $completedShifts,
+            'late_shifts' => $lateShifts,
+            'undertime_shifts' => $undertimeShifts,
+            'average_hours' => $averageHours,
         ];
 
         return view('Attendance.kpi', compact('kpiData'));
