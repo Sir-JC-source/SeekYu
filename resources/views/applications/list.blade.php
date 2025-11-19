@@ -75,3 +75,41 @@
     </div>
 </div>
 @endsection
+
+@push('page-scripts')
+<script>
+function showGameScores(applicationId) {
+    fetch(`{{ route("applications.game-scores", ":id") }}`.replace(':id', applicationId), {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            let content = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Game</th><th>Score</th><th>Percentage</th><th>Time</th></tr></thead><tbody>';
+            data.scores.forEach(score => {
+                content += `<tr><td>${score.game_type.replace('_', ' ').toUpperCase()}</td><td>${score.score}/${score.total}</td><td>${score.percentage}%</td><td>${score.time_taken}</td></tr>`;
+            });
+            content += '</tbody></table></div>';
+
+            Swal.fire({
+                title: 'Assessment Scores',
+                html: content,
+                width: 600,
+                showCloseButton: true,
+                showConfirmButton: false
+            });
+        } else {
+            Swal.fire('Error', 'Unable to load assessment scores.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        Swal.fire('Error', 'An error occurred.', 'error');
+    });
+}
+</script>
+@endpush
+@endsection

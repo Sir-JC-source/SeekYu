@@ -64,54 +64,58 @@
                     </li>
                     <li class="dropdown-notifications-list scrollable-container" style="max-height: 300px; overflow-y:auto;">
                         <ul class="list-group list-group-flush">
-                            @forelse(auth()->user()->unreadNotifications->take(5) as $notification)
+                            @forelse(auth()->user()->notifications->take(5) as $notification)
                                 <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                                    <div class="d-flex">
-                                        <div class="flex-shrink-0 me-3">
-                                            <div class="avatar">
-                                                <span class="avatar-initial rounded-circle
-                                                    @if($notification->data['type'] === 'leave_submitted') bg-label-info
-                                                    @elseif($notification->data['type'] === 'leave_status_update') bg-label-success
-                                                    @elseif($notification->data['type'] === 'job_application_status_update') bg-label-primary
-                                                    @else bg-label-warning
-                                                    @endif">
-                                                    @if($notification->data['type'] === 'leave_submitted')
-                                                        <i class="ti ti-calendar-plus"></i>
-                                                    @elseif($notification->data['type'] === 'leave_status_update')
-                                                        <i class="ti ti-calendar-check"></i>
-                                                    @elseif($notification->data['type'] === 'job_application_status_update')
-                                                        <i class="ti ti-briefcase"></i>
-                                                    @else
-                                                        <i class="ti ti-alert-triangle"></i>
-                                                    @endif
-                                                </span>
+                                    <a href="javascript:void(0)" onclick="handleNotificationClick('{{ $notification->data['type'] }}', {{ $notification->id }}, {{ json_encode($notification->data) }})" style="text-decoration: none; color: inherit;">
+                                        <div class="d-flex">
+                                            <div class="flex-shrink-0 me-3">
+                                                <div class="avatar">
+                                                    <span class="avatar-initial rounded-circle
+                                                        @if($notification->data['type'] === 'leave_submitted') bg-label-info
+                                                        @elseif($notification->data['type'] === 'leave_status_update') bg-label-success
+                                                        @elseif($notification->data['type'] === 'job_application_status_update') bg-label-primary
+                                                        @else bg-label-warning
+                                                        @endif">
+                                                        @if($notification->data['type'] === 'leave_submitted')
+                                                            <i class="ti ti-calendar-plus"></i>
+                                                        @elseif($notification->data['type'] === 'leave_status_update')
+                                                            <i class="ti ti-calendar-check"></i>
+                                                        @elseif($notification->data['type'] === 'job_application_status_update')
+                                                            <i class="ti ti-briefcase"></i>
+                                                        @else
+                                                            <i class="ti ti-alert-triangle"></i>
+                                                        @endif
+                                                    </span>
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                @if($notification->data['type'] === 'leave_submitted')
+                                                    <h6 class="mb-1">New Leave Request</h6>
+                                                    <p class="mb-0">{{ $notification->data['message'] }}</p>
+                                                @elseif($notification->data['type'] === 'leave_status_update')
+                                                    <h6 class="mb-1">Leave Request Update</h6>
+                                                    <p class="mb-0">{{ $notification->data['message'] }}</p>
+                                                @elseif($notification->data['type'] === 'job_application_status_update')
+                                                    <h6 class="mb-1">Job Application Update</h6>
+                                                    <p class="mb-0">{{ $notification->data['message'] }}</p>
+                                                @else
+                                                    <h6 class="mb-1">{{ $notification->data['incident_name'] ?? 'Incident Report Update' }}</h6>
+                                                    <p class="mb-0">
+                                                        Status changed from {{ ucfirst($notification->data['old_status']) }} to {{ ucfirst($notification->data['new_status']) }}
+                                                    </p>
+                                                @endif
+                                                <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
+                                            </div>
+                                            <div class="flex-shrink-0 dropdown-notifications-actions">
+                                                @if(is_null($notification->read_at))
+                                                    <a href="javascript:void(0)" class="dropdown-notifications-read"
+                                                       data-notification-id="{{ $notification->id }}" onclick="markAsRead({{ $notification->id }})">
+                                                        <span class="badge bg-danger rounded-pill">New</span>
+                                                    </a>
+                                                @endif
                                             </div>
                                         </div>
-                                        <div class="flex-grow-1">
-                                            @if($notification->data['type'] === 'leave_submitted')
-                                                <h6 class="mb-1">New Leave Request</h6>
-                                                <p class="mb-0">{{ $notification->data['message'] }}</p>
-                                            @elseif($notification->data['type'] === 'leave_status_update')
-                                                <h6 class="mb-1">Leave Request Update</h6>
-                                                <p class="mb-0">{{ $notification->data['message'] }}</p>
-                                            @elseif($notification->data['type'] === 'job_application_status_update')
-                                                <h6 class="mb-1">Job Application Update</h6>
-                                                <p class="mb-0">{{ $notification->data['message'] }}</p>
-                                            @else
-                                                <h6 class="mb-1">{{ $notification->data['incident_name'] ?? 'Incident Report Update' }}</h6>
-                                                <p class="mb-0">
-                                                    Status changed from {{ ucfirst($notification->data['old_status']) }} to {{ ucfirst($notification->data['new_status']) }}
-                                                </p>
-                                            @endif
-                                            <small class="text-muted">{{ $notification->created_at->diffForHumans() }}</small>
-                                        </div>
-                                        <div class="flex-shrink-0 dropdown-notifications-actions">
-                                            <a href="javascript:void(0)" class="dropdown-notifications-read"
-                                               data-notification-id="{{ $notification->id }}" onclick="markAsRead({{ $notification->id }})">
-                                                <span class="badge bg-danger rounded-pill">New</span>
-                                            </a>
-                                        </div>
-                                    </div>
+                                    </a>
                                 </li>
                             @empty
                                 <li class="list-group-item list-group-item-action dropdown-notifications-item">

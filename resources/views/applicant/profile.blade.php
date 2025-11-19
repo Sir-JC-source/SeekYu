@@ -14,7 +14,6 @@
                          alt="Profile Picture"
                          class="rounded-circle border-3 border-white shadow"
                          style="width:100px; height:100px; object-fit:cover; cursor:pointer;">
-                    <input type="file" name="profile_picture" id="profilePictureInput" class="d-none" accept="image/*">
                     <button type="button" class="btn btn-sm btn-icon btn-circle position-absolute bottom-0 end-0 bg-white text-primary border border-white" onclick="$('#profilePictureInput').click()" style="width: 32px; height: 32px;">
                         <i class="ti ti-camera" style="font-size: 16px;"></i>
                     </button>
@@ -46,6 +45,7 @@
             <div class="card-body">
                 <form id="profileForm" enctype="multipart/form-data">
                     @csrf
+                    <input type="file" name="profile_picture" id="profilePictureInput" class="d-none" accept="image/*">
                     <div class="row g-4">
                         <!-- Personal Information -->
                         <div class="col-12">

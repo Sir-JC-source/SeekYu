@@ -31,6 +31,7 @@
                     <option value="">Select Position</option>
                     <option value="Security Guard" {{ old('position') == 'Security Guard' ? 'selected' : '' }}>Security Guard</option>
                     <option value="Head Guard" {{ old('position') == 'Head Guard' ? 'selected' : '' }}>Head Guard</option>
+                    <option value="HR Officer" {{ old('position') == 'HR Officer' ? 'selected' : '' }}>HR Officer</option>
                 </select>
                 @error('position')
                     <small class="text-danger">{{ $message }}</small>

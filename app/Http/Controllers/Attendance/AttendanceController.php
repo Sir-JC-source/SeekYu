@@ -266,10 +266,17 @@ class AttendanceController extends Controller
         // Total Shifts (scheduled shifts for guards)
         $totalShifts = Schedule::whereIn('guard_id', $guardEmployeeIds)->count();
 
-        // Completed Shifts (attendances with both in and out times)
+        // Completed Shifts (attendances with both in and out times, not late, and no undertime)
         $completedShifts = Attendance::whereIn('employee_id', $guardEmployeeIds)
             ->whereNotNull('shift_in_time')
             ->whereNotNull('shift_out_time')
+            ->whereRaw('EXISTS (
+                SELECT 1 FROM schedules s
+                WHERE s.guard_id = attendances.employee_id
+                AND s.schedule_date = attendances.attendance_date
+                AND TIME(attendances.shift_in_time) <= TIME(s.shift_in)
+                AND TIME(attendances.shift_out_time) >= TIME(s.shift_out)
+            )')
             ->count();
 
         // Late and Undertime calculations
@@ -318,5 +325,204 @@ class AttendanceController extends Controller
         ];
 
         return view('Attendance.kpi', compact('kpiData'));
+    }
+
+    public function myKpi(Request $request)
+    {
+        $user = Auth::user();
+        $employee = Employee::where('employee_number', $user->login_id)->first();
+
+        if (!$employee) {
+            return redirect()->back()->with('error', 'Employee record not found.');
+        }
+
+        // Total Shifts (scheduled shifts for this guard)
+        $totalShifts = Schedule::where('guard_id', $employee->id)->count();
+
+        // Completed Shifts (attendances with both in and out times, not late, and no undertime)
+        $completedShifts = Attendance::where('employee_id', $employee->id)
+            ->whereNotNull('shift_in_time')
+            ->whereNotNull('shift_out_time')
+            ->whereRaw('EXISTS (
+                SELECT 1 FROM schedules s
+                WHERE s.guard_id = attendances.employee_id
+                AND s.schedule_date = attendances.attendance_date
+                AND TIME(attendances.shift_in_time) <= TIME(s.shift_in)
+                AND TIME(attendances.shift_out_time) >= TIME(s.shift_out)
+            )')
+            ->count();
+
+        // Late and Undertime calculations
+        $lateShifts = 0;
+        $undertimeShifts = 0;
+
+        $attendancesWithSchedules = Attendance::where('employee_id', $employee->id)
+            ->whereNotNull('shift_in_time')
+            ->whereNotNull('shift_out_time')
+            ->with('employee.schedules')
+            ->get();
+
+        foreach ($attendancesWithSchedules as $attendance) {
+            $schedule = $employee->schedules->where('schedule_date', $attendance->attendance_date)->first();
+            if ($schedule) {
+                $scheduledIn = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_in, 'Asia/Manila');
+                $scheduledOut = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_out, 'Asia/Manila');
+                $actualIn = Carbon::parse($attendance->shift_in_time, 'Asia/Manila');
+                $actualOut = Carbon::parse($attendance->shift_out_time, 'Asia/Manila');
+
+                if ($actualIn->gt($scheduledIn)) {
+                    $lateShifts++;
+                }
+                if ($actualOut->lt($scheduledOut)) {
+                    $undertimeShifts++;
+                }
+            }
+        }
+
+        // Average Hours (from completed attendances)
+        $averageHours = Attendance::where('employee_id', $employee->id)
+            ->whereNotNull('shift_in_time')
+            ->whereNotNull('shift_out_time')
+            ->where('total_hours', '>', 0)
+            ->avg('total_hours') ?? 0;
+
+        $averageHours = round($averageHours, 2);
+
+        $kpiData = [
+            'total_shifts' => $totalShifts,
+            'completed_shifts' => $completedShifts,
+            'late_shifts' => $lateShifts,
+            'undertime_shifts' => $undertimeShifts,
+            'average_hours' => $averageHours,
+        ];
+
+        return view('Attendance.my-kpi', compact('kpiData'));
+    }
+
+    public function getMyAttendanceTrends(Request $request)
+    {
+        $user = Auth::user();
+        $employee = Employee::where('employee_number', $user->login_id)->first();
+
+        if (!$employee) {
+            return response()->json(['error' => 'Employee record not found.'], 404);
+        }
+
+        $months = $request->get('months', 6);
+        $grouping = $request->get('grouping', 'monthly');
+
+        $trends = [];
+        $periods = $this->getPeriods($months, $grouping);
+
+        foreach ($periods as $period) {
+            $startDate = $period['start'];
+            $endDate = $period['end'];
+            $label = $period['label'];
+
+            // Total scheduled shifts for the period
+            $totalShifts = Schedule::where('guard_id', $employee->id)
+                ->whereBetween('schedule_date', [$startDate, $endDate])
+                ->count();
+
+            // Completed shifts for the period
+            $completedShifts = Attendance::where('employee_id', $employee->id)
+                ->whereNotNull('shift_in_time')
+                ->whereNotNull('shift_out_time')
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->count();
+
+            // Late arrivals - calculate based on schedule comparison
+            $lateShifts = 0;
+            $undertimeShifts = 0;
+
+            $attendancesWithSchedules = Attendance::where('employee_id', $employee->id)
+                ->whereNotNull('shift_in_time')
+                ->whereNotNull('shift_out_time')
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->with('employee.schedules')
+                ->get();
+
+            foreach ($attendancesWithSchedules as $attendance) {
+                $schedule = $employee->schedules->where('schedule_date', $attendance->attendance_date)->first();
+                if ($schedule) {
+                    $scheduledIn = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_in, 'Asia/Manila');
+                    $scheduledOut = Carbon::parse($schedule->schedule_date->format('Y-m-d') . ' ' . $schedule->shift_out, 'Asia/Manila');
+                    $actualIn = Carbon::parse($attendance->shift_in_time, 'Asia/Manila');
+                    $actualOut = Carbon::parse($attendance->shift_out_time, 'Asia/Manila');
+
+                    if ($actualIn->gt($scheduledIn)) {
+                        $lateShifts++;
+                    }
+                    if ($actualOut->lt($scheduledOut)) {
+                        $undertimeShifts++;
+                    }
+                }
+            }
+
+            // Total hours and average hours worked
+            $totalHours = Attendance::where('employee_id', $employee->id)
+                ->whereNotNull('shift_in_time')
+                ->whereNotNull('shift_out_time')
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->sum('total_hours');
+            $avgHours = $completedShifts > 0 ? $totalHours / $completedShifts : 0;
+
+            // Attendance issues rate
+            $totalAttendanceRecords = Attendance::where('employee_id', $employee->id)
+                ->whereBetween('attendance_date', [$startDate, $endDate])
+                ->count();
+            $issuesRate = $totalAttendanceRecords > 0 ? round((($lateShifts + $undertimeShifts) / $totalAttendanceRecords) * 100, 1) : 0;
+
+            $trends[] = [
+                'period' => $label,
+                'total_shifts' => $totalShifts,
+                'completed_shifts' => $completedShifts,
+                'late_shifts' => $lateShifts,
+                'undertime_shifts' => $undertimeShifts,
+                'avg_hours' => round($avgHours, 1),
+                'issues_rate' => $issuesRate,
+            ];
+        }
+
+        return response()->json($trends);
+    }
+
+    private function getPeriods($months, $grouping)
+    {
+        $periods = [];
+        $now = Carbon::now();
+
+        if ($grouping === 'monthly') {
+            for ($i = $months - 1; $i >= 0; $i--) {
+                $date = $now->copy()->subMonths($i);
+                $periods[] = [
+                    'start' => $date->copy()->startOfMonth(),
+                    'end' => $date->copy()->endOfMonth(),
+                    'label' => $date->format('M Y')
+                ];
+            }
+        } elseif ($grouping === 'quarterly') {
+            $quarters = ceil($months / 3);
+            for ($i = $quarters - 1; $i >= 0; $i--) {
+                $date = $now->copy()->subMonths($i * 3);
+                $periods[] = [
+                    'start' => $date->copy()->startOfQuarter(),
+                    'end' => $date->copy()->endOfQuarter(),
+                    'label' => 'Q' . $date->quarter . ' ' . $date->year
+                ];
+            }
+        } elseif ($grouping === 'yearly') {
+            $years = ceil($months / 12);
+            for ($i = $years - 1; $i >= 0; $i--) {
+                $date = $now->copy()->subYears($i);
+                $periods[] = [
+                    'start' => $date->copy()->startOfYear(),
+                    'end' => $date->copy()->endOfYear(),
+                    'label' => $date->year
+                ];
+            }
+        }
+
+        return $periods;
     }
 }

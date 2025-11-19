@@ -78,4 +78,18 @@ class ApplicationController extends Controller
             'message' => 'Application status updated successfully.',
         ]);
     }
+
+    /**
+     * Get game scores for an application.
+     */
+    public function getGameScores($id)
+    {
+        $application = JobApplication::findOrFail($id);
+        $scores = \App\Models\ApplicantGameScore::where('job_application_id', $id)->get();
+
+        return response()->json([
+            'success' => true,
+            'scores' => $scores
+        ]);
+    }
 }

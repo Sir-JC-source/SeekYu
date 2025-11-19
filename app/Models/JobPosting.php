@@ -21,6 +21,7 @@ class JobPosting extends Model
         'location',
         'created_by', // ✅ Important: allow assigning the creator ID
         'status',
+        'role', // Added role field
     ];
 
     /**
@@ -40,7 +41,7 @@ class JobPosting extends Model
      */
     public function getCreatorNameAttribute()
     {
-        return $this->creator ? $this->creator->name ?? 'Unknown User' : 'Unknown User';
+        return $this->postedBy ? $this->postedBy->name ?? 'Unknown User' : 'Unknown User';
     }
 
     /**

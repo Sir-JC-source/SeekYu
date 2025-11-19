@@ -1,9 +1,12 @@
-# TODO: Remove 'duration' field from Leave model and calculate dynamically
+# Integrate Guard Assessment Games into Application Process
 
-## Steps:
-- [ ] Update Leave model: Remove 'duration' from fillable, add getDurationAttribute accessor to calculate days from date_from and date_to.
-- [ ] Update LeaveController: Remove 'duration' from validation rules.
-- [ ] Update views: Remove duration select field from resources/views/Leaves/request.blade.php and resources/views/Leaves/index.blade.php, update JS logic.
-- [ ] Update display views: resources/views/Leaves/pending.blade.php and resources/views/Leaves/processed.blade.php to use $leave->duration.
-- [ ] Create migration: Drop 'duration' column from 'leaves' table.
-- [ ] Test the changes: Ensure leave days are calculated correctly, forms work without duration field.
+## Tasks
+- [ ] Modify JobPostingController@apply to redirect to games for Head Guard/Security Guard positions
+- [ ] Create applicant.games.gate view embedding GUARD/1 - Gate Screening.html
+- [ ] Create applicant.games.bag view embedding GUARD/2 - Bag Inspection.html
+- [ ] Create applicant.games.memory view embedding GUARD/3 - Memory Test.html
+- [ ] Add routes for game views and score submission
+- [ ] Implement score capture in game views using JS events and session storage
+- [ ] Create method to finalize application after games, saving JobApplication and ApplicantGameScore
+- [ ] Update admin application views to display game scores
+- [ ] Test the full flow: apply -> games -> application submitted -> admin sees scores

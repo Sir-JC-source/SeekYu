@@ -262,6 +262,13 @@
         {{-- Head Guard Menu --}}
         @if($userRole === 'head-guard')
 
+            {{-- My KPI --}}
+            <li class="menu-item {{ request()->routeIs('my-kpi.index') ? 'active' : '' }}">
+                <a href="{{ route('my-kpi.index') }}" class="menu-link">
+                    <i class="ti ti-chart-bar menu-icon"></i>
+                    <div>My KPI</div>
+                </a>
+            </li>
 
             {{-- Leave Requests --}}
             <li class="menu-item {{ request()->is('leaves*') || request()->is('attendance*') ? 'active open' : '' }}">
@@ -304,6 +311,13 @@
         {{-- Security Guard Menu --}}
         @if($userRole === 'security-guard')
 
+            {{-- My KPI --}}
+            <li class="menu-item {{ request()->routeIs('my-kpi.index') ? 'active' : '' }}">
+                <a href="{{ route('my-kpi.index') }}" class="menu-link">
+                    <i class="ti ti-chart-bar menu-icon"></i>
+                    <div>My KPI</div>
+                </a>
+            </li>
 
             {{-- Leave Requests --}}
             <li class="menu-item {{ request()->is('leaves*') || request()->is('attendance*') ? 'active open' : '' }}">

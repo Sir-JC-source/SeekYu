@@ -19,9 +19,9 @@ use App\Http\Controllers\GamificationController;
 use App\Http\Controllers\NotificationController;
 
 
-// Root redirect to login
+// Root to home page
 Route::get('/', function () {
-    return redirect()->route('login.index');
+    return view('home');
 });
 
 // ----------------------
@@ -118,6 +118,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/list', [ApplicationController::class, 'index'])->name('applications.list');
         Route::get('/rejected', [ApplicationController::class, 'rejected'])->name('applications.rejected');
         Route::get('/shortlist', [ApplicationController::class, 'shortlist'])->name('applications.shortlist');
+        Route::get('/game-scores/{id}', [ApplicationController::class, 'getGameScores'])->name('applications.game-scores');
 
         // 🧾 Job Postings
         Route::prefix('job-postings')->group(function () {
@@ -179,6 +180,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/profile/update', [ProfileController::class, 'update'])->name('employee.update-profile');
 
     // ----------------------
+    // 📊 My KPI (for Head Guard and Security Guard)
+    // ----------------------
+    Route::middleware(['role:head-guard|security-guard'])->group(function () {
+        Route::get('/my-kpi', [AttendanceController::class, 'myKpi'])->name('my-kpi.index');
+        Route::get('/my-attendance-trends', [AttendanceController::class, 'getMyAttendanceTrends'])->name('attendance.my-trends');
+    });
+
+    // ----------------------
     // ⏰ Attendance Management
     // ----------------------
     Route::prefix('attendance')->group(function () {
@@ -204,6 +213,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/credentials', [ApplicantCredentialController::class, 'index'])->name('applicant.credentials');
         Route::post('/credentials/store', [ApplicantCredentialController::class, 'store'])->name('applicant.credentials.store');
         Route::get('/gamification', [GamificationController::class, 'index'])->name('applicant.gamification');
+
+        // Assessment Games for Guard Positions
+        Route::get('/games/gate', [JobPostingController::class, 'showGateGame'])->name('applicant.games.gate');
+        Route::get('/games/bag', [JobPostingController::class, 'showBagGame'])->name('applicant.games.bag');
+        Route::get('/games/memory', [JobPostingController::class, 'showMemoryGame'])->name('applicant.games.memory');
+        Route::post('/games/submit-scores', [JobPostingController::class, 'submitGameScores'])->name('applicant.games.submit-scores');
     });
 
     // ----------------------

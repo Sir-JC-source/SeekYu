@@ -263,6 +263,25 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Assessment Results Section -->
+                        @if(in_array($application->jobPosting->position, ['Head Guard', 'Security Guard']))
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="card border-0 shadow-sm">
+                                        <div class="card-header bg-transparent border-0">
+                                            <div class="d-flex align-items-center">
+                                                <i class="ti ti-award text-warning ti-lg me-2"></i>
+                                                <h6 class="mb-0">Assessment Results</h6>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="assessment-results">
+                                            <!-- Assessment scores will be loaded here -->
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                     @else
                         <div class="text-center py-5">
                             <i class="ti ti-file-x display-1 text-muted mb-3"></i>
@@ -276,3 +295,39 @@
     </div>
 </div>
 @endsection
+
+@push('page-scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    @if($application->user->applicantCredential && in_array($application->jobPosting->position, ['Head Guard', 'Security Guard']))
+        loadAssessmentScores({{ $application->id }});
+    @endif
+});
+
+function loadAssessmentScores(applicationId) {
+    fetch(`{{ route("applications.game-scores", ":id") }}`.replace(':id', applicationId), {
+        method: 'GET',
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success && data.scores.length > 0) {
+            let content = '<div class="table-responsive"><table class="table table-sm"><thead><tr><th>Game</th><th>Score</th><th>Percentage</th><th>Time</th></tr></thead><tbody>';
+            data.scores.forEach(score => {
+                content += `<tr><td>${score.game_type.replace('_', ' ').toUpperCase()}</td><td>${score.score}/${score.total}</td><td>${score.percentage}%</td><td>${score.time_taken}</td></tr>`;
+            });
+            content += '</tbody></table></div>';
+            document.getElementById('assessment-results').innerHTML = content;
+        } else {
+            document.getElementById('assessment-results').innerHTML = '<p class="text-muted">No assessment scores available.</p>';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('assessment-results').innerHTML = '<p class="text-danger">Error loading assessment scores.</p>';
+    });
+}
+</script>
+@endpush

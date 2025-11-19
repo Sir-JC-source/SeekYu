@@ -107,7 +107,7 @@
     @endforeach
 </div>
 
-<script>
+    <script>
 function applyForJob(jobId) {
     if (confirm('Are you sure you want to apply for this job?')) {
         fetch(`{{ url('/applicant/jobs/apply') }}/${jobId}`, {
@@ -120,10 +120,15 @@ function applyForJob(jobId) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                alert(data.message);
-                // Close modal and reload page
-                document.querySelector(`#jobModal${jobId}`).querySelector('[data-bs-dismiss="modal"]').click();
-                location.reload();
+                if (data.redirect) {
+                    // Redirect to assessment
+                    window.location.href = data.redirect;
+                } else {
+                    alert(data.message);
+                    // Close modal and reload page
+                    document.querySelector(`#jobModal${jobId}`).querySelector('[data-bs-dismiss="modal"]').click();
+                    location.reload();
+                }
             } else {
                 alert(data.message);
             }

@@ -26,7 +26,7 @@ class JobPostingController extends Controller
         // Validate input
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'position' => 'required|in:Security Guard,Head Guard',
+            'position' => 'required|in:Security Guard,Head Guard,HR Officer',
             'description' => 'required|string',
             'type_of_employment' => 'required|in:Contractual,Full-Time',
             'location' => 'required|string|max:255',
@@ -166,7 +166,18 @@ class JobPostingController extends Controller
             ]);
         }
 
-        // Create application
+        // Check if position requires assessment
+        if (in_array($job->position, ['Head Guard', 'Security Guard'])) {
+            // Store job ID in session and redirect to first game
+            session(['pending_application_job_id' => $id]);
+            return response()->json([
+                'success' => true,
+                'redirect' => route('applicant.games.gate'),
+                'message' => 'Starting assessment...'
+            ]);
+        }
+
+        // For other positions, create application directly
         JobApplication::create([
             'job_posting_id' => $id,
             'user_id' => $user->id,
@@ -207,8 +218,12 @@ class JobPostingController extends Controller
     public function rejectApplication($id)
     {
         $application = JobApplication::findOrFail($id);
+        $oldStatus = $application->status;
         $application->status = 'rejected';
         $application->save();
+
+        // Notify the applicant
+        $application->user->notify(new \App\Notifications\JobApplicationStatusUpdated($application, $oldStatus, 'rejected'));
 
         return redirect()->back()->with('success', 'Application rejected successfully.');
     }
@@ -219,13 +234,137 @@ class JobPostingController extends Controller
     public function shortlistApplication($id)
     {
         $application = JobApplication::findOrFail($id);
+        $oldStatus = $application->status;
         $application->status = 'shortlisted';
         $application->save();
+
+        // Notify the applicant
+        $application->user->notify(new \App\Notifications\JobApplicationStatusUpdated($application, $oldStatus, 'shortlisted'));
 
         // Award gamification points for shortlisting
         $gamificationController = new \App\Http\Controllers\GamificationController();
         $gamificationController->awardShortlistPoints($application->user_id);
 
         return redirect()->back()->with('success', 'Application shortlisted successfully. Applicant earned 100 points!');
+    }
+
+    /**
+     * Show Gate Screening Game.
+     */
+    public function showGateGame()
+    {
+        $jobId = session('pending_application_job_id');
+        if (!$jobId) {
+            return redirect()->route('applicant.jobs')->with('error', 'Invalid access to assessment.');
+        }
+        return view('applicant.games.gate');
+    }
+
+    /**
+     * Show Bag Inspection Game.
+     */
+    public function showBagGame()
+    {
+        $jobId = session('pending_application_job_id');
+        if (!$jobId) {
+            return redirect()->route('applicant.jobs')->with('error', 'Invalid access to assessment.');
+        }
+        return view('applicant.games.bag');
+    }
+
+    /**
+     * Show Memory Test Game.
+     */
+    public function showMemoryGame()
+    {
+        $jobId = session('pending_application_job_id');
+        if (!$jobId) {
+            return redirect()->route('applicant.jobs')->with('error', 'Invalid access to assessment.');
+        }
+        return view('applicant.games.memory');
+    }
+
+    /**
+     * Submit Game Scores and Finalize Application.
+     */
+    public function submitGameScores(Request $request)
+    {
+        $request->validate([
+            'gate_score' => 'required|integer|min:0|max:10',
+            'gate_total' => 'required|integer',
+            'gate_pct' => 'required|numeric|min:0|max:100',
+            'gate_time' => 'required|string',
+            'bag_score' => 'required|integer|min:0|max:7',
+            'bag_total' => 'required|integer',
+            'bag_pct' => 'required|numeric|min:0|max:100',
+            'bag_time' => 'required|string',
+            'memory_score' => 'required|integer|min:0|max:5',
+            'memory_total' => 'required|integer',
+            'memory_pct' => 'required|numeric|min:0|max:100',
+            'memory_time' => 'required|string',
+        ]);
+
+        $jobId = session('pending_application_job_id');
+        $user = Auth::user();
+
+        if (!$jobId) {
+            return response()->json(['success' => false, 'message' => 'Invalid session.']);
+        }
+
+        // Check if already applied
+        $existing = JobApplication::where('job_posting_id', $jobId)->where('user_id', $user->id)->first();
+        if ($existing) {
+            return response()->json(['success' => false, 'message' => 'Already applied.']);
+        }
+
+        // Create JobApplication
+        $application = JobApplication::create([
+            'job_posting_id' => $jobId,
+            'user_id' => $user->id,
+            'applied_at' => now(),
+        ]);
+
+        // Save Game Scores
+        \App\Models\ApplicantGameScore::create([
+            'job_application_id' => $application->id,
+            'user_id' => $user->id,
+            'game_type' => 'gate_screening',
+            'score' => $request->gate_score,
+            'total' => $request->gate_total,
+            'percentage' => $request->gate_pct,
+            'time_taken' => $request->gate_time,
+        ]);
+
+        \App\Models\ApplicantGameScore::create([
+            'job_application_id' => $application->id,
+            'user_id' => $user->id,
+            'game_type' => 'bag_inspection',
+            'score' => $request->bag_score,
+            'total' => $request->bag_total,
+            'percentage' => $request->bag_pct,
+            'time_taken' => $request->bag_time,
+        ]);
+
+        \App\Models\ApplicantGameScore::create([
+            'job_application_id' => $application->id,
+            'user_id' => $user->id,
+            'game_type' => 'memory_test',
+            'score' => $request->memory_score,
+            'total' => $request->memory_total,
+            'percentage' => $request->memory_pct,
+            'time_taken' => $request->memory_time,
+        ]);
+
+        // Clear session
+        session()->forget('pending_application_job_id');
+
+        // Award points
+        $gamificationController = new \App\Http\Controllers\GamificationController();
+        $gamificationController->awardApplicationPoints($user->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Assessment completed! Application submitted successfully. You earned 10 points!'
+        ]);
     }
 }

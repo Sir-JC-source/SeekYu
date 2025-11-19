@@ -29,7 +29,8 @@
                                         <td>{{ $application->user->email }}</td>
                                         <td>{{ $application->applied_at->format('M d, Y H:i') }}</td>
                                         <td>
-                                            <a href="{{ route('job_postings.applicant-credentials', $application->id) }}" class="btn btn-sm btn-primary">View Credentials</a>
+                                            <a href="{{ route('job_postings.applicant-credentials', $application->id) }}" class="btn btn-sm btn-primary me-1">View Credentials</a>
+
                                         </td>
                                     </tr>
                                 @endforeach

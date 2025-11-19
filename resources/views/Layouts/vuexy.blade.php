@@ -170,10 +170,10 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Remove the notification from the dropdown
+                    // Remove the "New" badge from the notification
                     const notificationElement = document.querySelector(`[data-notification-id="${notificationId}"]`);
                     if (notificationElement) {
-                        notificationElement.closest('.dropdown-notifications-item').remove();
+                        notificationElement.remove();
                     }
                     // Update the badge count
                     updateNotificationBadge();
@@ -193,16 +193,9 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Clear all notifications from the dropdown
-                    const notificationList = document.querySelector('.list-group-flush');
-                    notificationList.innerHTML = `
-                        <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                            <div class="text-center py-3">
-                                <i class="ti ti-bell-off mb-2" style="font-size: 2rem; color: #ccc;"></i>
-                                <p class="mb-0 text-muted">No new notifications</p>
-                            </div>
-                        </li>
-                    `;
+                    // Remove all "New" badges from notifications
+                    const newBadges = document.querySelectorAll('.dropdown-notifications-read');
+                    newBadges.forEach(badge => badge.remove());
                     // Update the badge count
                     updateNotificationBadge();
                 }
@@ -225,6 +218,22 @@
                 }
             })
             .catch(error => console.error('Error:', error));
+        }
+
+        function handleNotificationClick(notificationId, type) {
+            // Mark as read
+            markAsRead(notificationId);
+
+            // Navigate based on type
+            if (type === 'leave_request') {
+                window.location.href = '/leaves/list';
+            } else if (type === 'job_application' || type === 'job_application_status_update') {
+                window.location.href = '/applicant/applications';
+            } else if (type === 'incident_report') {
+                window.location.href = '/incident-reports/logs';
+            } else {
+                window.location.href = '/dashboard';
+            }
         }
     </script>
 
