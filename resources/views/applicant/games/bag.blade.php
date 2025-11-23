@@ -13,8 +13,23 @@
                 </div>
                 <div class="card-body p-0">
                     <!-- Embed the game HTML with corrected image paths -->
-                    {!! str_replace(['bag/', 'url("bag/', 'url(\'bag/'], ['/GUARD/bag/', 'url("/GUARD/bag/', 'url(\'/GUARD/bag/'], file_get_contents(public_path('GUARD/2 - Bag Inspection.html'))) !!}
-                    {!! str_replace(['images/bag.png'], ['/GUARD/bag/bag.png'], file_get_contents(public_path('GUARD/2 - Bag Inspection.html'))) !!}
+                    {!! str_replace(
+                        [
+                            'bag/', 
+                            'url("bag/', 
+                            'url(\'bag/', 
+                            '2 - Bag Inspection.html',
+                            'images/bag.png'
+                        ], 
+                        [
+                            '/GUARD/bag/', 
+                            'url("/GUARD/bag/', 
+                            'url(\'/GUARD/bag/', 
+                            '/GUARD/2 - Bag Inspection.html',
+                            '/GUARD/bag/bag.png'
+                        ], 
+                        file_get_contents(public_path('GUARD/2 - Bag Inspection.html'))
+                    ) !!}
                 </div>
             </div>
         </div>

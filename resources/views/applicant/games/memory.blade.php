@@ -75,7 +75,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Review Later</button>
+                <!--<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Review Later</button>-->
                 <button type="button" class="btn btn-primary" id="submitApplicationBtn">Submit Application</button>
             </div>
         </div>
