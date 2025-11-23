@@ -134,162 +134,95 @@
         </div>
     </div>
 </div>
-@endsection
 
+@include('UserManagement._user_view_modal')
+@endsection
 
 @push('page-scripts')
 <script src="{{ asset('assets/vendor/libs/sweetalert2/sweetalert2.js') }}"></script>
-
 <script>
 $(function () {
+    // Employees Table DataTable initialization
+    $('#employees-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route("user-management.json") }}',
+            type: 'GET',
+            data: function(d) {
+                d._token = '{{ csrf_token() }}';
+            }
+        },
+        columns: [
+            { data: 'employee_no', className: 'text-center' },
+            { data: 'login_id' },
+            { data: 'fullname' },
+            { data: 'user_type' },
+            { data: 'status', className: 'text-center' },
+            { data: 'created_at' },
+            { data: 'last_login' },
+            { data: 'action', className: 'text-center', orderable: false, searchable: false }
+        ],
+        order: [[1, 'asc']],
+        lengthChange: true,
+        pageLength: 10
+    });
 
-    // Employees Table
-    var employees_table = $('#employees-table');
-    if (employees_table.length) {
-        employees_table.DataTable({
-            ajax: {
-                url: '{{ route("user-management.json") }}',
-                type: 'GET',
-                error: function(xhr, error, code) {
-                    console.log('AJAX Error:', xhr, error, code);
-                    alert('Error loading data: ' + xhr.responseText);
-                }
-            },
-            columns: [
-                { data: 'employee_no' },
-                { data: 'login_id' },
-                { data: 'fullname' },
-                { data: 'user_type' },
-                { data: 'status' },
-                { data: 'created_at' },
-                { data: 'last_login' },
-                { data: 'action', orderable: false, searchable: false, render: function(data) { return data; } }
-            ],
-            dom: 't<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-            responsive: true,
-            processing: true,
-            serverSide: true,
-            pageLength: 10
-        });
-    }
+    // Non-Employees Table DataTable initialization
+    $('#non-employees-table').DataTable({
+        processing: true,
+        serverSide: true,
+        ajax: {
+            url: '{{ route("user-management.json.non-employees") }}',
+            type: 'GET',
+            data: function(d) {
+                d._token = '{{ csrf_token() }}';
+            }
+        },
+        columns: [
+            { data: 'login_id' },
+            { data: 'fullname' },
+            { data: 'user_type' },
+            { data: 'created_at' },
+            { data: 'last_login' },
+            { data: 'status', className: 'text-center' },
+            { data: 'email_verified_at' },
+            { data: 'action', className: 'text-center', orderable: false, searchable: false }
+        ],
+        order: [[0, 'asc']],
+        lengthChange: true,
+        pageLength: 10
+    });
 
-    // Non-Employees Table
-    var non_employees_table = $('#non-employees-table');
-    if (non_employees_table.length) {
-        non_employees_table.DataTable({
-            ajax: {
-                url: '{{ route("user-management.json.non-employees") }}',
-                type: 'GET',
-                error: function(xhr, error, code) {
-                    console.log('AJAX Error:', xhr, error, code);
-                    alert('Error loading data: ' + xhr.responseText);
-                }
+    // Handle View User button click
+    $('body').on('click', '.view-user-btn', function() {
+        let userId = $(this).data('user-id');
+
+        // Show loading state in modal
+        $('#userViewModal .modal-body').html('<p>Loading...</p>');
+        $('#userViewModal').modal('show');
+
+        $.ajax({
+            url: '/user-management/user-info/' + userId,
+            method: 'GET',
+            success: function(data) {
+                let userInfoHtml = '<ul class="list-group">';
+                userInfoHtml += '<li class="list-group-item"><strong>Login ID:</strong> ' + data.login_id + '</li>';
+                userInfoHtml += '<li class="list-group-item"><strong>Full Name:</strong> ' + data.fullname + '</li>';
+                userInfoHtml += '<li class="list-group-item"><strong>User Type:</strong> ' + data.role + '</li>';
+                userInfoHtml += '<li class="list-group-item"><strong>Status:</strong> ' + data.status + '</li>';
+                userInfoHtml += '<li class="list-group-item"><strong>Email:</strong> ' + data.email + '</li>';
+                userInfoHtml += '<li class="list-group-item"><strong>Created At:</strong> ' + data.created_at + '</li>';
+                userInfoHtml += '<li class="list-group-item"><strong>Last Login:</strong> ' + data.last_login + '</li>';
+                userInfoHtml += '</ul>';
+
+                $('#userViewModal .modal-body').html(userInfoHtml);
             },
-            columns: [
-                { data: 'login_id' },
-                { data: 'fullname' },
-                { data: 'user_type' },
-                { data: 'created_at' },
-                { data: 'last_login' },
-                { data: 'status' },
-                { data: 'email_verified_at' },
-                { data: 'action', orderable: false, searchable: false, render: function(data) { return data; } }
-            ],
-            dom: 't<"row"<"col-sm-12 col-md-6"i><"col-sm-12 col-md-6"p>>',
-            responsive: true,
-            processing: true,
-            serverSide: true,
-            pageLength: 10
+            error: function() {
+                $('#userViewModal .modal-body').html('<p class="text-danger">Failed to load user information.</p>');
+            }
         });
-    }
+    });
 });
-
-// Reusable confirmation alert
-const swalConfirm = (options) => {
-    return Swal.fire({
-        title: options.title || 'Are you sure?',
-        text: options.text || '',
-        icon: options.icon || 'warning',
-        showCancelButton: false,
-        confirmButtonText: options.confirmButtonText || 'Yes',
-        cancelButtonText: options.cancelButtonText || 'No',
-        confirmButtonColor: '#3085d6',
-        cancelButtonColor: '#d33',
-        buttonsStyling: true,
-        allowOutsideClick: false
-    });
-};
-
-// Delete user
-function deleteUser(deleteUrl) {
-    swalConfirm({
-        title: 'Are you sure?',
-        text: "You won't be able to revert this!"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: deleteUrl,
-                type: 'DELETE',
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: function() {
-                    Swal.fire('Deleted!', 'User has been deleted.', 'success');
-                    $('#employees-table').DataTable().ajax.reload();
-                    $('#non-employees-table').DataTable().ajax.reload();
-                },
-                error: function() {
-                    Swal.fire('Error!', 'Failed to delete user.', 'error');
-                }
-            });
-        }
-    });
-}
-
-// Reset password
-function resetPassword(userId) {
-    swalConfirm({
-        title: 'Are you sure?',
-        text: "This will generate a new password and send it to the user's email."
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: '{{ route("user-management.reset-password", ":id") }}'.replace(':id', userId),
-                type: 'POST',
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: function(response) {
-                    Swal.fire('Success!', response.message, 'success');
-                    $('#employees-table').DataTable().ajax.reload();
-                    $('#non-employees-table').DataTable().ajax.reload();
-                },
-                error: function(xhr) {
-                    Swal.fire('Error!', xhr.responseJSON?.message || 'Failed to reset password.', 'error');
-                }
-            });
-        }
-    });
-}
-
-// Deactivate user
-function deactivateUser(userId) {
-    swalConfirm({
-        title: 'Are you sure?',
-        text: "This will deactivate the user account."
-    }).then((result) => {
-        if (result.isConfirmed) {
-            $.ajax({
-                url: '{{ route("user-management.deactivate", ":id") }}'.replace(':id', userId),
-                type: 'POST',
-                headers: { 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content') },
-                success: function(response) {
-                    Swal.fire('Success!', response.message, 'success');
-                    $('#employees-table').DataTable().ajax.reload();
-                    $('#non-employees-table').DataTable().ajax.reload();
-                },
-                error: function(xhr) {
-                    Swal.fire('Error!', xhr.responseJSON?.message || 'Failed to deactivate user.', 'error');
-                }
-            });
-        }
-    });
-}
 </script>
 @endpush

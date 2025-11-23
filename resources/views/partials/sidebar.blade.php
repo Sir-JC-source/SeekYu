@@ -243,7 +243,7 @@
                 </a>
                 <ul class="menu-sub">
                     {{-- Submit IR visible to super-admin, admin, hr-officer, head-guard, security-guard --}}
-                    @if(in_array($userRole, ['super-admin','admin','hr-officer','head-guard','security-guard']))
+                    @if(in_array($userRole, ['head-guard','security-guard']))
                         <li class="menu-item {{ request()->routeIs('incident-reports.index') ? 'active' : '' }}">
                             <a href="{{ route('incident-reports.index') }}" class="menu-link"><div>Submit IR</div></a>
                         </li>
@@ -385,15 +385,89 @@
             </li>
         @endif
 
-        {{-- Logout Button --}}
-        <div class="menu-bottom-logout mt-auto text-center p-3" style="position: absolute; bottom: 10px; width: 100%;">
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button type="submit" class="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px;">
-                    <i class="ti ti-logout"></i>
-                    <span>Log Out</span>
-                </button>
-            </form>
-        </div>
-    </ul>
+    {{-- Logout Button --}}
+    <div class="menu-bottom-logout mt-auto text-center p-3" style="position: absolute; bottom: 10px; width: 100%;">
+        <form action="{{ route('logout') }}" method="POST">
+            @csrf
+            <button type="submit" class="btn btn-danger w-100 d-flex align-items-center justify-content-center gap-2" style="border-radius: 8px;">
+                <i class="ti ti-logout"></i>
+                <span>Log Out</span>
+            </button>
+        </form>
+    </div>
+
+    {{-- Client Menu --}}
+    @if($userRole === 'client')
+        {{-- Dashboard --}}
+        <li class="menu-item {{ request()->routeIs('dashboard.index') ? 'active' : '' }}">
+            <a href="{{ route('dashboard.index') }}" class="menu-link">
+                <i class="ti ti-home menu-icon"></i>
+                <div>Dashboard</div>
+            </a>
+        </li>
+
+        {{-- Notifications --}}
+        <li class="menu-item {{ request()->is('notifications*') ? 'active open' : '' }}">
+            <a href="{{ route('notifications.unread-count') }}" class="menu-link">
+                <i class="ti ti-bell menu-icon"></i>
+                <div>Notifications</div>
+            </a>
+        </li>
+
+        {{-- Profile --}}
+        <li class="menu-item {{ request()->routeIs('profile.show') ? 'active' : '' }}">
+            <a href="{{ route('profile.show') }}" class="menu-link">
+                <i class="ti ti-user menu-icon"></i>
+                <div>Profile</div>
+            </a>
+        </li>
+
+        {{-- Security Guard Tracking --}}
+        <li class="menu-item {{ request()->is('guard-scheduling*') ? 'active open' : '' }}">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
+                <i class="ti ti-shield-check menu-icon"></i>
+                <div>Security Guard Tracking</div>
+            </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('guard-scheduling.view-all') ? 'active' : '' }}">
+                    <a href="{{ route('guard-scheduling.view-all') }}" class="menu-link">
+                        <div>Shift Schedule View</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('guard-scheduling.list') ? 'active' : '' }}">
+                    <a href="{{ route('guard-scheduling.list') }}" class="menu-link">
+                        <div>Security Guard Management</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('my-kpi.index') ? 'active' : '' }}">
+                    <a href="{{ route('my-kpi.index') }}" class="menu-link">
+                        <div>Key Performance Indicator Evaluation</div>
+                    </a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('attendance.index') ? 'active' : '' }}">
+                    <a href="{{ route('attendance.index') }}" class="menu-link">
+                        <div>Attendance Record</div>
+                    </a>
+                </li>
+                {{-- Removed Attendance Monitoring as route does not exist --}}
+            </ul>
+        </li>
+
+        {{-- Incident Report --}}
+        <li class="menu-item {{ request()->is('incident-reports*') ? 'active open' : '' }}">
+            <a href="{{ route('incident-reports.index') }}" class="menu-link">
+                <i class="ti ti-alert-triangle menu-icon"></i>
+                <div>Incident Report</div>
+            </a>
+        </li>
+
+        {{-- Leave Request --}}
+        <li class="menu-item {{ request()->routeIs('leaves.list') ? 'active' : '' }}">
+            <a href="{{ route('leaves.list') }}" class="menu-link">
+                <i class="ti ti-calendar-event menu-icon"></i>
+                <div>Leave Request</div>
+            </a>
+        </li>
+    @endif
+</ul>
 </aside>

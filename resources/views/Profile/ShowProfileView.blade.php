@@ -176,17 +176,22 @@
                         <h6 class="card-title mb-0">Quick Actions</h6>
                     </div>
                     <div class="card-body">
-                        <div class="d-grid gap-2">
-                            <a href="{{ route('dashboard.index') }}" class="btn btn-outline-primary">
-                                <i class="ti ti-dashboard me-2"></i>Go to Dashboard
-                            </a>
-                            <a href="{{ route('leaves.request') }}" class="btn btn-outline-success">
-                                <i class="ti ti-calendar-plus me-2"></i>Request Leave
-                            </a>
-                            <a href="{{ route('incident-reports.submit') }}" class="btn btn-outline-warning">
-                                <i class="ti ti-alert-triangle me-2"></i>Report Incident
-                            </a>
-                        </div>
+                            @php
+                                $hiddenRoles = ['super-admin', 'admin', 'hr-officer', 'security-guard', 'head-guard'];
+                            @endphp
+                            <div class="d-grid gap-2">
+                                <a href="{{ route('dashboard.index') }}" class="btn btn-outline-primary">
+                                    <i class="ti ti-dashboard me-2"></i>Go to Dashboard
+                                </a>
+                                @if(!in_array(auth()->user()->role, $hiddenRoles))
+                                <a href="{{ route('leaves.request') }}" class="btn btn-outline-success">
+                                    <i class="ti ti-calendar-plus me-2"></i>Request Leave
+                                </a>
+                                <a href="{{ route('incident-reports.submit') }}" class="btn btn-outline-warning">
+                                    <i class="ti ti-alert-triangle me-2"></i>Report Incident
+                                </a>
+                                @endif
+                            </div>
                     </div>
                 </div>
             </div>

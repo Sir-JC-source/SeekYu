@@ -177,15 +177,55 @@ body {
                     <input type="checkbox" class="form-check-input" id="remember" name="remember">
                     <label class="form-check-label" for="remember">Remember Me</label>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Sign In</button>
-            </form>
+            <button type="submit" class="btn btn-primary w-100">Sign In</button>
+        </form>
 
-            <p class="mt-4">
-                <span>Seeking for a job?</span>
-                <a href="{{ route('login.register') }}" class="fw-semibold">Click here to apply!</a>
-            </p>
+        <div class="mt-3">
+            <a href="{{ url('/') }}" class="btn btn-secondary w-100">Return to Homepage</a>
         </div>
+
+        <p class="mt-4">
+            <span>Seeking for a job?</span>
+            <a href="{{ route('login.register') }}" class="fw-semibold">Click here to apply!</a>
+        </p>
+        <p class="mt-2">
+            Also register as External Client, <a href="{{ route('login.client-register') }}" class="fw-semibold">click here.</a>
+        </p>
+
+        <p class="mt-3">
+            <a href="#" data-bs-toggle="modal" data-bs-target="#privacyPolicyModal" class="text-decoration-underline">Click here to read Privacy and Policy section.</a>
+        </p>
     </div>
+</div>
+
+<!-- Privacy and Policy Modal -->
+<div class="modal fade" id="privacyPolicyModal" tabindex="-1" aria-labelledby="privacyPolicyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="privacyPolicyModalLabel">Privacy and Policy</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>
+          We value your privacy and are committed to protecting your personal information. This Privacy and Policy section outlines how we collect, use, and safeguard your data in compliance with relevant regulations.
+        </p>
+        <p>
+          By using our services, you agree to the collection and use of information in accordance with this policy. We only collect information necessary to provide and improve our services.
+        </p>
+        <p>
+          Your personal data will not be shared with third parties without your consent except as required by law. We implement strict security measures to protect your information from unauthorized access.
+        </p>
+        <p>
+          For more detailed information or any concerns, please contact our support team.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
 </div>
 
 @endsection

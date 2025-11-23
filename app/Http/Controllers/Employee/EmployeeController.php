@@ -15,7 +15,15 @@ class EmployeeController extends Controller
     // Employee List view (Active Employees)
     public function index()
     {
-        $employees = Employee::all(); // Only non-deleted employees
+        // Fix duplicate employee accounts by selecting latest per employee_number
+        $employees = Employee::select('employees.*')
+            ->whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')
+                    ->from('employees')
+                    ->groupBy('employee_number');
+            })
+            ->get();
+
         return view('Employee.EmployeeListView', compact('employees'));
     }
 

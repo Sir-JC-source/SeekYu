@@ -1,6 +1,6 @@
 @extends('Layouts.auth')
 
-@section('title', 'Register - SeekYu HRIS')
+@section('title', 'Client Registration - SeekYu HRIS')
 
 @section('content')
 
@@ -128,8 +128,8 @@ body {
     <div class="register-form-panel">
         <div class="register-card mx-auto">
             <div class="text-center mb-4">
-                <h4>Security Personnel Registration</h4>
-                <p class="mb-0">Apply as Security Guard or Head Guard</p>
+                <h4>Client Registration</h4>
+                <p class="mb-0">Register as an External Client</p>
             </div>
 
             {{-- Success / Error Messages --}}
@@ -147,37 +147,22 @@ body {
                 </div>
             @endif
 
-            <form method="POST" action="{{ route('login.store') }}">
+            <form method="POST" action="{{ route('login.client-store') }}">
                 @csrf
 
-                {{-- Name Fields --}}
+                {{-- Company Name --}}
                 <div class="mb-3">
-                    <label class="form-label">Full Name</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        <input type="text"
-                               class="form-control @error('last_name') is-invalid @enderror"
-                               id="last_name"
-                               name="last_name"
-                               placeholder="Last Name"
-                               value="{{ old('last_name') }}"
-                               required>
-                        <input type="text"
-                               class="form-control @error('middle_name') is-invalid @enderror"
-                               id="middle_name"
-                               name="middle_name"
-                               placeholder="Middle Name (Optional)"
-                               value="{{ old('middle_name') }}">
-                        <input type="text"
-                               class="form-control @error('first_name') is-invalid @enderror"
-                               id="first_name"
-                               name="first_name"
-                               placeholder="First Name"
-                               value="{{ old('first_name') }}"
-                               required>
-                    </div>
-                    @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    @error('middle_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                    <label for="company_name" class="form-label">Company Name</label>
+                    <input type="text"
+                           class="form-control @error('company_name') is-invalid @enderror"
+                           id="company_name"
+                           name="company_name"
+                           placeholder="Enter Company Name"
+                           value="{{ old('company_name') }}"
+                           required>
+                    @error('company_name')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
                 </div>
 
                 {{-- Email --}}
@@ -224,26 +209,26 @@ body {
                     @enderror
                 </div>
 
-            {{-- Contact Number --}}
-            <div class="mb-3">
-                <label for="contact_number" class="form-label">Contact Number</label>
-                <div class="input-group">
-                    <span class="input-group-text">+63</span>
-                    <input type="text"
-                           class="form-control @error('contact_number') is-invalid @enderror"
-                           id="contact_number"
-                           name="contact_number"
-                           placeholder="9123456789"
-                           value="{{ old('contact_number') }}"
-                           pattern="[0-9]{10}"
-                           maxlength="10"
-                           required>
+                {{-- Contact Number --}}
+                <div class="mb-3">
+                    <label for="contact_number" class="form-label">Contact Number</label>
+                    <div class="input-group">
+                        <span class="input-group-text">+63</span>
+                        <input type="text"
+                               class="form-control @error('contact_number') is-invalid @enderror"
+                               id="contact_number"
+                               name="contact_number"
+                               placeholder="9123456789"
+                               value="{{ old('contact_number') }}"
+                               pattern="[0-9]{10}"
+                               maxlength="10"
+                               required>
+                    </div>
+                    @error('contact_number')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                    <small class="text-muted">Enter 10 digits after +63</small>
                 </div>
-                @error('contact_number')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-                <small class="text-muted">Enter 10 digits after +63</small>
-            </div>
 
                 {{-- Location Dropdown --}}
                 <div class="mb-3">
@@ -287,8 +272,6 @@ body {
     const provinceSelect = document.getElementById('province');
     const citySelect = document.getElementById('city');
     const barangaySelect = document.getElementById('barangay');
-
-    // No longer needed - login ID is generated server-side
 
     // Load provinces on page load
     async function loadProvinces() {

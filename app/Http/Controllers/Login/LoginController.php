@@ -20,18 +20,88 @@ class LoginController extends Controller
         return view('Login.register');
     }
 
+    public function clientRegister()
+    {
+        return view('Login.client-register');
+    }
+
+    public function clientStore(Request $request)
+    {
+        $request->validate([
+            'company_name'  => 'required|string|max:255',
+            'email'          => [
+                'required',
+                'email',
+                'unique:registered_users,email',
+            ],
+            'password'              => 'required|string|min:8|confirmed',
+            'contact_number'        => 'required|string|max:20',
+            'province'              => 'required|string|max:255',
+            'city'                  => 'required|string|max:255',
+            'barangay'              => 'required|string|max:255',
+        ]);
+
+        // Generate a unique login_id for the client (e.g., slug + timestamp or 4-digit random unique number)
+        $loginIdBase = preg_replace('/\s+/', '', strtolower($request->company_name));
+        $loginId = $loginIdBase . substr(time(), -4);
+
+        // Ensure login_id uniqueness, fallback to random 4-digit number if duplicate
+        if (RegisteredUsers::where('login_id', $loginId)->exists()) {
+            do {
+                $loginId = str_pad(mt_rand(1000, 9999), 4, '0', STR_PAD_LEFT);
+            } while (RegisteredUsers::where('login_id', $loginId)->exists());
+        }
+
+        $user = new RegisteredUsers();
+        $user->fullname       = $request->company_name; // Company name as fullname or create a separate field later if needed
+        $user->email          = $request->email;
+        $user->login_id       = $loginId;
+        $user->password       = Hash::make($request->password);
+        $user->contact_no     = $request->contact_number;
+        $user->province       = $request->province;
+        $user->city           = $request->city;
+        $user->barangay       = $request->barangay;
+        $user->role           = 'client';
+        $user->account_status = 'pending'; // Pending approval or verification flow as needed
+        $user->first_login    = true;
+        $user->save();
+
+        $user->assignRole('client');
+
+        // Generate verification URL
+        $verificationUrl = route('email.verify', ['id' => $user->id, 'token' => sha1($user->email . $user->created_at)]);
+
+        // Send email with credentials and verification link
+        \Mail::to($user->email)->send(new \App\Mail\LoginCredentialsMail($user, $verificationUrl));
+
+        return redirect()->route('login.client-register')
+            ->with('success', 'Registration successful! Please check your email for login credentials and verification link.');
+    }
+
     public function store(Request $request)
     {
         $request->validate([
             'last_name'      => 'required|string|max:255',
             'first_name'     => 'required|string|max:255',
             'middle_name'    => 'nullable|string|max:255',
-            'email'          => 'required|email|unique:registered_users,email',
-            'password'       => 'required|string|min:8',
-            'contact_number' => 'required|string|max:20',
-            'province'       => 'required|string|max:255',
-            'city'           => 'required|string|max:255',
-            'barangay'       => 'required|string|max:255',
+            'email'          => [
+                'required',
+                'email',
+                'unique:registered_users,email',
+                function ($attribute, $value, $fail) {
+                    $allowedDomains = ['gmail.com', 'yahoo.com'];
+                    $emailDomain = substr(strrchr($value, "@"), 1);
+                    if (!in_array($emailDomain, $allowedDomains)) {
+                        $fail('The ' . $attribute . ' must be a valid email address from: ' . implode(', ', $allowedDomains) . '.');
+                    }
+                }
+            ],
+            'password'                 => 'required|string|min:8',
+            'password_confirmation'    => 'required|same:password',
+            'contact_number'           => 'required|string|max:20',
+            'province'                 => 'required|string|max:255',
+            'city'                     => 'required|string|max:255',
+            'barangay'                 => 'required|string|max:255',
         ]);
 
         $fullname = trim($request->last_name . ', ' . $request->first_name . ($request->middle_name ? ' ' . $request->middle_name : ''));

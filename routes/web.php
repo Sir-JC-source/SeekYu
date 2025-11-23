@@ -32,6 +32,10 @@ Route::middleware('guest')->prefix('login')->group(function () {
     Route::get('/register', [LoginController::class, 'register'])->name('login.register');
     Route::post('/store', [LoginController::class, 'store'])->name('login.store');
     Route::post('/authenticate', [LoginController::class, 'authenticate'])->name('login.authenticate');
+
+    // Client Registration Routes
+    Route::get('/client-register', [LoginController::class, 'clientRegister'])->name('login.client-register');
+    Route::post('/client-store', [LoginController::class, 'clientStore'])->name('login.client-store');
 });
 
 // Email verification route (accessible to guests)
@@ -72,6 +76,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/{id}/edit', [UserManagementController::class, 'edit'])->name('user-management.edit');
         Route::put('/{id}/update', [UserManagementController::class, 'update'])->name('user-management.update');
         Route::delete('/{id}', [UserManagementController::class, 'destroy'])->name('user-management.destroy');
+
+        // Add route for user info JSON
+        Route::get('/user-info/{id}', [UserManagementController::class, 'userInfo'])->name('user-management.user-info');
     });
 
     // ----------------------
