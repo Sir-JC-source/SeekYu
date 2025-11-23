@@ -72,9 +72,7 @@
                     <li class="menu-item {{ request()->routeIs('guard-scheduling.deploy') ? 'active' : '' }}">
                         <a href="{{ route('guard-scheduling.deploy') }}" class="menu-link"><div>Deploy Guard</div></a>
                     </li>
-                    <li class="menu-item {{ request()->routeIs('guard-scheduling.list') ? 'active' : '' }}">
-                        <a href="{{ route('guard-scheduling.list') }}" class="menu-link"><div>Guard List</div></a>
-                    </li>
+                   
                    
             </li>
             </ul>
