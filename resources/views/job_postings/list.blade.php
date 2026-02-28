@@ -203,8 +203,18 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 $(document).ready(function() {
-    // Initialize DataTable
+    // Initialize DataTable with explicit column configuration
     var table = $('#job-postings-table').DataTable({
+        "columns": [
+            { "orderable": true },
+            { "orderable": true },
+            { "orderable": true },
+            { "orderable": true },
+            { "orderable": true },
+            { "orderable": true },
+            { "orderable": true },
+            { "orderable": false }
+        ],
         "order": [[5, "desc"], [6, "desc"]]
     });
 

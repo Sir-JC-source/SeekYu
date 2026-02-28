@@ -17,6 +17,7 @@ use App\Http\Controllers\Shift\ShiftController;
 use App\Http\Controllers\Attendance\AttendanceController;
 use App\Http\Controllers\GamificationController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\File201Controller;
 
 
 // Root to home page
@@ -235,6 +236,22 @@ Route::middleware('auth')->group(function () {
         Route::post('/mark-as-read/{id}', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
         Route::post('/mark-all-as-read', [NotificationController::class, 'markAllAsRead'])->name('notifications.mark-all-as-read');
         Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('notifications.unread-count');
+    });
+
+    // 201 File Routes
+    Route::middleware(['role:hr-officer'])->prefix('201file')->name('201file.')->group(function () {
+        Route::get('/', [File201Controller::class, 'index'])->name('index');
+        Route::get('/applicants', [File201Controller::class, 'applicants'])->name('applicants');
+        Route::get('/employees', [File201Controller::class, 'employees'])->name('employees');
+        Route::get('/applicant/{id}', [File201Controller::class, 'showApplicant'])->name('show-applicant');
+        Route::get('/employee/{id}', [File201Controller::class, 'showEmployee'])->name('show-employee');
+        Route::put('/employee/{id}/update', [File201Controller::class, 'updateEmployee'])->name('update-employee');
+    });
+
+    // My 201 File
+    Route::prefix('my-201file')->name('my201file.')->group(function () {
+        Route::get('/', [File201Controller::class, 'showMyFile'])->name('show');
+        Route::put('/update', [File201Controller::class, 'updateMyFile'])->name('update');
     });
 
 });

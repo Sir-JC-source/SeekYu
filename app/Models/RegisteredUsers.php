@@ -26,7 +26,7 @@ class RegisteredUsers extends Authenticatable
         'profile_picture',
         'status',
         'first_login',
-        'contact_no', // ✅ added
+        'contact_no',
         'last_login',
         'leave_credits',
         'points',
@@ -35,6 +35,8 @@ class RegisteredUsers extends Authenticatable
         'province',
         'city',
         'barangay',
+        'birthdate',
+        'age',
     ];
 
     protected $hidden = [

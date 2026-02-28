@@ -112,4 +112,3 @@ function showGameScores(applicationId) {
 }
 </script>
 @endpush
-@endsection

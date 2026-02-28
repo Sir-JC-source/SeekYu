@@ -26,6 +26,7 @@ body {
     justify-content: center;
     align-items: center;
     padding: 3rem 2rem;
+    overflow-y: auto;
 }
 
 .register-card {
@@ -107,6 +108,38 @@ body {
     max-width: 420px;
 }
 
+/* Form Section Grouping */
+.form-section {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+}
+
+.form-section-title {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4f46e5;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.form-section-title::before {
+    content: '';
+    display: inline-block;
+    width: 4px;
+    height: 16px;
+    background-color: #4f46e5;
+    border-radius: 2px;
+}
+
 /* Responsive design */
 @media (max-width: 992px) {
     .register-wrapper {
@@ -128,8 +161,8 @@ body {
     <div class="register-form-panel">
         <div class="register-card mx-auto">
             <div class="text-center mb-4">
-                <h4>Security Personnel Registration</h4>
-                <p class="mb-0">Apply as Security Guard or Head Guard</p>
+                <h4>Security Personnel/HR Officer Registration</h4>
+                <p class="mb-0">Apply as Security Personnel/HR Officer </p>
             </div>
 
             {{-- Success / Error Messages --}}
@@ -150,119 +183,179 @@ body {
             <form method="POST" action="{{ route('login.store') }}">
                 @csrf
 
-                {{-- Name Fields --}}
-                <div class="mb-3">
-                    <label class="form-label">Full Name</label>
-                    <div class="d-flex flex-wrap gap-2">
-                        <input type="text"
-                               class="form-control @error('last_name') is-invalid @enderror"
-                               id="last_name"
-                               name="last_name"
-                               placeholder="Last Name"
-                               value="{{ old('last_name') }}"
-                               required>
-                        <input type="text"
-                               class="form-control @error('middle_name') is-invalid @enderror"
-                               id="middle_name"
-                               name="middle_name"
-                               placeholder="Middle Name (Optional)"
-                               value="{{ old('middle_name') }}">
-                        <input type="text"
-                               class="form-control @error('first_name') is-invalid @enderror"
-                               id="first_name"
-                               name="first_name"
-                               placeholder="First Name"
-                               value="{{ old('first_name') }}"
-                               required>
+                {{-- Section 1: Personal Information --}}
+                <div class="form-section">
+                    <div class="form-section-title">Personal Information</div>
+                    
+                    {{-- Full Name --}}
+                    <div class="mb-3">
+                        <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <input type="text"
+                                   class="form-control @error('last_name') is-invalid @enderror"
+                                   id="last_name"
+                                   name="last_name"
+                                   placeholder="Last Name"
+                                   value="{{ old('last_name') }}"
+                                   required>
+                            <input type="text"
+                                   class="form-control @error('middle_name') is-invalid @enderror"
+                                   id="middle_name"
+                                   name="middle_name"
+                                   placeholder="Middle Name (Optional)"
+                                   value="{{ old('middle_name') }}">
+                            <input type="text"
+                                   class="form-control @error('first_name') is-invalid @enderror"
+                                   id="first_name"
+                                   name="first_name"
+                                   placeholder="First Name"
+                                   value="{{ old('first_name') }}"
+                                   required>
+                        </div>
+                        @error('last_name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                        @error('middle_name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
+                        @error('first_name') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                     </div>
-                    @error('last_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    @error('middle_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
-                    @error('first_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+
+                    {{-- Birthdate and Age --}}
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="birthdate" class="form-label">Birthdate <span class="text-danger">*</span></label>
+                            <input type="date"
+                                   class="form-control @error('birthdate') is-invalid @enderror"
+                                   id="birthdate"
+                                   name="birthdate"
+                                   value="{{ old('birthdate') }}"
+                                   required>
+                            @error('birthdate')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="age" class="form-label">Age <span class="text-danger">*</span></label>
+                            <input type="number"
+                                   class="form-control @error('age') is-invalid @enderror"
+                                   id="age"
+                                   name="age"
+                                   value="{{ old('age') }}"
+                                   readonly
+                                   placeholder="Auto-calculated">
+                            @error('age')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
+                            @if(!$errors->has('age'))
+                                <small class="text-muted">Auto-calculated from birthdate</small>
+                            @endif
+                        </div>
+                    </div>
                 </div>
 
-                {{-- Email --}}
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email Address</label>
-                    <input type="email"
-                           class="form-control @error('email') is-invalid @enderror"
-                           id="email"
-                           name="email"
-                           placeholder="Enter your email address"
-                           value="{{ old('email') }}"
-                           required>
-                    @error('email')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                    <small class="text-muted">Your login credentials will be sent to this email</small>
+                {{-- Section 2: Contact Information --}}
+                <div class="form-section">
+                    <div class="form-section-title">Contact Information</div>
+                    
+                    {{-- Email --}}
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email Address <span class="text-danger">*</span></label>
+                        <input type="email"
+                               class="form-control @error('email') is-invalid @enderror"
+                               id="email"
+                               name="email"
+                               placeholder="Enter your email address"
+                               value="{{ old('email') }}"
+                               required>
+                        @error('email')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Your login credentials will be sent to this email</small>
+                    </div>
+
+                    {{-- Contact Number --}}
+                    <div class="mb-3">
+                        <label for="contact_number" class="form-label">Contact Number <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text">+63</span>
+                            <input type="text"
+                                   class="form-control @error('contact_number') is-invalid @enderror"
+                                   id="contact_number"
+                                   name="contact_number"
+                                   placeholder="9123456789"
+                                   value="{{ old('contact_number') }}"
+                                   pattern="[0-9]{10}"
+                                   maxlength="10"
+                                   required>
+                        </div>
+                        @error('contact_number')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                        <small class="text-muted">Enter 10 digits after +63</small>
+                    </div>
                 </div>
 
-                {{-- Password --}}
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password"
-                           class="form-control @error('password') is-invalid @enderror"
-                           id="password"
-                           name="password"
-                           placeholder="Enter your password"
-                           required>
-                    @error('password')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
+                {{-- Section 3: Account Security --}}
+                <div class="form-section">
+                    <div class="form-section-title">Account Security</div>
+                    
+                    {{-- Password --}}
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                        <input type="password"
+                               class="form-control @error('password') is-invalid @enderror"
+                               id="password"
+                               name="password"
+                               placeholder="Enter your password"
+                               required>
+                        @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    {{-- Confirm Password --}}
+                    <div class="mb-3">
+                        <label for="password_confirmation" class="form-label">Confirm Password <span class="text-danger">*</span></label>
+                        <input type="password"
+                               class="form-control @error('password_confirmation') is-invalid @enderror"
+                               id="password_confirmation"
+                               name="password_confirmation"
+                               placeholder="Confirm your password"
+                               required>
+                        @error('password_confirmation')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
-                {{-- Confirm Password --}}
-                <div class="mb-3">
-                    <label for="password_confirmation" class="form-label">Confirm Password</label>
-                    <input type="password"
-                           class="form-control @error('password_confirmation') is-invalid @enderror"
-                           id="password_confirmation"
-                           name="password_confirmation"
-                           placeholder="Confirm your password"
-                           required>
-                    @error('password_confirmation')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-            {{-- Contact Number --}}
-            <div class="mb-3">
-                <label for="contact_number" class="form-label">Contact Number</label>
-                <div class="input-group">
-                    <span class="input-group-text">+63</span>
-                    <input type="text"
-                           class="form-control @error('contact_number') is-invalid @enderror"
-                           id="contact_number"
-                           name="contact_number"
-                           placeholder="9123456789"
-                           value="{{ old('contact_number') }}"
-                           pattern="[0-9]{10}"
-                           maxlength="10"
-                           required>
-                </div>
-                @error('contact_number')
-                    <div class="invalid-feedback">{{ $message }}</div>
-                @enderror
-                <small class="text-muted">Enter 10 digits after +63</small>
-            </div>
-
-                {{-- Location Dropdown --}}
-                <div class="mb-3">
-                    <label class="form-label">Region/Province</label>
-                    <select class="form-select mb-2" id="province" name="province" required>
-                        <option value="">Select Region/Province</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">City/Municipality</label>
-                    <select class="form-select mb-2" id="city" name="city" required disabled>
-                        <option value="">Select City/Municipality</option>
-                    </select>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Barangay</label>
-                    <select class="form-select" id="barangay" name="barangay" required disabled>
-                        <option value="">Select Barangay</option>
-                    </select>
+                {{-- Section 4: Location Information --}}
+                <div class="form-section">
+                    <div class="form-section-title">Location Information</div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Region/Province <span class="text-danger">*</span></label>
+                        <select class="form-select @error('province') is-invalid @enderror" id="province" name="province" required>
+                            <option value="">Select Region/Province</option>
+                        </select>
+                        @error('province')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">City/Municipality <span class="text-danger">*</span></label>
+                        <select class="form-select @error('city') is-invalid @enderror" id="city" name="city" required disabled>
+                            <option value="">Select City/Municipality</option>
+                        </select>
+                        @error('city')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Barangay <span class="text-danger">*</span></label>
+                        <select class="form-select @error('barangay') is-invalid @enderror" id="barangay" name="barangay" required disabled>
+                            <option value="">Select Barangay</option>
+                        </select>
+                        @error('barangay')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary w-100">Register</button>
@@ -287,8 +380,62 @@ body {
     const provinceSelect = document.getElementById('province');
     const citySelect = document.getElementById('city');
     const barangaySelect = document.getElementById('barangay');
+    const birthdateInput = document.getElementById('birthdate');
+    const ageInput = document.getElementById('age');
 
-    // No longer needed - login ID is generated server-side
+    // Disable future dates in birthdate picker
+    const today = new Date();
+    const maxDate = today.toISOString().split('T')[0];
+    birthdateInput.setAttribute('max', maxDate);
+
+    // Calculate age from birthdate
+    function calculateAge(birthdate) {
+        const today = new Date();
+        const birthDate = new Date(birthdate);
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        return age;
+    }
+
+    // Show SweetAlert error for age below 20
+    function showAgeError() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Age Requirement Not Met',
+            text: 'You must be at least 20 years old to register.',
+            confirmButtonColor: '#dc2626',
+            confirmButtonText: 'OK'
+        });
+        ageInput.value = '';
+        birthdateInput.value = '';
+        birthdateInput.classList.add('is-invalid');
+    }
+
+    // Clear invalid class when user selects a valid date
+    birthdateInput.addEventListener('input', function() {
+        this.classList.remove('is-invalid');
+    });
+
+    // Update age when birthdate changes
+    birthdateInput.addEventListener('change', function() {
+        if (this.value) {
+            const age = calculateAge(this.value);
+            
+            if (age < 20) {
+                showAgeError();
+            } else {
+                ageInput.value = age;
+                this.classList.remove('is-invalid');
+            }
+        } else {
+            ageInput.value = '';
+        }
+    });
 
     // Load provinces on page load
     async function loadProvinces() {
@@ -301,7 +448,7 @@ body {
             provinces.sort((a, b) => a.name.localeCompare(b.name));
             provinces.forEach(province => {
                 const option = document.createElement('option');
-                option.value = province.name; // Use name instead of code for simplicity
+                option.value = province.name;
                 option.textContent = province.name;
                 provinceSelect.appendChild(option);
             });
@@ -315,36 +462,34 @@ body {
         citySelect.innerHTML = '<option value="">Select City/Municipality</option>';
         barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
         barangaySelect.disabled = true;
+        citySelect.classList.remove('is-invalid');
+        barangaySelect.classList.remove('is-invalid');
 
         if (this.value) {
             try {
                 if (this.value === 'Metro Manila (NCR)') {
-                    // Load NCR cities from PSGC API using region endpoint
                     const response = await fetch('https://psgc.gitlab.io/api/regions/130000000/cities-municipalities/');
                     const cities = await response.json();
-                    // Sort cities alphabetically
                     cities.sort((a, b) => a.name.localeCompare(b.name));
                     citySelect.disabled = false;
                     cities.forEach(city => {
                         const option = document.createElement('option');
-                        option.value = city.name; // Use name
+                        option.value = city.name;
                         option.textContent = city.name;
                         citySelect.appendChild(option);
                     });
                 } else {
-                    // Find province code by name
                     const provinceResponse = await fetch('https://psgc.gitlab.io/api/provinces/');
                     const provinces = await provinceResponse.json();
                     const selectedProvince = provinces.find(p => p.name === this.value);
                     if (selectedProvince) {
                         const response = await fetch(`https://psgc.gitlab.io/api/provinces/${selectedProvince.code}/cities-municipalities/`);
                         const cities = await response.json();
-                        // Sort cities alphabetically
                         cities.sort((a, b) => a.name.localeCompare(b.name));
                         citySelect.disabled = false;
                         cities.forEach(city => {
                             const option = document.createElement('option');
-                            option.value = city.name; // Use name instead of code
+                            option.value = city.name;
                             option.textContent = city.name;
                             citySelect.appendChild(option);
                         });
@@ -362,19 +507,18 @@ body {
     // Load barangays for selected city/municipality
     citySelect.addEventListener('change', async function() {
         barangaySelect.innerHTML = '<option value="">Select Barangay</option>';
+        barangaySelect.classList.remove('is-invalid');
 
         if (this.value) {
             try {
                 const provinceValue = provinceSelect.value;
                 if (provinceValue === 'Metro Manila (NCR)') {
-                    // Load barangays for NCR cities
                     const regionResponse = await fetch('https://psgc.gitlab.io/api/regions/130000000/cities-municipalities/');
                     const cities = await regionResponse.json();
                     const selectedCity = cities.find(c => c.name === this.value);
                     if (selectedCity) {
                         const response = await fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCity.code}/barangays/`);
                         const barangays = await response.json();
-                        // Sort barangays alphabetically
                         barangays.sort((a, b) => a.name.localeCompare(b.name));
                         barangaySelect.disabled = false;
                         barangays.forEach(barangay => {
@@ -385,7 +529,6 @@ body {
                         });
                     }
                 } else {
-                    // Find city code by name
                     const provinceResponse = await fetch('https://psgc.gitlab.io/api/provinces/');
                     const provinces = await provinceResponse.json();
                     const selectedProvince = provinces.find(p => p.name === provinceValue);
@@ -396,12 +539,11 @@ body {
                         if (selectedCity) {
                             const response = await fetch(`https://psgc.gitlab.io/api/cities-municipalities/${selectedCity.code}/barangays/`);
                             const barangays = await response.json();
-                            // Sort barangays alphabetically
                             barangays.sort((a, b) => a.name.localeCompare(b.name));
                             barangaySelect.disabled = false;
                             barangays.forEach(barangay => {
                                 const option = document.createElement('option');
-                                option.value = barangay.name; // Use name instead of code
+                                option.value = barangay.name;
                                 option.textContent = barangay.name;
                                 barangaySelect.appendChild(option);
                             });

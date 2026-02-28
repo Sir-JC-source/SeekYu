@@ -102,6 +102,8 @@ class LoginController extends Controller
             'province'                 => 'required|string|max:255',
             'city'                     => 'required|string|max:255',
             'barangay'                 => 'required|string|max:255',
+            'birthdate'                => 'required|date|before:today',
+            'age'                      => 'required|integer|min:20|max:100',
         ]);
 
         $fullname = trim($request->last_name . ', ' . $request->first_name . ($request->middle_name ? ' ' . $request->middle_name : ''));
@@ -120,6 +122,8 @@ class LoginController extends Controller
         $user->province       = $request->province;
         $user->city           = $request->city;
         $user->barangay       = $request->barangay;
+        $user->birthdate      = $request->birthdate;
+        $user->age            = $request->age;
         $user->role           = 'applicant'; // All registrants become applicants
         $user->account_status = 'pending'; // Pending email verification
         $user->first_login    = true;

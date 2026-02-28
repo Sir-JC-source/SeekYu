@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('registered_users', function (Blueprint $table) {
-            $table->string('login_id', 255)->nullable()->change(); // Change to varchar(255)
+            $table->date('birthdate')->nullable()->after('barangay');
+            $table->integer('age')->nullable()->after('birthdate');
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('registered_users', function (Blueprint $table) {
-            $table->string('login_id', 5)->change(); // Revert back to 5 characters
+            $table->dropColumn(['birthdate', 'age']);
         });
     }
 };

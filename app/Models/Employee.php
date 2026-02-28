@@ -34,6 +34,21 @@ class Employee extends Model
         'age',
         'barangay',
         'email',
+        // 201 File Fields - Government IDs
+        'sss_number',
+        'pagibig_number',
+        'philhealth_number',
+        // 201 File Fields - Personal Details
+        'birthdate',
+        'gender',
+        'civil_status',
+        // 201 File Fields - Address
+        'address',
+        'zip_code',
+        // 201 File Fields - Emergency Contact
+        'emergency_contact_name',
+        'emergency_contact_number',
+        'emergency_contact_relationship',
     ];
 
     /**

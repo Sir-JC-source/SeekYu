@@ -133,6 +133,47 @@
                                                 </div>
                                             </div>
                                         </div>
+
+                                        <!-- Government IDs -->
+                                        <div class="col-12 mt-4">
+                                            <div class="card border-0 bg-light">
+                                                <div class="card-body">
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <i class="ti ti-id text-info ti-lg me-2"></i>
+                                                        <h6 class="card-title mb-0">Government IDs (SSS, PAG-IBIG, PhilHealth)</h6>
+                                                    </div>
+                                                    <div class="row g-3">
+                                                        <div class="col-lg-4">
+                                                            <label for="sss_number" class="form-label fw-semibold">SSS Number</label>
+                                                            <input type="text" class="form-control" id="sss_number" name="sss_number"
+                                                                   value="{{ old('sss_number', $credentials?->sss_number ?? '') }}"
+                                                                   placeholder="e.g., 01-1234567-8">
+                                                            @error('sss_number')
+                                                                <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        <div class="col-lg-4">
+                                                            <label for="pagibig_number" class="form-label fw-semibold">PAG-IBIG Number</label>
+                                                            <input type="text" class="form-control" id="pagibig_number" name="pagibig_number"
+                                                                   value="{{ old('pagibig_number', $credentials?->pagibig_number ?? '') }}"
+                                                                   placeholder="e.g., 1234-5678-9012">
+                                                            @error('pagibig_number')
+                                                                <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                        <div class="col-lg-4">
+                                                            <label for="philhealth_number" class="form-label fw-semibold">PhilHealth Number</label>
+                                                            <input type="text" class="form-control" id="philhealth_number" name="philhealth_number"
+                                                                   value="{{ old('philhealth_number', $credentials?->philhealth_number ?? '') }}"
+                                                                   placeholder="e.g., 123456789012">
+                                                            @error('philhealth_number')
+                                                                <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
+                                                            @enderror
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
