@@ -36,7 +36,31 @@
                                             <td>{{ $application->jobPosting->position }}</td>
                                             <td>{{ $application->applied_at->format('M d, Y') }}</td>
                                             <td>
-                                                @if($application->status === 'rejected')
+                                                @if($application->status === 'rejected' && $application->rejection_notes)
+                                                    <div>
+                                                        <span class="badge bg-danger me-1">Rejected</span>
+                                                        <button class="btn btn-sm btn-link p-0 text-danger" data-bs-toggle="modal" data-bs-target="#rejectReason{{ $application->id }}">Reason</button>
+                                                    </div>
+                                                    <div class="modal fade" id="rejectReason{{ $application->id }}" tabindex="-1">
+                                                        <div class="modal-dialog">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title">Rejection Reason</h5>
+                                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                                </div>
+                                                                <div class="modal-body">
+                                                                    {{ $application->rejection_notes }}
+                                                                    @if($application->rejected_at)
+                                                                        <small class="text-muted d-block mt-2">{{ $application->rejected_at->format('M d, Y H:i') }}</small>
+                                                                    @endif
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @elseif($application->status === 'rejected')
                                                     <span class="badge bg-danger">Rejected</span>
                                                 @elseif($application->status === 'shortlisted')
                                                     <span class="badge bg-success">Shortlisted</span>

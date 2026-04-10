@@ -125,7 +125,7 @@
       <div style="background-color:#f7f7f7; padding:20px 25px 20px 20px; position:relative;">
           <button type="button" class="btn-close position-absolute top-2 end-0 mt-2 me-4" data-bs-dismiss="modal" aria-label="Close"></button>
           <div class="text-center mb-3">
-              <img src="{{ asset('storage/logo.png') }}" alt="Company Logo" style="height:65px; object-fit:contain;">
+              <img src="{{ asset('favicon.ico') }}" alt="Company Logo" style="height:65px; object-fit:contain;">
           </div>
           <div style="display:flex; gap:20px; align-items:flex-start;">
               <div style="flex-shrink:0;">

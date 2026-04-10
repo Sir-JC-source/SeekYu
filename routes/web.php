@@ -136,6 +136,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/show/{id}', [JobPostingController::class, 'show'])->name('job_postings.show');
             Route::post('/toggle-status/{id}', [JobPostingController::class, 'toggleStatus'])->name('job_postings.toggle-status');
             Route::get('/applications/{id}', [JobPostingController::class, 'showApplications'])->name('job_postings.applications');
+            Route::get('/applications/{id}/reject-modal', [JobPostingController::class, 'showRejectModal'])->name('job_postings.reject.modal');
             Route::post('/applications/reject/{id}', [JobPostingController::class, 'rejectApplication'])->name('job_postings.applications.reject');
             Route::post('/applications/shortlist/{id}', [JobPostingController::class, 'shortlistApplication'])->name('job_postings.applications.shortlist');
             Route::get('/applicant-credentials/{applicationId}', [JobPostingController::class, 'showApplicantCredentials'])->name('job_postings.applicant-credentials');

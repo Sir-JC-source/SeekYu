@@ -2,11 +2,10 @@
     <div class="app-brand demo text-center py-3">
         <a href="{{ route('dashboard.index') }}" class="app-brand-link d-flex align-items-center justify-content-center">
             <img 
-                src="{{ asset('storage/logo.png') }}" 
-                onerror="this.onerror=null; this.src='{{ asset('assets/bgpicture/default-logo.png') }}';"
+                src="{{ asset('favicon.ico') }}"
                 alt="Logo" 
                 class="app-brand-logo"
-                style="width: 180px; height: 180px; object-fit: contain; border-radius: 8px;"
+                style="width: 120px; height: 60px; object-fit: contain; border-radius: 8px;"
             />
         </a>
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">

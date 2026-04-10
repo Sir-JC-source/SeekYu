@@ -12,10 +12,13 @@ class JobApplication extends Model
         'user_id',
         'status',
         'applied_at',
+        'rejection_notes',
+        'rejected_at',
     ];
 
     protected $casts = [
         'applied_at' => 'datetime',
+        'rejected_at' => 'datetime',
     ];
 
     public function jobPosting(): BelongsTo
@@ -27,4 +30,10 @@ class JobApplication extends Model
     {
         return $this->belongsTo(RegisteredUsers::class, 'user_id');
     }
+
+    public function gameScores()
+    {
+        return $this->hasMany(ApplicantGameScore::class);
+    }
 }
+

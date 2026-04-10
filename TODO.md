@@ -1,12 +1,12 @@
-# Integrate Guard Assessment Games into Application Process
+# Rejection Notes Feature (Approved)
 
-## Tasks
-- [ ] Modify JobPostingController@apply to redirect to games for Head Guard/Security Guard positions
-- [ ] Create applicant.games.gate view embedding GUARD/1 - Gate Screening.html
-- [ ] Create applicant.games.bag view embedding GUARD/2 - Bag Inspection.html
-- [ ] Create applicant.games.memory view embedding GUARD/3 - Memory Test.html
-- [ ] Add routes for game views and score submission
-- [ ] Implement score capture in game views using JS events and session storage
-- [ ] Create method to finalize application after games, saving JobApplication and ApplicantGameScore
-- [ ] Update admin application views to display game scores
-- [ ] Test the full flow: apply -> games -> application submitted -> admin sees scores
+**Status:** Creating migration...
+
+Steps:
+- [x] Plan approved (notes visible to applicants)
+- [x] 1. Migration & migrate done
+- [x] 2. JobApplication model updated
+- [x] 3. Controller + reject modal + JS added to job_postings/applications.blade.php
+- [x] 4. HR rejected list shows notes
+- [x] 5. Applicant view (applications.blade.php) + rejected.blade.php updated
+- [x] 6. Complete - Rejection notes full flow: HR modal → save → HR sees → applicant sees in dashboard + notification

@@ -20,7 +20,7 @@
                                     <th>Email</th>
                                     <th>Job Position</th>
                                     <th>Applied At</th>
-                                    <th>Status</th>
+                                    <th>Rejection Reason</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
@@ -32,7 +32,14 @@
                                         <td>{{ $application->jobPosting->title }} - {{ $application->jobPosting->position }}</td>
                                         <td>{{ $application->applied_at->format('M d, Y H:i') }}</td>
                                         <td>
-                                            <span class="badge bg-danger">{{ ucfirst($application->status) }}</span>
+                                            @if($application->rejection_notes)
+                                                {{ Str::limit($application->rejection_notes, 100) }}
+                                                @if($application->rejected_at)
+                                                    <br><small class="text-muted">{{ $application->rejected_at->format('M d, Y H:i') }}</small>
+                                                @endif
+                                            @else
+                                                <span class="text-muted">No reason provided</span>
+                                            @endif
                                         </td>
                                         <td>
                                             <a href="{{ route('job_postings.applicant-credentials', $application->id) }}" class="btn btn-sm btn-primary">View Credentials</a>
@@ -58,7 +65,11 @@
 @push('page-scripts')
 <script>
 $(document).ready(function() {
-    $('#rejected-table').DataTable();
+    $('#rejected-table').DataTable({
+        columnDefs: [
+            { targets: 4, width: '300px' } // Rejection Reason column
+        ]
+    });
 });
 </script>
 @endpush

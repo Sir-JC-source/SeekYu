@@ -141,8 +141,7 @@ body {
     <div class="login-container">
         <div class="login-card text-center">
             <img
-                src="{{ asset('storage/logo.png') }}"
-                onerror="this.onerror=null; this.src='{{ asset('assets/bgpicture/default-logo.png') }}';"
+                src="{{ asset('favicon.ico') }}"
                 alt="Logo"
             />
             <h4>Sign in to your account</h4>

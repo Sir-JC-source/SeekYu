@@ -45,7 +45,7 @@
       <div class="h-16 flex items-center justify-between">
         <!-- Brand -->
         <a href="#" class="flex items-center gap-3">
-          <img src="{{ asset('assets/img/MJL logo.png') }}" alt="MJL Security Agency logo" class="h-10 w-auto" />
+          <img src="{{ asset('favicon.ico') }}" alt="MJL Security Agency logo" class="h-10 w-auto" />
           <span class="text-lg sm:text-xl font-extrabold tracking-tight">MJL Security Agency</span>
         </a>
         <!-- Desktop Nav -->

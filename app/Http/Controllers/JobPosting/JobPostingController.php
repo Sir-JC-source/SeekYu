@@ -213,19 +213,39 @@ class JobPostingController extends Controller
     }
 
     /**
-     * Reject an application (Admin/HR only).
+     * Show reject modal (AJAX)
      */
-    public function rejectApplication($id)
+    public function showRejectModal($id)
     {
+        $application = JobApplication::with('user')->findOrFail($id);
+        return response()->json([
+            'application' => $application
+        ]);
+    }
+
+    /**
+     * Reject an application with notes (Admin/HR only).
+     */
+    public function rejectApplication(Request $request, $id)
+    {
+        $request->validate([
+            'rejection_notes' => 'required|string|max:1000'
+        ]);
+
         $application = JobApplication::findOrFail($id);
         $oldStatus = $application->status;
         $application->status = 'rejected';
+        $application->rejection_notes = $request->rejection_notes;
+        $application->rejected_at = now();
         $application->save();
 
-        // Notify the applicant
+        // Notify the applicant with notes
         $application->user->notify(new \App\Notifications\JobApplicationStatusUpdated($application, $oldStatus, 'rejected'));
 
-        return redirect()->back()->with('success', 'Application rejected successfully.');
+        return response()->json([
+            'success' => true,
+            'message' => 'Application rejected with notes.'
+        ]);
     }
 
     /**
