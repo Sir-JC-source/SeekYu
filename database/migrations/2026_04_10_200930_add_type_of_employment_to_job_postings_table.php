@@ -11,9 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('job_postings', function (Blueprint $table) {
-            $table->enum('type_of_employment', ['Contractual', 'Full-Time'])->after('description');
-        });
+
     }
 
     /**
