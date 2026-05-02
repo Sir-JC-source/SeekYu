@@ -58,29 +58,7 @@
                 </ul>
             </li>
 
-            {{-- 201 File --}}
-            <li class="menu-item {{ request()->is('201file*') || request()->is('my-201file*') ? 'active open' : '' }}">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="ti ti-folder menu-icon"></i>
-                    <div>201 File</div>
-                </a>
-                <ul class="menu-sub">
-                    <li class="menu-item {{ request()->routeIs('201file.index') ? 'active' : '' }}">
-                        <a href="{{ route('201file.index') }}" class="menu-link"><div>All Records</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('201file.applicants') ? 'active' : '' }}">
-                        <a href="{{ route('201file.applicants') }}" class="menu-link"><div>Applicants</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('201file.employees') ? 'active' : '' }}">
-                        <a href="{{ route('201file.employees') }}" class="menu-link"><div>Employees</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('my201file.show') ? 'active' : '' }}">
-                        <a href="{{ route('my201file.show') }}" class="menu-link"><div>My 201 File</div></a>
-                    </li>
-                </ul>
-            </li>
-
-             {{-- Security Guard Management --}}
+{{-- Security Guard Management --}}
             <li class="menu-item {{ request()->is('guard-scheduling*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-calendar-time menu-icon"></i>
@@ -193,31 +171,7 @@
                 </ul>
             </li>
 
-            {{-- 201 File --}}
-            <li class="menu-item {{ request()->is('201file*') || request()->is('my-201file*') ? 'active open' : '' }}">
-                <a href="javascript:void(0);" class="menu-link menu-toggle">
-                    <i class="ti ti-folder menu-icon"></i>
-                    <div>201 File</div>
-                </a>
-                <ul class="menu-sub">
-                    <li class="menu-item {{ request()->routeIs('201file.index') ? 'active' : '' }}">
-                        <a href="{{ route('201file.index') }}" class="menu-link"><div>All Records</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('201file.applicants') ? 'active' : '' }}">
-                        <a href="{{ route('201file.applicants') }}" class="menu-link"><div>Applicants</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('201file.employees') ? 'active' : '' }}">
-                        <a href="{{ route('201file.employees') }}" class="menu-link"><div>Employees</div></a>
-                    </li>
-                    <li class="menu-item {{ request()->routeIs('my201file.show') ? 'active' : '' }}">
-                        <a href="{{ route('my201file.show') }}" class="menu-link"><div>My 201 File</div></a>
-                    </li>
-                </ul>
-            </li>
-
-
-
-            {{-- Applications --}}
+{{-- Applications --}}
             <li class="menu-item {{ request()->is('applications*') ? 'active open' : '' }}">
                 <a href="javascript:void(0);" class="menu-link menu-toggle">
                     <i class="ti ti-file-text menu-icon"></i>

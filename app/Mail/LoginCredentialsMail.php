@@ -20,6 +20,10 @@ class LoginCredentialsMail extends Mailable
 
     /**
      * Create a new message instance.
+     * 
+     * @param RegisteredUsers $user
+     * @param string $verificationUrl
+     * @param string|null $password (The plain-text password)
      */
     public function __construct(RegisteredUsers $user, string $verificationUrl, string $password = null)
     {
@@ -45,13 +49,17 @@ class LoginCredentialsMail extends Mailable
     {
         return new Content(
             view: 'emails.login-credentials',
+            // Explicitly passing the variables to ensure they are available in Blade
+            with: [
+                'user' => $this->user,
+                'password' => $this->password,
+                'verificationUrl' => $this->verificationUrl,
+            ],
         );
     }
 
     /**
      * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
      */
     public function attachments(): array
     {

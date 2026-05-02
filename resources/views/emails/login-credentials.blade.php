@@ -42,8 +42,8 @@
         }
         .btn {
             display: inline-block;
-            background-color: #000;
-            color: #ffffff;
+            background-color: #4f46e5;
+            color: #ffffff !important;
             padding: 12px 24px;
             text-decoration: none;
             border-radius: 6px;
@@ -51,7 +51,7 @@
             font-weight: bold;
         }
         .btn:hover {
-            background-color: #0000;
+            background-color: #4338ca;
         }
         .footer {
             margin-top: 30px;
@@ -82,10 +82,10 @@
 
         <p>Thank you for registering with SeekYu HRIS. Your account has been created and is pending email verification. To complete your registration and access your account, please verify your email address by clicking the button below.</p>
 
-        <div class="credentials">
+<div class="credentials">
             <h3>Your Login Credentials:</h3>
             <p><strong>Login ID:</strong> {{ $user->login_id ?? $user->student_no ?? $user->faculty_no ?? $user->email }}</p>
-            <p><strong>Password:</strong> {{ $password }}</p>
+            <p><strong>Password:</strong> {{ $password ?? 'Temporary - change upon first login' }}</p>
             <p><strong>Role:</strong> {{ ucfirst($user->role) }}</p>
         </div>
 

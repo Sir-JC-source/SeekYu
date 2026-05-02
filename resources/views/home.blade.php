@@ -76,9 +76,9 @@
 
   <!-- =============== Hero =============== -->
   <section class="relative overflow-hidden">
-  <!-- Background image -->
+<!-- Background image -->
   <div class="absolute inset-0 -z-10">
-    <img src="{{ asset('assets/img/about-4.jpg') }}" alt="Security team on duty"
+    <img src="https://images.unsplash.com/photo-1581244277943-fe4a9c777105?w=1920&q=80" alt="Security guard on duty"
          class="w-full h-full object-cover">
     <!-- Dark gradient overlay -->
     <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
@@ -99,7 +99,7 @@
          class="lift inline-flex justify-center items-center px-6 py-3 rounded-md bg-brand-accent text-black font-semibold hover:bg-yellow-300">
         Request Service
       </a>
-      <a href="{{ asset('login/register.php') }}"
+<a href="{{ route('login.register') }}"
          class="lift inline-flex justify-center items-center px-6 py-3 rounded-md bg-white/10 text-white ring-1 ring-white/20 hover:bg-white/15">
         Apply as Guard/Staff </a>
 
@@ -204,14 +204,14 @@
       <div class="relative group" id="aboutGallery">
         <div class="aspect-[4/3] rounded-2xl overflow-hidden shadow-soft ring-1 ring-slate-200 relative">
           <!-- Slides -->
-          <div class="absolute inset-0 transition-opacity duration-500" data-slide="0" aria-hidden="false">
-            <img src="{{ asset('assets/img/about-1.jpg') }}" alt="MJL guards briefing before deployment" class="w-full h-full object-cover" loading="eager" />
+<div class="absolute inset-0 transition-opacity duration-500" data-slide="0" aria-hidden="false">
+            <img src="https://images.unsplash.com/photo-1555590918-6934b1c7d31f?w=800&q=80" alt="Security guard in Philippines" class="w-full h-full object-cover" loading="eager" />
           </div>
           <div class="absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500" data-slide="1" aria-hidden="true">
-            <img src="{{ asset('assets/img/about-2.jpg') }}" alt="Checkpoint post with CCTV coordination" class="w-full h-full object-cover" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1520453809954-b5a513c5c3a4?w=800&q=80" alt="Security checkpoint" class="w-full h-full object-cover" loading="lazy" />
           </div>
           <div class="absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500" data-slide="2" aria-hidden="true">
-            <img src="{{ asset('assets/img/about-3.jpg') }}" alt="Event security team on site" class="w-full h-full object-cover" loading="lazy" />
+            <img src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=800&q=80" alt="Corporate security team" class="w-full h-full object-cover" loading="lazy" />
           </div>
 
           <!-- Prev/Next controls -->
