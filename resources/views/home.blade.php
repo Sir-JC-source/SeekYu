@@ -74,39 +74,41 @@
     </div>
   </header>
 
-  <!-- =============== Hero =============== -->
-  <section class="relative overflow-hidden">
-<!-- Background image -->
-  <div class="absolute inset-0 -z-10">
-    <img src="https://images.unsplash.com/photo-1581244277943-fe4a9c777105?w=1920&q=80" alt="Security guard on duty"
-         class="w-full h-full object-cover">
-    <!-- Dark gradient overlay -->
-    <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
-  </div>
-
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 text-white text-center relative">
-    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 ring-1 ring-white/15 text-xs uppercase tracking-wider">
-      Duly licensed · Nationwide deployment
-    </span>
-    <h1 class="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight">
-      Reliable Security Services for Homes, Businesses & Events
-    </h1>
-    <p class="mt-4 text-lg sm:text-xl text-white/85 max-w-3xl mx-auto">
-      Trusted personnel, modern systems. In partnership with <span class="font-semibold">Seekyu</span> for streamlined recruitment and HRIS.
-    </p>
-    <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-      <a href="#contact"
-         class="lift inline-flex justify-center items-center px-6 py-3 rounded-md bg-brand-accent text-black font-semibold hover:bg-yellow-300">
-        Request Service
-      </a>
-<a href="{{ route('login.register') }}"
-         class="lift inline-flex justify-center items-center px-6 py-3 rounded-md bg-white/10 text-white ring-1 ring-white/20 hover:bg-white/15">
-        Apply as Guard/Staff </a>
-
+  <!-- =============== Hero (Carousel Updated) =============== -->
+  <section class="relative overflow-hidden" id="heroCarousel">
+    <!-- Background image Carousel -->
+    <div class="absolute inset-0 -z-10">
+      <div class="absolute inset-0 transition-opacity duration-1000" data-hero-slide="0">
+src="{{ asset('assets/img/seekyu 1.jpg') }}"
+      </div>
+      <div class="absolute inset-0 opacity-0 transition-opacity duration-1000" data-hero-slide="1">
+src="{{ asset('assets/img/seekyu 2.jpg') }}"
+      </div>
+      <!-- Dark gradient overlay -->
+      <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
     </div>
-  </div>
-</section>
 
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 sm:py-28 text-white text-center relative">
+      <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 ring-1 ring-white/15 text-xs uppercase tracking-wider">
+        Duly licensed · Nationwide deployment
+      </span>
+      <h1 class="mt-6 text-4xl sm:text-5xl md:text-6xl font-extrabold leading-tight">
+        Reliable Security Services for Homes, Businesses & Events
+      </h1>
+      <p class="mt-4 text-lg sm:text-xl text-white/85 max-w-3xl mx-auto">
+        Trusted personnel, modern systems. In partnership with <span class="font-semibold">Seekyu</span> for streamlined recruitment and HRIS.
+      </p>
+      <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="#contact"
+           class="lift inline-flex justify-center items-center px-6 py-3 rounded-md bg-brand-accent text-black font-semibold hover:bg-yellow-300">
+          Request Service
+        </a>
+        <a href="{{ route('login.register') }}"
+           class="lift inline-flex justify-center items-center px-6 py-3 rounded-md bg-white/10 text-white ring-1 ring-white/20 hover:bg-white/15">
+          Apply as Guard/Staff </a>
+      </div>
+    </div>
+  </section>
 
   <!-- =============== Services =============== -->
   <section id="services" class="py-16 sm:py-20">
@@ -188,7 +190,7 @@
     </div>
   </section>
 
-  <!-- =============== About =============== -->
+  <!-- =============== About (Carousel Updated with seekyu 3-8) =============== -->
   <section id="about" class="py-16 sm:py-20">
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 grid lg:grid-cols-2 gap-10 items-start">
       <div>
@@ -200,18 +202,27 @@
         </div>
       </div>
 
-      <!-- ABOUT GALLERY -->
+      <!-- ABOUT GALLERY (seekyu 3 to 8) -->
       <div class="relative group" id="aboutGallery">
         <div class="aspect-[4/3] rounded-2xl overflow-hidden shadow-soft ring-1 ring-slate-200 relative">
           <!-- Slides -->
-<div class="absolute inset-0 transition-opacity duration-500" data-slide="0" aria-hidden="false">
-            <img src="https://images.unsplash.com/photo-1555590918-6934b1c7d31f?w=800&q=80" alt="Security guard in Philippines" class="w-full h-full object-cover" loading="eager" />
+          <div class="absolute inset-0 transition-opacity duration-500" data-slide="0" aria-hidden="false">
+            <img src="{{ asset('homepage/images/seekyu 3.jpg') }}" alt="Security Image 3" class="w-full h-full object-cover" loading="eager" />
           </div>
           <div class="absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500" data-slide="1" aria-hidden="true">
-            <img src="https://images.unsplash.com/photo-1520453809954-b5a513c5c3a4?w=800&q=80" alt="Security checkpoint" class="w-full h-full object-cover" loading="lazy" />
+            <img src="{{ asset('homepage/images/seekyu 4.jpg') }}" alt="Security Image 4" class="w-full h-full object-cover" loading="lazy" />
           </div>
           <div class="absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500" data-slide="2" aria-hidden="true">
-            <img src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=800&q=80" alt="Corporate security team" class="w-full h-full object-cover" loading="lazy" />
+            <img src="{{ asset('homepage/images/seekyu 5.jpg') }}" alt="Security Image 5" class="w-full h-full object-cover" loading="lazy" />
+          </div>
+          <div class="absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500" data-slide="3" aria-hidden="true">
+            <img src="{{ asset('homepage/images/seekyu 6.jpg') }}" alt="Security Image 6" class="w-full h-full object-cover" loading="lazy" />
+          </div>
+          <div class="absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500" data-slide="4" aria-hidden="true">
+            <img src="{{ asset('homepage/images/seekyu 7.jpg') }}" alt="Security Image 7" class="w-full h-full object-cover" loading="lazy" />
+          </div>
+          <div class="absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-500" data-slide="5" aria-hidden="true">
+            <img src="{{ asset('homepage/images/seekyu 8.jpg') }}" alt="Security Image 8" class="w-full h-full object-cover" loading="lazy" />
           </div>
 
           <!-- Prev/Next controls -->
@@ -226,9 +237,12 @@
 
           <!-- Dots -->
           <div class="absolute bottom-3 left-0 right-0 flex items-center justify-center gap-2">
-            <button class="w-2.5 h-2.5 rounded-full bg-white/90 ring-1 ring-slate-300" aria-label="Go to slide 1" data-dot="0"></button>
-            <button class="w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 ring-1 ring-slate-300" aria-label="Go to slide 2" data-dot="1"></button>
-            <button class="w-2.5 h-2.5 rounded-full bg-white/50 hover:bg-white/80 ring-1 ring-slate-300" aria-label="Go to slide 3" data-dot="2"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/90 ring-1 ring-slate-300" data-dot="0"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/50 ring-1 ring-slate-300" data-dot="1"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/50 ring-1 ring-slate-300" data-dot="2"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/50 ring-1 ring-slate-300" data-dot="3"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/50 ring-1 ring-slate-300" data-dot="4"></button>
+            <button class="w-2.5 h-2.5 rounded-full bg-white/50 ring-1 ring-slate-300" data-dot="5"></button>
           </div>
         </div>
 
@@ -251,42 +265,32 @@
           <h2 class="text-2xl sm:text-3xl font-bold">Contact Us</h2>
           <p class="mt-2 text-slate-600">Tell us what you need and we’ll craft a security plan for you.</p>
           <ul class="mt-6 space-y-3 text-sm">
-  ... three <li> items ...
-</ul>
-  <!-- Email -->
-  <li class="flex items-center gap-3">
-    <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-brand-light">
-      <!-- Mail icon -->
-      <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-      </svg>
-    </span>
-    contact@mjlsecurity.ph
-  </li>
-
-  <!-- Mobile -->
-  <li class="flex items-center gap-3">
-    <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-brand-light">
-      <!-- Mobile phone icon -->
-      <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M7 4h10a1 1 0 011 1v14a1 1 0 01-1 1H7a1 1 0 01-1-1V5a1 1 0 011-1zM12 18h.01"/>
-      </svg>
-    </span>
-    09059793642
-  </li>
-
-  <!-- Address -->
-  <li class="flex items-center gap-3">
-    <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-brand-light">
-      <!-- Map pin icon -->
-      <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c1.656 0 3-1.344 3-3s-1.344-3-3-3-3 1.344-3 3 1.344 3 3 3z"/>
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4.5 8-11c0-4.418-3.582-8-8-8s-8 3.582-8 8c0 6.5 8 11 8 11z"/>
-      </svg>
-    </span>
-    San Jose del Monte, Bulacan
-  </li>
-
+            <li class="flex items-center gap-3">
+              <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-brand-light">
+                <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+              </span>
+              contact@mjlsecurity.ph
+            </li>
+            <li class="flex items-center gap-3">
+              <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-brand-light">
+                <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M7 4h10a1 1 0 011 1v14a1 1 0 01-1 1H7a1 1 0 01-1-1V5a1 1 0 011-1zM12 18h.01"/>
+                </svg>
+              </span>
+              09059793642
+            </li>
+            <li class="flex items-center gap-3">
+              <span class="inline-flex w-8 h-8 items-center justify-center rounded-full bg-brand-light">
+                <svg class="w-5 h-5 text-brand-primary" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 11c1.656 0 3-1.344 3-3s-1.344-3-3-3-3 1.344-3 3 1.344 3 3 3z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4.5 8-11c0-4.418-3.582-8-8-8s-8 3.582-8 8c0 6.5 8 11 8 11z"/>
+                </svg>
+              </span>
+              San Jose del Monte, Bulacan
+            </li>
+          </ul>
         </div>
         <form class="lift bg-white p-6 rounded-2xl border border-slate-200 shadow-soft space-y-4" onsubmit="event.preventDefault(); alert('Thanks! We\'ll get back to you shortly.'); this.reset();">
           <div>
@@ -339,6 +343,18 @@
       const shouldShow = typeof force === 'boolean' ? force : isHidden;
       nav.classList.toggle('hidden', !shouldShow);
     }
+
+    /* ===== Hero Carousel (New) ===== */
+    (function initHeroCarousel(){
+      const slides = Array.from(document.querySelectorAll('[data-hero-slide]'));
+      if (!slides.length) return;
+      let index = 0;
+      setInterval(() => {
+        slides[index].classList.add('opacity-0');
+        index = (index + 1) % slides.length;
+        slides[index].classList.remove('opacity-0');
+      }, 5000);
+    })();
 
     /* ===== About Gallery (auto + controls + swipe + a11y) ===== */
     (function initAboutGallery(){

@@ -41,7 +41,7 @@
                 <div class="col-md-4">
                     <label for="deployment_date" class="form-label small">Deployment Date</label>
                     <input type="date" class="form-control form-control-sm" id="deployment_date" name="deployment_date"
-                           value="{{ old('deployment_date', date('Y-m-d')) }}" required min="{{ date('Y-m-d') }}">
+min="{{ date('Y-m-d') }}" max="{{ now()->endOfYear()->addYear()->format('Y-m-d') }}">
                 </div>
                 <div class="col-md-4">
                     <label for="shift_template" class="form-label small">Shift Template</label>
@@ -141,6 +141,14 @@
 
 @push('page-scripts')
 <script>
+document.addEventListener('DOMContentLoaded', function() {
+  const dateInput = document.getElementById('deployment_date');
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() + 1);
+  maxDate.setHours(23,59,59,999);
+  dateInput.setAttribute('max', maxDate.toISOString().split('T')[0]);
+});
+
 function confirmAction(url, status, actionText) {
     Swal.fire({
         title: 'Are you sure?',

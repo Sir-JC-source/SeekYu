@@ -67,7 +67,7 @@ class SecurityController extends Controller
         $guard = Employee::findOrFail($id);
 
         $request->validate([
-            'deployment_date' => 'required|date|after_or_equal:today',
+'deployment_date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->endOfYear()->addYear()->format('Y-m-d'),
             'shift_in' => 'required|date_format:H:i',
             'shift_out' => 'required|date_format:H:i|after:shift_in',
             'assigned_head_guard_id' => 'required|exists:employees,id',
@@ -274,8 +274,18 @@ class SecurityController extends Controller
      */
     public function deploy()
     {
-        // Placeholder for deploy functionality
-        return view('Security.Deploy');
+        $headGuards = Employee::where('position', 'Head Guard')->get();
+        $deployments = Deployment::with(['employee', 'headGuard'])
+                                ->orderBy('deployment_date', 'desc')
+                                ->orderBy('shift_in', 'asc')
+                                ->get();
+        
+        $activeDeployments = Deployment::where('status', 'active')->count();
+        $pendingDeployments = Deployment::where('status', 'pending')->count();
+        $completedDeployments = Deployment::where('status', 'completed')->count();
+        $cancelledDeployments = Deployment::where('status', 'cancelled')->count();
+
+        return view('Security.Deploy', compact('headGuards', 'deployments', 'activeDeployments', 'pendingDeployments', 'completedDeployments', 'cancelledDeployments'));
     }
 
     /**
