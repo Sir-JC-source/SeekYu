@@ -170,7 +170,12 @@ body {
                 </div>
                 <div class="mb-3 text-start">
                     <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" name="password" class="form-control" placeholder="••••••••">
+                    <div class="input-group">
+                        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••">
+                        <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password" title="Show/Hide password">
+                            <i class="ti ti-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <div class="mb-3 form-check text-start">
                     <input type="checkbox" class="form-check-input" id="remember" name="remember">
@@ -235,5 +240,16 @@ body {
     usernameInput.addEventListener('input', function() {
         this.value = this.value.substring(0,20);
     });
+
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+
+    if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', function () {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            this.innerHTML = isHidden ? '<i class="ti ti-eye-off"></i>' : '<i class="ti ti-eye"></i>';
+        });
+    }
 </script>
 @endpush

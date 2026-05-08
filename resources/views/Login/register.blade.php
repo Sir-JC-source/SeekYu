@@ -299,12 +299,17 @@ body {
                     {{-- Password --}}
                     <div class="mb-3">
                         <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
-                        <input type="password"
-                               class="form-control @error('password') is-invalid @enderror"
-                               id="password"
-                               name="password"
-                               placeholder="Enter your password"
-                               required>
+                        <div class="input-group">
+                            <input type="password"
+                                   class="form-control @error('password') is-invalid @enderror"
+                                   id="password"
+                                   name="password"
+                                   placeholder="Enter your password"
+                                   required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePassword" aria-label="Show password" title="Show/Hide password">
+                                <i class="ti ti-eye"></i>
+                            </button>
+                        </div>
                         @error('password')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -313,12 +318,17 @@ body {
                     {{-- Confirm Password --}}
                     <div class="mb-3">
                         <label for="password_confirmation" class="form-label">Confirm Password <span class="text-danger">*</span></label>
-                        <input type="password"
-                               class="form-control @error('password_confirmation') is-invalid @enderror"
-                               id="password_confirmation"
-                               name="password_confirmation"
-                               placeholder="Confirm your password"
-                               required>
+                        <div class="input-group">
+                            <input type="password"
+                                   class="form-control @error('password_confirmation') is-invalid @enderror"
+                                   id="password_confirmation"
+                                   name="password_confirmation"
+                                   placeholder="Confirm your password"
+                                   required>
+                            <button class="btn btn-outline-secondary" type="button" id="togglePasswordConfirmation" aria-label="Show confirm password" title="Show/Hide password">
+                                <i class="ti ti-eye"></i>
+                            </button>
+                        </div>
                         @error('password_confirmation')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
@@ -561,6 +571,27 @@ body {
 
     // Initialize provinces on load
     loadProvinces();
-</script>
 
+    // Show/Hide password toggles
+    const passwordInput = document.getElementById('password');
+    const togglePasswordBtn = document.getElementById('togglePassword');
+    const passwordConfirmationInput = document.getElementById('password_confirmation');
+    const togglePasswordConfirmationBtn = document.getElementById('togglePasswordConfirmation');
+
+    if (togglePasswordBtn && passwordInput) {
+        togglePasswordBtn.addEventListener('click', function () {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            this.innerHTML = isHidden ? '<i class="ti ti-eye-off"></i>' : '<i class="ti ti-eye"></i>';
+        });
+    }
+
+    if (togglePasswordConfirmationBtn && passwordConfirmationInput) {
+        togglePasswordConfirmationBtn.addEventListener('click', function () {
+            const isHidden = passwordConfirmationInput.type === 'password';
+            passwordConfirmationInput.type = isHidden ? 'text' : 'password';
+            this.innerHTML = isHidden ? '<i class="ti ti-eye-off"></i>' : '<i class="ti ti-eye"></i>';
+        });
+    }
+</script>
 @endsection

@@ -154,7 +154,12 @@
                                     </div>
                                     <div class="col-md-6">
                                         <label for="password" class="form-label fw-bold">Password <span class="text-danger">*</span></label>
-                                        <input type="password" class="form-control form-control-lg bg-light" id="password" name="password" readonly required>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control form-control-lg bg-light" id="password" name="password" readonly required>
+                                            <button class="btn btn-outline-secondary" type="button" id="toggleEmployeePassword" aria-label="Show password" title="Show/Hide password">
+                                                <i class="bx bx-show"></i>
+                                            </button>
+                                        </div>
                                         <small class="form-text text-muted">Auto-generated secure password</small>
                                     </div>
                                 </div>
@@ -199,6 +204,20 @@
             passwordField.value = generatePassword();
         }
     }
+
+    // Show/Hide generated password
+    (function () {
+        const passwordInput = document.getElementById('password');
+        const toggleBtn = document.getElementById('toggleEmployeePassword');
+        if (!passwordInput || !toggleBtn) return;
+
+        toggleBtn.addEventListener('click', function () {
+            const isHidden = passwordInput.type === 'password';
+            passwordInput.type = isHidden ? 'text' : 'password';
+            // bx-show to bx-hide toggling
+            this.innerHTML = isHidden ? '<i class="bx bx-hide"></i>' : '<i class="bx bx-show"></i>';
+        });
+    })();
 
     // Image Preview
     const inputImage = document.getElementById('employee_image');

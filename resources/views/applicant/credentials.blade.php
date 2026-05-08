@@ -84,9 +84,12 @@
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="license_no" class="form-label fw-semibold">License Number</label>
-                                                        <input type="text" class="form-control form-control-lg" id="license_no" name="license_no"
+                                                        <input type="text" class="form-control form-control-lg"
+                                                               id="license_no" name="license_no"
                                                                value="{{ old('license_no', $credentials?->license_no ?? '') }}"
-                                                               placeholder="Enter your license number">
+                                                               placeholder="Enter your license number"
+                                                               inputmode="numeric"
+                                                               pattern="[0-9-]*">
                                                         @error('license_no')
                                                             <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
                                                         @enderror
@@ -145,27 +148,36 @@
                                                     <div class="row g-3">
                                                         <div class="col-lg-4">
                                                             <label for="sss_number" class="form-label fw-semibold">SSS Number</label>
-                                                            <input type="text" class="form-control" id="sss_number" name="sss_number"
+                                                            <input type="text" class="form-control"
+                                                                   id="sss_number" name="sss_number"
                                                                    value="{{ old('sss_number', $credentials?->sss_number ?? '') }}"
-                                                                   placeholder="e.g., 01-1234567-8">
+                                                                   placeholder="e.g., 01-1234567-8"
+                                                                   inputmode="numeric"
+                                                                   pattern="[0-9-]*">
                                                             @error('sss_number')
                                                                 <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
                                                             @enderror
                                                         </div>
                                                         <div class="col-lg-4">
                                                             <label for="pagibig_number" class="form-label fw-semibold">PAG-IBIG Number</label>
-                                                            <input type="text" class="form-control" id="pagibig_number" name="pagibig_number"
+                                                            <input type="text" class="form-control"
+                                                                   id="pagibig_number" name="pagibig_number"
                                                                    value="{{ old('pagibig_number', $credentials?->pagibig_number ?? '') }}"
-                                                                   placeholder="e.g., 1234-5678-9012">
+                                                                   placeholder="e.g., 1234-5678-9012"
+                                                                   inputmode="numeric"
+                                                                   pattern="[0-9-]*">
                                                             @error('pagibig_number')
                                                                 <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
                                                             @enderror
                                                         </div>
                                                         <div class="col-lg-4">
                                                             <label for="philhealth_number" class="form-label fw-semibold">PhilHealth Number</label>
-                                                            <input type="text" class="form-control" id="philhealth_number" name="philhealth_number"
+                                                            <input type="text" class="form-control"
+                                                                   id="philhealth_number" name="philhealth_number"
                                                                    value="{{ old('philhealth_number', $credentials?->philhealth_number ?? '') }}"
-                                                                   placeholder="e.g., 123456789012">
+                                                                   placeholder="e.g., 123456789012"
+                                                                   inputmode="numeric"
+                                                                   pattern="[0-9-]*">
                                                             @error('philhealth_number')
                                                                 <div class="text-danger small mt-1"><i class="ti ti-alert-circle me-1"></i>{{ $message }}</div>
                                                             @enderror

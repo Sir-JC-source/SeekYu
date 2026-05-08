@@ -43,7 +43,10 @@ class ApplicantCredentialController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'license_no' => 'nullable|string|max:255',
+            'license_no' => ['nullable','string','max:255','regex:/^[0-9-]+$/'],
+            'sss_number' => ['nullable','string','regex:/^[0-9-]+$/','max:20'],
+            'pagibig_number' => ['nullable','string','regex:/^[0-9-]+$/','max:20'],
+            'philhealth_number' => ['nullable','string','regex:/^[0-9-]+$/','max:20'],
             'certifications' => 'nullable|string',
             'license_expiration_date' => 'nullable|date',
             'years_of_experience' => 'nullable|integer|min:0',
