@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Employee;
 use App\Models\Deployment;
 use App\Models\Schedule;
+use App\Models\RegisteredUsers;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -32,32 +33,52 @@ class SecurityController extends Controller
     {
         $guard = null;
         $headGuards = Employee::where('position', 'Head Guard')->get();
+        $clients = RegisteredUsers::query()
+            ->where('role', 'client')
+            ->orderBy('fullname')
+            ->get();
+
         $deployments = Deployment::with(['employee', 'headGuard'])
                                 ->orderBy('deployment_date', 'desc')
-                                ->orderBy('shift_in', 'asc')
                                 ->get();
+
 
         if ($request->has('guard_id')) {
             $guard = Employee::find($request->guard_id);
         }
 
-        return view('Security.DeployGuard', compact('guard', 'headGuards', 'deployments'));
+        return view('Security.DeployGuard', compact('guard', 'headGuards', 'clients', 'deployments'));
     }
 
     /**
      * Show deploy form for a specific guard (from List of Guards)
      */
-    public function showDeployForm($id)
+    public function showDeployForm(Request $request, $id)
     {
         $guard = Employee::findOrFail($id);
         $headGuards = Employee::where('position', 'Head Guard')->get();
-        $deployments = Deployment::with(['employee', 'headGuard'])
-                                ->where('employee_id', $id)
-                                ->orderBy('deployment_date', 'desc')
-                                ->get();
+        $clients = RegisteredUsers::query()
+            ->where('role', 'client')
+            ->orderBy('fullname')
+            ->get();
 
-        return view('Security.DeployGuard', compact('guard', 'headGuards', 'deployments'));
+        // If this is loaded into the modal via AJAX, return ONLY the modal body (no layout/sidebar)
+        if ($request->ajax()) {
+            return view('Security.partials.DeployGuardForm', compact('guard', 'headGuards', 'clients'));
+        }
+
+
+
+
+
+        $deployments = Deployment::with(['employee', 'headGuard'])
+            ->where('employee_id', $id)
+            ->orderBy('deployment_date', 'desc')
+            ->get();
+
+        return view('Security.DeployGuard', compact('guard', 'headGuards', 'clients', 'deployments'));
     }
+
 
     /**
      * Store deployment information
@@ -67,37 +88,18 @@ class SecurityController extends Controller
         $guard = Employee::findOrFail($id);
 
         $request->validate([
-'deployment_date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->endOfYear()->addYear()->format('Y-m-d'),
-            'shift_in' => 'required|date_format:H:i',
-            'shift_out' => 'required|date_format:H:i|after:shift_in',
+            'deployment_date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->endOfYear()->addYear()->format('Y-m-d'),
+            'client_id' => 'nullable|exists:registered_users,id',
             'assigned_head_guard_id' => 'required|exists:employees,id',
         ]);
 
-        // Check for conflicts
-        $conflict = Deployment::where('employee_id', $id)
-            ->where('deployment_date', $request->deployment_date)
-            ->where(function ($query) use ($request) {
-                $query->whereBetween('shift_in', [$request->shift_in, $request->shift_out])
-                      ->orWhereBetween('shift_out', [$request->shift_in, $request->shift_out])
-                      ->orWhere(function ($q) use ($request) {
-                          $q->where('shift_in', '<=', $request->shift_in)
-                            ->where('shift_out', '>=', $request->shift_out);
-                      });
-            })
-            ->exists();
-
-        if ($conflict) {
-            return back()->withInput()->withErrors(['shift_in' => 'This guard is already deployed during this time slot.']);
-        }
-
         Deployment::create([
+            'client_id' => $request->client_id,
             'employee_id' => $id,
             'deployment_date' => $request->deployment_date,
-            'shift_in' => $request->shift_in,
-            'shift_out' => $request->shift_out,
             'assigned_head_guard_id' => $request->assigned_head_guard_id,
-            'status' => 'pending',
-            'created_by' => Auth::id(),
+'status' => 'active',
+'created_by' => Auth::id() ?? 1,
         ]);
 
         return redirect()->route('security.deployments')
@@ -274,18 +276,42 @@ class SecurityController extends Controller
      */
     public function deploy()
     {
-        $headGuards = Employee::where('position', 'Head Guard')->get();
-        $deployments = Deployment::with(['employee', 'headGuard'])
-                                ->orderBy('deployment_date', 'desc')
-                                ->orderBy('shift_in', 'asc')
-                                ->get();
-        
+        $clients = RegisteredUsers::query()
+            ->where('role', 'client')
+            ->orderBy('fullname')
+            ->get();
+
+        // Show all employees in the deploy dashboard so the table is never empty.
+        // (We can refine by position later once we confirm DB stored values.)
+        $guards = Employee::query()
+            ->whereIn('position', ['Security Guard', 'Head Guard'])
+            ->get();
+
+        // Status counters (used by Security/Deploy dashboard)
+        // Guard the counters so Deploy dashboard never crashes if statuses are missing.
         $activeDeployments = Deployment::where('status', 'active')->count();
         $pendingDeployments = Deployment::where('status', 'pending')->count();
         $completedDeployments = Deployment::where('status', 'completed')->count();
         $cancelledDeployments = Deployment::where('status', 'cancelled')->count();
 
-        return view('Security.Deploy', compact('headGuards', 'deployments', 'activeDeployments', 'pendingDeployments', 'completedDeployments', 'cancelledDeployments'));
+
+        // Status rule (A): assigned if ANY deployment exists for that guard with client_id NOT NULL
+        $assignedByGuardId = Deployment::query()
+            ->whereNotNull('client_id')
+            ->selectRaw('employee_id as guard_id')
+            ->distinct()
+            ->pluck('guard_id')
+            ->flip();
+
+        return view('Security.Deploy', compact(
+            'guards',
+            'clients',
+            'assignedByGuardId',
+            'activeDeployments',
+            'pendingDeployments',
+            'completedDeployments',
+            'cancelledDeployments'
+        ));
     }
 
     /**
