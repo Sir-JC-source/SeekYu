@@ -448,13 +448,21 @@
             </ul>
         </li>
 
-        {{-- Incident Report --}}
+        {{-- Incident Report (dropdown) --}}
         <li class="menu-item {{ request()->is('incident-reports*') ? 'active open' : '' }}">
-            <a href="{{ route('incident-reports.index') }}" class="menu-link">
+            <a href="javascript:void(0);" class="menu-link menu-toggle">
                 <i class="ti ti-alert-triangle menu-icon"></i>
-                <div>Incident Report</div>
+                <div>Incident Reports</div>
             </a>
+            <ul class="menu-sub">
+                <li class="menu-item {{ request()->routeIs('incident-reports.logs') ? 'active' : '' }}">
+                    <a href="{{ route('incident-reports.logs') }}" class="menu-link">
+                        <div>IR Logs</div>
+                    </a>
+                </li>
+            </ul>
         </li>
+
 
         {{-- Leave Request --}}
         <li class="menu-item {{ request()->routeIs('leaves.list') ? 'active' : '' }}">

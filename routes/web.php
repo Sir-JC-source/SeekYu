@@ -234,6 +234,13 @@ Route::middleware('auth')->group(function () {
         Route::get('/games/bag', [JobPostingController::class, 'showBagGame'])->name('applicant.games.bag');
         Route::get('/games/memory', [JobPostingController::class, 'showMemoryGame'])->name('applicant.games.memory');
         Route::post('/games/submit-scores', [JobPostingController::class, 'submitGameScores'])->name('applicant.games.submit-scores');
+
+        // Assessment Games for HR Officer Position (HR/1 -> HR/2 -> HR/3)
+        Route::get('/games/hr/resume-id', [JobPostingController::class, 'showHrResumeGame'])->name('applicant.games.hr.resume');
+        Route::get('/games/hr/folder-sorting', [JobPostingController::class, 'showHrSortingGame'])->name('applicant.games.hr.sorting');
+        Route::get('/games/hr/client-guard', [JobPostingController::class, 'showHrClientGuardGame'])->name('applicant.games.hr.client-guard');
+        Route::post('/games/hr/submit-scores', [JobPostingController::class, 'submitHrGameScores'])->name('applicant.games.hr.submit-scores');
+
     });
 
     // ----------------------

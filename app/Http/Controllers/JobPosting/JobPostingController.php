@@ -179,12 +179,23 @@ class JobPostingController extends Controller
             ]);
         }
 
+        if ($job->position === 'HR Officer') {
+            // Store job ID in session and redirect to first HR game
+            session(['pending_application_job_id' => $id]);
+            return response()->json([
+                'success' => true,
+                'redirect' => route('applicant.games.hr.resume'),
+                'message' => 'Starting HR assessment...'
+            ]);
+        }
+
         // For other positions, create application directly
         JobApplication::create([
             'job_posting_id' => $id,
             'user_id' => $user->id,
             'applied_at' => now(),
         ]);
+
 
         // Award gamification points for job application
         $gamificationController = new \App\Http\Controllers\GamificationController();
@@ -307,10 +318,131 @@ class JobPostingController extends Controller
     }
 
     /**
+     * Show HR Resume-ID Matching Game (HR/1).
+     */
+    public function showHrResumeGame()
+    {
+        $jobId = session('pending_application_job_id');
+        if (!$jobId) {
+            return redirect()->route('applicant.jobs')->with('error', 'Invalid access to assessment.');
+        }
+        return view('applicant.games.hr.resume-id');
+    }
+
+    /**
+     * Show HR Folder Sorting Game (HR/2).
+     */
+    public function showHrSortingGame()
+    {
+        $jobId = session('pending_application_job_id');
+        if (!$jobId) {
+            return redirect()->route('applicant.jobs')->with('error', 'Invalid access to assessment.');
+        }
+        return view('applicant.games.hr.folder-sorting');
+    }
+
+    /**
+     * Show HR Client-Guard Match Game (HR/3).
+     */
+    public function showHrClientGuardGame()
+    {
+        $jobId = session('pending_application_job_id');
+        if (!$jobId) {
+            return redirect()->route('applicant.jobs')->with('error', 'Invalid access to assessment.');
+        }
+        return view('applicant.games.hr.client-guard');
+    }
+
+    /**
+     * Submit HR Game Scores and Finalize HR Officer Application.
+     */
+    public function submitHrGameScores(Request $request)
+    {
+        $request->validate([
+            'resume_id_score' => 'required|integer|min:0',
+            'resume_id_total' => 'required|integer',
+            'resume_id_pct' => 'required|numeric|min:0|max:100',
+            'resume_id_time' => 'required|string',
+
+            'folder_sort_score' => 'required|integer|min:0',
+            'folder_sort_total' => 'required|integer',
+            'folder_sort_pct' => 'required|numeric|min:0|max:100',
+            'folder_sort_time' => 'required|string',
+
+            'client_guard_match_score' => 'required|integer|min:0',
+            'client_guard_match_total' => 'required|integer',
+            'client_guard_match_pct' => 'required|numeric|min:0|max:100',
+            'client_guard_match_time' => 'required|string',
+        ]);
+
+        $jobId = session('pending_application_job_id');
+        $user = Auth::user();
+
+        if (!$jobId) {
+            return response()->json(['success' => false, 'message' => 'Invalid session.']);
+        }
+
+        $existing = JobApplication::where('job_posting_id', $jobId)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($existing) {
+            return response()->json(['success' => false, 'message' => 'Already applied.']);
+        }
+
+        $application = JobApplication::create([
+            'job_posting_id' => $jobId,
+            'user_id' => $user->id,
+            'applied_at' => now(),
+        ]);
+
+        \App\Models\ApplicantGameScore::create([
+            'job_application_id' => $application->id,
+            'user_id' => $user->id,
+            'game_type' => 'hr_resume_id_matching',
+            'score' => $request->resume_id_score,
+            'total' => $request->resume_id_total,
+            'percentage' => $request->resume_id_pct,
+            'time_taken' => $request->resume_id_time,
+        ]);
+
+        \App\Models\ApplicantGameScore::create([
+            'job_application_id' => $application->id,
+            'user_id' => $user->id,
+            'game_type' => 'hr_folder_sorting',
+            'score' => $request->folder_sort_score,
+            'total' => $request->folder_sort_total,
+            'percentage' => $request->folder_sort_pct,
+            'time_taken' => $request->folder_sort_time,
+        ]);
+
+        \App\Models\ApplicantGameScore::create([
+            'job_application_id' => $application->id,
+            'user_id' => $user->id,
+            'game_type' => 'hr_client_guard_match',
+            'score' => $request->client_guard_match_score,
+            'total' => $request->client_guard_match_total,
+            'percentage' => $request->client_guard_match_pct,
+            'time_taken' => $request->client_guard_match_time,
+        ]);
+
+        session()->forget('pending_application_job_id');
+
+        $gamificationController = new \App\Http\Controllers\GamificationController();
+        $gamificationController->awardApplicationPoints($user->id);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'HR assessment completed! Application submitted successfully. You earned 10 points!'
+        ]);
+    }
+
+    /**
      * Submit Game Scores and Finalize Application.
      */
     public function submitGameScores(Request $request)
     {
+
         $request->validate([
             'gate_score' => 'required|integer|min:0|max:10',
             'gate_total' => 'required|integer',

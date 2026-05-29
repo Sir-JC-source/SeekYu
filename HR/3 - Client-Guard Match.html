@@ -754,7 +754,16 @@
 
         submitBtn.classList.add('hidden');
         endBtn.classList.remove('hidden');
-        endBtn.onclick = () => console.log('END clicked');
+        endBtn.onclick = () => {
+          window.dispatchEvent(new CustomEvent('seekyu:hr-client-guard-finished', {
+            detail: {
+              score: matched,
+              total: total,
+              pct: isPass ? 100 : 0,
+              time: document.getElementById('pixelTimer').textContent
+            }
+          }));
+        };
       }
 
       beginBtn.addEventListener('click', () => {

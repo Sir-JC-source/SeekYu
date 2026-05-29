@@ -329,10 +329,10 @@
       document.getElementById('btnFinalSubmit').classList.add('hidden');
       const nextBtn = document.getElementById('nextBtn');
       nextBtn.classList.remove('hidden');
-      nextBtn.onclick = () => { window.location.href = '2%20-%20Folder%20Sorting.html'; };
+      nextBtn.onclick = () => { window.location.href = '/applicant/games/hr/folder-sorting'; };
 
       // Analytics payload
-      window.dispatchEvent(new CustomEvent('seekyu:hr-match-finished',{
+window.dispatchEvent(new CustomEvent('seekyu:hr-resume-id-finished',{ 
         detail:{ score:session.score, total:session.total, wrong, pct, result:isPass?'Pass':'Failed', time:document.getElementById('pixelTimer').textContent }
       }));
     }
