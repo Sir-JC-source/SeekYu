@@ -212,39 +212,47 @@
                 </div>
             </div>
 
-            <!-- Quick Tips -->
+            <!-- Leave Logs (Approved only) -->
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h6 class="card-title mb-0">Quick Tips</h6>
+                        <h6 class="card-title mb-0">Leave Logs</h6>
                     </div>
                     <div class="card-body">
-                        <div class="timeline timeline-border-primary">
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-primary"></div>
-                                <div class="timeline-content">
-                                    <small class="text-muted">Plan ahead</small>
-                                    <p class="mb-0">Submit requests at least 2 weeks in advance</p>
-                                </div>
+                        @php
+                            $approvedLeaves = $user && $user->id
+                                ? \App\Models\Leave::where('user_id', $user->id)
+                                    ->where('status', 'Approved')
+                                    ->orderBy('date_from', 'desc')
+                                    ->get()
+                                : collect();
+                        @endphp
+
+                        @if($approvedLeaves->isEmpty())
+                            <div class="text-center text-muted" style="padding: 12px 0;">
+                                No approved leave requests yet.
                             </div>
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-info"></div>
-                                <div class="timeline-content">
-                                    <small class="text-muted">Be specific</small>
-                                    <p class="mb-0">Provide clear reasons for better approval chances</p>
-                                </div>
+                        @else
+                            <div class="timeline timeline-border-primary">
+                                @foreach($approvedLeaves as $leave)
+                                    <div class="timeline-item">
+                                        <div class="timeline-marker bg-success"></div>
+                                        <div class="timeline-content">
+                                            <small class="text-muted">{{ $leave->leave_type }}</small>
+                                            <p class="mb-0">
+                                                {{ \Carbon\Carbon::parse($leave->date_from)->format('M d, Y') }}
+                                                &rarr;
+                                                {{ \Carbon\Carbon::parse($leave->date_to)->format('M d, Y') }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                @endforeach
                             </div>
-                            <div class="timeline-item">
-                                <div class="timeline-marker bg-warning"></div>
-                                <div class="timeline-content">
-                                    <small class="text-muted">Check credits</small>
-                                    <p class="mb-0">Ensure you have sufficient leave credits</p>
-                                </div>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

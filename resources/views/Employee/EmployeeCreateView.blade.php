@@ -47,19 +47,23 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="first_name" class="form-label fw-bold">First Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-lg" id="first_name" name="first_name" placeholder="Enter first name" required>
+                                        <input type="text" class="form-control form-control-lg" id="first_name" name="first_name" placeholder="Enter first name" required value="{{ old('first_name', session('employee_prefill.first_name', '')) }}">
+
                                     </div>
                                     <div class="col-md-6">
                                         <label for="middle_name" class="form-label fw-bold">Middle Name</label>
-                                        <input type="text" class="form-control form-control-lg" id="middle_name" name="middle_name" placeholder="Enter middle name (optional)">
+                                        <input type="text" class="form-control form-control-lg" id="middle_name" name="middle_name" placeholder="Enter middle name (optional)" value="{{ old('middle_name', session('employee_prefill.middle_name', '')) }}">
+
                                     </div>
                                     <div class="col-md-6">
                                         <label for="last_name" class="form-label fw-bold">Last Name <span class="text-danger">*</span></label>
-                                        <input type="text" class="form-control form-control-lg" id="last_name" name="last_name" placeholder="Enter last name" required>
+                                        <input type="text" class="form-control form-control-lg" id="last_name" name="last_name" placeholder="Enter last name" required value="{{ old('last_name', session('employee_prefill.last_name', '')) }}">
+
                                     </div>
                                     <div class="col-md-6">
                                         <label for="age" class="form-label fw-bold">Age <span class="text-danger">*</span></label>
-                                        <input type="number" class="form-control form-control-lg" id="age" name="age" min="18" max="100" placeholder="Enter age" required>
+                                        <input type="number" class="form-control form-control-lg" id="age" name="age" min="18" max="100" placeholder="Enter age" required value="{{ old('age', session('employee_prefill.age', '')) }}">
+
                                     </div>
                                     <div class="col-md-4">
                                         <label for="province" class="form-label fw-bold">Province <span class="text-danger">*</span></label>
@@ -79,10 +83,14 @@
                                             <option value="">Select Barangay</option>
                                         </select>
                                     </div>
-                                    <div class="col-md-12">
+                                <div class="col-md-12">
                                         <label for="email" class="form-label fw-bold">Email Address <span class="text-danger">*</span></label>
-                                        <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="Enter email address" required>
+                                        <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="Enter email address" required value="{{ old('email', session('employee_prefill.email', '')) }}">
+                                        <div class="invalid-feedback" id="emailAlreadyUsedFeedback" style="display:none;">
+                                            This email is already used.
+                                        </div>
                                     </div>
+
                                 </div>
                                 <div class="d-flex justify-content-end mt-4">
                                     <button type="button" class="btn btn-primary btn-lg next-tab" data-next="miscellaneous">
@@ -96,22 +104,27 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label for="date_hired" class="form-label fw-bold">Date Hired <span class="text-danger">*</span></label>
-                                        <input type="date" class="form-control form-control-lg" id="date_hired" name="date_hired" required>
+                                        <input type="date" class="form-control form-control-lg" id="date_hired" name="date_hired" required value="{{ old('date_hired', session('employee_prefill.date_hired', '')) }}">
+
                                     </div>
                                     <div class="col-md-6">
                                         <label for="position" class="form-label fw-bold">Position <span class="text-danger">*</span></label>
                                         <select class="form-select form-select-lg" id="position" name="position" required>
                                             <option value="">Select Position</option>
+
                                             @if(auth()->user()->role === 'super-admin')
-                                                <option value="Administrator">Administrator</option>
+                                                <option value="Administrator" {{ old('position', session('employee_prefill.position', '')) === 'Administrator' ? 'selected' : '' }}>Administrator</option>
+
                                             @elseif(auth()->user()->role === 'admin')
-                                                <option value="HR Officer">HR Officer</option>
-                                                <option value="Security Guard">Security Guard</option>
-                                                <option value="Head Guard">Head Guard</option>
+                                                <option value="HR Officer" {{ old('position', session('employee_prefill.position', '')) === 'HR Officer' ? 'selected' : '' }}>HR Officer</option>
+                                                <option value="Security Guard" {{ old('position', session('employee_prefill.position', '')) === 'Security Guard' ? 'selected' : '' }}>Security Guard</option>
+                                                <option value="Head Guard" {{ old('position', session('employee_prefill.position', '')) === 'Head Guard' ? 'selected' : '' }}>Head Guard</option>
+
                                             @elseif(auth()->user()->role === 'hr-officer')
-                                                <option value="Security Guard">Security Guard</option>
-                                                <option value="Head Guard">Head Guard</option>
+                                                <option value="Security Guard" {{ old('position', session('employee_prefill.position', '')) === 'Security Guard' ? 'selected' : '' }}>Security Guard</option>
+                                                <option value="Head Guard" {{ old('position', session('employee_prefill.position', '')) === 'Head Guard' ? 'selected' : '' }}>Head Guard</option>
                                             @endif
+
                                         </select>
                                     </div>
                                     <div class="col-md-6">
@@ -442,13 +455,27 @@
         });
     });
 
+
+
+
+    const emailInput = document.getElementById('email');
+    const emailFeedback = document.getElementById('emailAlreadyUsedFeedback');
+
+    emailInput?.addEventListener('blur', function () {
+        // Server-side unique validation exists in EmployeeController@store.
+        // This blur handler only clears the UI when the user changes the value.
+        emailInput.classList.remove('is-invalid');
+        if (emailFeedback) emailFeedback.style.display = 'none';
+    });
+
+
     // Form submission with toast notification
-    document.getElementById('employeeForm').addEventListener('submit', function(e) {
+    document.getElementById('employeeForm').addEventListener('submit', async function(e) {
         const submitBtn = document.getElementById('submitBtn');
+
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="bx bx-loader-alt bx-spin me-1"></i>Creating Employee...';
 
-        // Show immediate toast notification
         Toastify({
             text: "Creating employee... Please wait.",
             duration: 3000,
@@ -458,8 +485,25 @@
         }).showToast();
     });
 
+
+
     // Toast Notifications for session messages
+
+    @if($errors->any())
+        @if($errors->has('email'))
+            // Show inline email error label on duplicate email
+            const emailInputEl = document.getElementById('email');
+            const emailFeedbackEl = document.getElementById('emailAlreadyUsedFeedback');
+            if (emailInputEl) emailInputEl.classList.add('is-invalid');
+            if (emailFeedbackEl) {
+                emailFeedbackEl.textContent = '{{ $errors->first('email') }}';
+                emailFeedbackEl.style.display = 'block';
+            }
+        @endif
+    @endif
+
     @if(session('success'))
+
     Toastify({
         text: "{{ session('success') }}",
         duration: 3000,

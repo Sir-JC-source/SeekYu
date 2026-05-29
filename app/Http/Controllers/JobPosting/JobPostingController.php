@@ -62,9 +62,11 @@ class JobPostingController extends Controller
      */
     public function index()
     {
-        $jobPostings = JobPosting::orderByRaw("CASE WHEN status = 'active' THEN 1 ELSE 2 END")
+        $jobPostings = JobPosting::withCount('applications as total_applicants')
+            ->orderByRaw("CASE WHEN status = 'active' THEN 1 ELSE 2 END")
             ->orderBy('created_at', 'desc')
             ->get();
+
         return view('job_postings.list', compact('jobPostings'));
     }
 

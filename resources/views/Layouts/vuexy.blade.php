@@ -220,14 +220,14 @@
             .catch(error => console.error('Error:', error));
         }
 
-        function handleNotificationClick(notificationId, type) {
+        function handleNotificationClick(type, notificationId, payload) {
             // Mark as read
             markAsRead(notificationId);
 
             // Navigate based on type
-            if (type === 'leave_request') {
-                window.location.href = '/leaves/list';
-            } else if (type === 'job_application' || type === 'job_application_status_update') {
+            if (type === 'leave_submitted' || type === 'leave_status_update' || type === 'leave_request') {
+                window.location.href = '/leaves/processed';
+            } else if (type === 'job_application_status_update' || type === 'job_application') {
                 window.location.href = '/applicant/applications';
             } else if (type === 'incident_report') {
                 window.location.href = '/incident-reports/logs';
@@ -235,6 +235,7 @@
                 window.location.href = '/dashboard';
             }
         }
+
     </script>
 
 </body>

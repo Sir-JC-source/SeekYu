@@ -34,8 +34,23 @@
                                         <td>
                                             <span class="badge bg-success">{{ ucfirst($application->status) }}</span>
                                         </td>
-                                        <td>
-                                            <a href="{{ route('job_postings.applicant-credentials', $application->id) }}" class="btn btn-sm btn-primary">View Credentials</a>
+                                        <td class="text-nowrap">
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    Actions
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    <li>
+                                                        <a href="{{ route('job_postings.applicant-credentials', $application->id) }}" class="dropdown-item">View Credentials</a>
+                                                    </li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li>
+                                                        <a class="dropdown-item" href="{{ route('employee.create.from-shortlist', $application->id) }}">
+                                                            Create Account
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </div>
                                         </td>
                                     </tr>
                                 @endforeach

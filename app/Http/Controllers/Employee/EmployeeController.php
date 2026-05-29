@@ -22,6 +22,7 @@ class EmployeeController extends Controller
                     ->from('employees')
                     ->groupBy('employee_number');
             })
+            ->orderBy('date_hired', 'asc')
             ->get();
 
         return view('Employee.EmployeeListView', compact('employees'));

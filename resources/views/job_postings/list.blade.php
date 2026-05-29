@@ -16,20 +16,19 @@
         <table class="table table-striped table-bordered text-center" id="job-postings-table">
             <thead>
                 <tr>
-                    <th>Job Post ID</th>
                     <th>Title</th>
                     <th>Position</th>
                     <th>Type of Employment</th>
                     <th>Location</th>
                     <th>Status</th>
                     <th>Created At</th>
+                    <th>Total Applicants</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($jobPostings as $job)
                     <tr>
-                        <td>{{ $job->job_post_id }}</td>
                         <td>{{ $job->title }}</td>
                         <td>{{ $job->position }}</td>
                         <td>{{ $job->type_of_employment }}</td>
@@ -40,24 +39,25 @@
                             </span>
                         </td>
                         <td>{{ $job->created_at->format('Y-m-d') }}</td>
-                        <td>
+                        <td>{{ $job->total_applicants }}</td>
+                        <td class="text-nowrap">
                             <div class="dropdown">
                                 <button class="btn btn-sm btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Actions
                                 </button>
-                                <ul class="dropdown-menu">
+                                <ul class="dropdown-menu dropdown-menu-end">
                                     <li><a class="dropdown-item" href="{{ route('job_postings.applications', $job->id) }}">View Applications</a></li>
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         @if($job->status === 'active')
-                                            <a class="dropdown-item btn-toggle-status" href="javascript:void(0);" 
-                                               data-job-id="{{ $job->id }}" 
+                                            <a class="dropdown-item btn-toggle-status" href="javascript:void(0);"
+                                               data-job-id="{{ $job->id }}"
                                                data-status="deactivate">
                                                <i class="ti ti-power me-1"></i> Deactivate
                                             </a>
                                         @else
-                                            <a class="dropdown-item btn-toggle-status text-success" href="javascript:void(0);" 
-                                               data-job-id="{{ $job->id }}" 
+                                            <a class="dropdown-item btn-toggle-status text-success" href="javascript:void(0);"
+                                               data-job-id="{{ $job->id }}"
                                                data-status="activate">
                                                <i class="ti ti-check me-1"></i> Activate
                                             </a>
@@ -142,7 +142,7 @@ $(document).ready(function() {
         "columns": [
             null, null, null, null, null, null, null, { "orderable": false }
         ],
-        "order": [[6, "desc"]]
+        "order": [[5, "desc"]]
     });
 
     // Handle status change via Dropdown Item click

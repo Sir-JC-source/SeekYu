@@ -156,7 +156,9 @@
 </style>
 <script>
 $(document).ready(function() {
-    var table = $('#employee-table').DataTable({"order": [[1,"asc"]]});
+    var table = $('#employee-table').DataTable({"order": [[3,"asc"]]});
+
+
 
     $('#employee-table tbody').on('click', 'tr.employee-row', function(e) {
         if($(e.target).closest('.dropdown, .delete-employee-btn').length) return;

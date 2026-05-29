@@ -5,6 +5,7 @@ use App\Http\Controllers\Login\LoginController;
 use App\Http\Controllers\Dashboard\DashboardController;
 use App\Http\Controllers\UserManagement\UserManagementController;
 use App\Http\Controllers\Employee\EmployeeController;
+use App\Http\Controllers\Employee\PrefillEmployeeController;
 use App\Http\Controllers\Security\SecurityController;
 use App\Http\Controllers\Application\ApplicationController;
 use App\Http\Controllers\Leave\LeaveController;
@@ -88,6 +89,11 @@ Route::middleware('auth')->group(function () {
     Route::prefix('employee')->group(function () {
         Route::get('/list', [EmployeeController::class, 'index'])->name('employee.list');
         Route::get('/create', [EmployeeController::class, 'create'])->name('employee.create');
+
+        // Prefill employee creation fields from a shortlisted application
+        Route::get('/create/from-shortlist/{applicationId}', [PrefillEmployeeController::class, 'fromShortlist'])
+            ->name('employee.create.from-shortlist');
+
         Route::post('/store', [EmployeeController::class, 'store'])->name('employee.store');
         Route::get('/edit/{id}', [EmployeeController::class, 'edit'])->name('employee.edit');
         Route::put('/update/{id}', [EmployeeController::class, 'update'])->name('employee.update');

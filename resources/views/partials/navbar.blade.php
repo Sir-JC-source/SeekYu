@@ -66,7 +66,9 @@
                         <ul class="list-group list-group-flush">
                             @forelse(auth()->user()->notifications->take(5) as $notification)
                                 <li class="list-group-item list-group-item-action dropdown-notifications-item">
-                                    <a href="javascript:void(0)" onclick="handleNotificationClick('{{ $notification->data['type'] }}', {{ $notification->id }}, {{ json_encode($notification->data) }})" style="text-decoration: none; color: inherit;">
+                                    <a onclick="handleNotificationClick('{{ $notification->data['type'] }}', {{ $notification->id }}, {{ json_encode($notification->data) }});" style="cursor:pointer; text-decoration: none; color: inherit;">
+
+
                                         <div class="d-flex">
                                             <div class="flex-shrink-0 me-3">
                                                 <div class="avatar">
