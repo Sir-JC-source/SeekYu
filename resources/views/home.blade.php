@@ -78,11 +78,11 @@
   <section class="relative overflow-hidden" id="heroCarousel">
     <!-- Background image Carousel -->
     <div class="absolute inset-0 -z-10">
-      <div class="absolute inset-0 transition-opacity duration-1000" data-hero-slide="0">
-src="{{ asset('assets/img/seekyu 1.jpg') }}"
+      <div class="absolute inset-0 opacity-0 transition-opacity duration-1000" data-hero-slide="0">
+        <img src="{{ asset('assets/img/seekyu 1.jpg') }}" alt="Seekyu security hero 1" class="w-full h-full object-cover" loading="eager" />
       </div>
       <div class="absolute inset-0 opacity-0 transition-opacity duration-1000" data-hero-slide="1">
-src="{{ asset('assets/img/seekyu 2.jpg') }}"
+        <img src="{{ asset('assets/img/seekyu 2.jpg') }}" alt="Seekyu security hero 2" class="w-full h-full object-cover" loading="lazy" />
       </div>
       <!-- Dark gradient overlay -->
       <div class="absolute inset-0 bg-gradient-to-b from-black/70 via-black/50 to-black/70"></div>
@@ -110,7 +110,60 @@ src="{{ asset('assets/img/seekyu 2.jpg') }}"
     </div>
   </section>
 
+  <!-- =============== Job Openings (Applicant) =============== -->
+  <section id="jobs" class="py-16 sm:py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+        <div>
+          <h2 class="text-2xl sm:text-3xl font-bold">Job Openings</h2>
+          <p class="mt-2 text-slate-600 max-w-2xl">Browse active roles in the MJL applicant portal.</p>
+        </div>
+        <a href="{{ route('applicant.jobs') }}" class="lift inline-flex justify-center items-center px-5 py-3 rounded-md bg-brand-accent text-black font-semibold hover:bg-yellow-300">
+          View All Jobs
+        </a>
+      </div>
+
+      <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        @forelse($jobPostings as $job)
+          <div class="lift p-6 rounded-2xl border border-slate-200 bg-white">
+            <div class="flex items-start justify-between gap-4">
+              <div>
+                <h3 class="font-semibold text-lg">{{ $job->title }}</h3>
+                <p class="mt-1 text-sm text-slate-600">{{ $job->position }}</p>
+              </div>
+              <span class="badge bg-success text-white px-3 py-1 rounded-full whitespace-nowrap">Active</span>
+            </div>
+
+            <p class="mt-3 text-sm text-slate-700 line-clamp-3">{{ Str::limit($job->description, 120) }}</p>
+
+            <div class="mt-4 space-y-1 text-sm">
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-slate-500">Type</span>
+                <span class="font-medium text-slate-800">{{ $job->type_of_employment }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-slate-500">Location</span>
+                <span class="font-medium text-slate-800">{{ $job->location }}</span>
+              </div>
+              <div class="flex items-center justify-between gap-3">
+                <span class="text-slate-500">Posted</span>
+                <span class="font-medium text-slate-800">{{ optional($job->created_at)->format('M d, Y') }}</span>
+              </div>
+            </div>
+
+            {{-- No Apply button on homepage version (intentionally omitted) --}}
+          </div>
+        @empty
+          <div class="sm:col-span-2 lg:col-span-3 text-center py-10">
+            <div class="text-slate-600">No active job postings available right now.</div>
+          </div>
+        @endforelse
+      </div>
+    </div>
+  </section>
+
   <!-- =============== Services =============== -->
+
   <section id="services" class="py-16 sm:py-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <h2 class="text-2xl sm:text-3xl font-bold text-center">Our Services</h2>

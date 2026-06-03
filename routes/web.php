@@ -9,7 +9,9 @@ use App\Http\Controllers\Employee\PrefillEmployeeController;
 use App\Http\Controllers\Security\SecurityController;
 use App\Http\Controllers\Application\ApplicationController;
 use App\Http\Controllers\Leave\LeaveController;
+use App\Http\Controllers\Leave\LeaveExportController;
 use App\Http\Controllers\IncidentReport\IncidentReportController;
+
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\JobPosting\JobPostingController;
 use App\Http\Controllers\Applicant\ApplicantCredentialController;
@@ -23,8 +25,14 @@ use App\Http\Controllers\File201Controller;
 
 // Root to home page
 Route::get('/', function () {
-    return view('home');
+    $jobPostings = \App\Models\JobPosting::where('status', 'active')
+        ->orderBy('created_at', 'desc')
+        ->limit(6)
+        ->get();
+
+    return view('home', compact('jobPostings'));
 });
+
 
 // ----------------------
 // 🧩 Guest Routes
@@ -158,10 +166,16 @@ Route::middleware('auth')->group(function () {
         Route::get('/accepted', [LeaveController::class, 'accepted'])->name('accepted');
         Route::get('/rejected', [LeaveController::class, 'rejected'])->name('rejected');
         Route::get('/processed', [LeaveController::class, 'processed'])->name('processed');
+
+        // Excel exports
+        Route::get('/pending/export-excel', [LeaveExportController::class, 'exportPendingExcel'])->name('pending.export-excel');
+        Route::get('/processed/export-excel', [LeaveExportController::class, 'exportProcessedExcel'])->name('processed.export-excel');
+
         Route::get('/request', [LeaveController::class, 'create'])->name('request');
         Route::post('/request/store', [LeaveController::class, 'store'])->name('request.store');
         Route::match(['put', 'post'], '/approve/{id}', [LeaveController::class, 'approve'])->name('approve');
         Route::match(['put', 'post'], '/reject/{id}', [LeaveController::class, 'reject'])->name('reject');
+
     });
 
     // ----------------------

@@ -5,9 +5,29 @@
 @section('content')
 <div class="card">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h5>Pending Leave Requests</h5>
-        <a href="{{ route('leaves.processed') }}" class="btn btn-outline-primary btn-sm">View Processed Leaves</a>
+        <div>
+            @php
+                $user = auth()->user();
+                $leaveCredits = $user?->leave_credits;
+            @endphp
+            <h5 class="mb-0">Pending Leave Requests</h5>
+            @if(!is_null($leaveCredits))
+<div class="text-muted" style="font-size: 0.9rem;">
+                    Your Leave Credits: <strong>{{ $leaveCredits }}</strong>
+                    <span class="badge ms-2 {{ $leaveCredits > 0 ? 'bg-success' : 'bg-danger' }}">
+                        {{ $leaveCredits > 0 ? 'AVAILABLE' : 'INSUFFICIENT' }}
+                    </span>
+                </div>
+            @endif
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <a href="{{ route('leaves.pending.export-excel') }}" class="btn btn-outline-success btn-sm">
+                Download Excel
+            </a>
+            <a href="{{ route('leaves.processed') }}" class="btn btn-outline-primary btn-sm">View Processed Leaves</a>
+        </div>
     </div>
+
 
     <div class="card-body">
         @if($leaves->where('status','Pending')->isEmpty())

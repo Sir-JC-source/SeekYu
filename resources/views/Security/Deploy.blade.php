@@ -7,11 +7,9 @@
     <div class="row">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0">Deployments Dashboard</h5>
-                    <a href="{{ route('security.list') }}" class="btn btn-primary btn-sm">
-                        <i class="ti ti-users me-1"></i>View Guards
-                    </a>
+                    {{-- Mechanism/logic: guard selection + filtering + status actions handled by existing buttons below --}}
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">

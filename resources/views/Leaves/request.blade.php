@@ -164,10 +164,18 @@
                         <h6 class="card-title mb-0">Leave Credits</h6>
                     </div>
                     <div class="card-body">
+                        @php
+                            $leaveCredits = Auth::user()->leave_credits ?? 10;
+                            $leaveCreditBadgeText = $leaveCredits > 0 ? 'OK' : 'INSUFFICIENT';
+                            $leaveCreditBadgeClass = $leaveCredits > 0 ? 'bg-success' : 'bg-danger';
+                        @endphp
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <div>
                                 <small class="text-muted">Available Credits</small>
-                                <div class="fw-bold text-success fs-4">{{ Auth::user()->leave_credits ?? 10 }}</div>
+                                <div class="fw-bold text-success fs-4">{{ $leaveCredits }}</div>
+                                <div class="mt-2">
+                                    <span class="badge {{ $leaveCreditBadgeClass }}">{{ $leaveCreditBadgeText }}</span>
+                                </div>
                             </div>
                             <i class="ti ti-calendar-heart text-success" style="font-size: 32px;"></i>
                         </div>

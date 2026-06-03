@@ -79,12 +79,35 @@ class LeaveController extends Controller
     /**
      * Display processed leaves (approved + rejected).
      */
-    public function processed()
+    public function processed(Request $request)
     {
-        $leaves = Leave::whereIn('status', ['Approved', 'Rejected'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Leave::whereIn('status', ['Approved', 'Rejected']);
 
+        // Optional filters
+        $requestor = $request->input('requestor');
+        if ($request->filled('requestor')) {
+            $query->where('requestor', 'like', '%' . $request->input('requestor') . '%');
+        }
+
+        $exactDate = $request->input('date_exact');
+        $dateFrom  = $request->input('date_from');
+        $dateTo    = $request->input('date_to');
+
+        if ($request->filled('date_exact')) {
+            // Exact match on the Date Requested column (created_at)
+            $query->whereDate('created_at', $exactDate);
+        } else {
+            // Range filter (only applied when exact date is not set)
+            if ($request->filled('date_from') && $request->filled('date_to')) {
+                $query->whereBetween('created_at', [$dateFrom . ' 00:00:00', $dateTo . ' 23:59:59']);
+            } elseif ($request->filled('date_from')) {
+                $query->where('created_at', '>=', $dateFrom . ' 00:00:00');
+            } elseif ($request->filled('date_to')) {
+                $query->where('created_at', '<=', $dateTo . ' 23:59:59');
+            }
+        }
+
+        $leaves = $query->orderBy('created_at', 'desc')->get();
         return view('leaves.processed', compact('leaves'));
     }
 

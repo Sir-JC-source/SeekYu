@@ -3,12 +3,52 @@
 @section('title', 'Processed Leaves')
 
 @section('content')
+@php
+    $user = auth()->user();
+    $leaveCredits = $user?->leave_credits;
+@endphp
+
 <div class="card">
-    <div class="card-header">
-        <h5>Processed Leave Requests</h5>
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">Processed Leave Requests</h5>
+            @if(!is_null($leaveCredits))
+<div class="text-muted" style="font-size: 0.9rem;">
+Your Leave Credits: <strong>{{ $leaveCredits }}</strong>
+                <span class="badge ms-2 {{ $leaveCredits > 0 ? 'bg-success' : 'bg-danger' }}">
+                    {{ $leaveCredits > 0 ? 'OK' : 'INSUFFICIENT' }}
+                </span>
+            </div>
+            @endif
+        </div>
+        <a href="{{ route('leaves.processed.export-excel') }}" class="btn btn-outline-success btn-sm">Download Excel</a>
     </div>
 
+
     <div class="card-body">
+        <form method="GET" action="{{ route('leaves.processed') }}" class="row g-3 mb-4">
+            <div class="col-md-4">
+                <label for="requestor" class="form-label">Requestor</label>
+                <input type="text" class="form-control" id="requestor" name="requestor" value="{{ request('requestor') }}" placeholder="Search requestor" />
+            </div>
+            <div class="col-md-4">
+                <label for="date_exact" class="form-label">Date Requested (Exact)</label>
+                <input type="date" class="form-control" id="date_exact" name="date_exact" value="{{ request('date_exact') }}" />
+            </div>
+            <div class="col-md-2">
+                <label for="date_from" class="form-label">From</label>
+                <input type="date" class="form-control" id="date_from" name="date_from" value="{{ request('date_from') }}" />
+            </div>
+            <div class="col-md-2">
+                <label for="date_to" class="form-label">To</label>
+                <input type="date" class="form-control" id="date_to" name="date_to" value="{{ request('date_to') }}" />
+            </div>
+            <div class="col-12 d-flex gap-2 align-items-end">
+                <button type="submit" class="btn btn-primary">Filter</button>
+                <a href="{{ route('leaves.processed') }}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+
         @if($leaves->whereIn('status',['Approved','Rejected'])->isEmpty())
             <div class="alert alert-info">There are no processed leave requests yet.</div>
         @else

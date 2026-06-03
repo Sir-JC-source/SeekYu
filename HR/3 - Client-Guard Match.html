@@ -183,6 +183,9 @@
     document.addEventListener('DOMContentLoaded', () => {
       const PASS_THRESHOLD = 50;
 
+      // NOTE: This game currently renders cards with text only (no image assets).
+      // If images are added later, they must use absolute paths like /HR/... to avoid mis-resolution.
+
       const LICENSE_RANK = { "SGL-1": 1, "SGL-2": 2, "SGL-3": 3 };
 
       const CLIENTS_SRC = [

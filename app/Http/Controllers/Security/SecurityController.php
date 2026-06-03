@@ -89,17 +89,27 @@ class SecurityController extends Controller
 
         $request->validate([
             'deployment_date' => 'required|date|after_or_equal:today|before_or_equal:' . now()->endOfYear()->addYear()->format('Y-m-d'),
-            'client_id' => 'nullable|exists:registered_users,id',
+            'client_id' => 'required|exists:registered_users,id',
             'assigned_head_guard_id' => 'required|exists:employees,id',
         ]);
+
+        // Exclusivity rule: guard can only have one ACTIVE deployment at a time.
+        // If it already has an active deployment for a different client, deactivate it.
+        $existingActive = Deployment::where('employee_id', $id)
+            ->where('status', 'active')
+            ->first();
+
+        if ($existingActive && $existingActive->client_id != $request->client_id) {
+            $existingActive->update(['status' => 'completed']);
+        }
 
         Deployment::create([
             'client_id' => $request->client_id,
             'employee_id' => $id,
             'deployment_date' => $request->deployment_date,
             'assigned_head_guard_id' => $request->assigned_head_guard_id,
-'status' => 'active',
-'created_by' => Auth::id() ?? 1,
+            'status' => 'active',
+            'created_by' => Auth::id() ?? 1,
         ]);
 
         return redirect()->route('security.deployments')
@@ -195,6 +205,19 @@ class SecurityController extends Controller
     {
         $guard = Employee::findOrFail($guardId);
 
+        // Client exclusivity: deny if this guard is not actively deployed to the client.
+        $userRole = Auth::user()->getRoleNames()->first();
+        if ($userRole === 'client') {
+            $clientId = Auth::id();
+            $ownsGuard = Deployment::where('employee_id', $guardId)
+                ->where('client_id', $clientId)
+                ->where('status', 'active')
+                ->exists();
+
+            abort_unless($ownsGuard, 404);
+        }
+
+
         // Get the month from request, default to current month
         $month = $request->get('month', now()->format('Y-m'));
         $currentMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
@@ -281,32 +304,35 @@ class SecurityController extends Controller
             ->orderBy('fullname')
             ->get();
 
-        // Show all employees in the deploy dashboard so the table is never empty.
-        // (We can refine by position later once we confirm DB stored values.)
+        // Guards shown on the deploy dashboard
         $guards = Employee::query()
             ->whereIn('position', ['Security Guard', 'Head Guard'])
             ->get();
 
         // Status counters (used by Security/Deploy dashboard)
-        // Guard the counters so Deploy dashboard never crashes if statuses are missing.
         $activeDeployments = Deployment::where('status', 'active')->count();
         $pendingDeployments = Deployment::where('status', 'pending')->count();
         $completedDeployments = Deployment::where('status', 'completed')->count();
         $cancelledDeployments = Deployment::where('status', 'cancelled')->count();
 
+        // Pass deployments to the view because Security/Deploy.blade.php expects $deployments.
+        // If logged-in user is a client, only show active deployments for that client.
+        $userRole = Auth::user()->getRoleNames()->first();
 
-        // Status rule (A): assigned if ANY deployment exists for that guard with client_id NOT NULL
-        $assignedByGuardId = Deployment::query()
-            ->whereNotNull('client_id')
-            ->selectRaw('employee_id as guard_id')
-            ->distinct()
-            ->pluck('guard_id')
-            ->flip();
+        $deploymentsQuery = Deployment::with(['employee', 'headGuard'])
+            ->orderBy('deployment_date', 'desc');
+
+        if ($userRole === 'client') {
+            $clientId = Auth::id();
+            $deploymentsQuery->where('client_id', $clientId);
+        }
+
+        $deployments = $deploymentsQuery->get();
 
         return view('Security.Deploy', compact(
             'guards',
             'clients',
-            'assignedByGuardId',
+            'deployments',
             'activeDeployments',
             'pendingDeployments',
             'completedDeployments',
@@ -328,13 +354,28 @@ class SecurityController extends Controller
      */
     public function viewAllSchedules()
     {
-        $guards = Employee::with(['assignedHeadGuard', 'schedules' => function ($query) {
+        // If user is a client, only show guards owned by that client.
+        $userRole = Auth::user()->getRoleNames()->first();
+
+        $base = Employee::with(['assignedHeadGuard', 'schedules' => function ($query) {
             $query->orderBy('schedule_date');
         }])
         ->where('position', 'Security Guard')
         ->where('status', 'Active')
-        ->whereNull('deleted_at') // Exclude soft-deleted employees
-        ->get();
+        ->whereNull('deleted_at');
+
+        if ($userRole === 'client') {
+            $clientId = Auth::id();
+
+            $base->whereIn('id', function ($q) use ($clientId) {
+                $q->select('employee_id')
+                  ->from('deployments')
+                  ->where('client_id', $clientId)
+                  ->where('status', 'active');
+            });
+        }
+
+        $guards = $base->get();
 
         return view('Security.ViewAllSchedules', compact('guards'));
     }

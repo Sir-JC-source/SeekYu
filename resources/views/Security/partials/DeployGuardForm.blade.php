@@ -6,6 +6,8 @@
         <form action="{{ isset($guard) ? route('security.deploy.store', $guard->id) : '#' }}" method="POST" id="deployGuardForm" data-guard-id="{{ isset($guard) ? $guard->id : '' }}">
             @csrf
 
+            {{-- Exclusivity hint: guard can only belong to one client at a time (active deployment). --}}
+
             <div class="row g-2 mb-2">
                 <div class="col-md-3">
                     <label for="employee_number" class="form-label small">Employee No.</label>
