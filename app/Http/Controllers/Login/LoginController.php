@@ -215,9 +215,15 @@ class LoginController extends Controller
             ->first();
 
         if ($user) {
+            // Disable admin login globally (if account is an admin-type user)
+            if (in_array($user->role, ['admin', 'super-admin'])) {
+                return back()->with('error', 'Account not found');
+            }
+
             if (!in_array(strtolower($user->account_status), ['approved', 'active'])) {
                 return back()->with('error', 'Your account is not yet approved.');
             }
+
 
             // Check if email is verified (only for applicants)
             if ($user->role === 'applicant' && !$user->email_verified_at) {

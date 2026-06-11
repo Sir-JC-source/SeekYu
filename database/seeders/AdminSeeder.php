@@ -12,6 +12,15 @@ class AdminSeeder extends Seeder
 {
     public function run()
     {
+        // Disabled by request: do not seed admin account.
+        // If you re-seed, we still want to make sure an existing admin record isn't usable.
+        // (login will be blocked by account_status below)
+        
+        // NOTE: This seeder only runs during seeding. For already-existing DB data,
+        // this prevents creating new admins but doesn't automatically revoke existing ones.
+        return;
+
+
         // ✅ Ensure the 'admin' role exists
         $role = Role::firstOrCreate(['name' => 'admin']);
 

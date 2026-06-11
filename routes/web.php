@@ -193,8 +193,9 @@ Route::middleware('auth')->group(function () {
     // 🧑‍💼 Admin Routes
     // ----------------------
     Route::prefix('admin')->group(function () {
-        Route::get('/add', [AdminController::class, 'add'])->name('admin.add');
-        Route::post('/store', [AdminController::class, 'store'])->name('admin.store');
+        // Admin UI/creation disabled. Treat as non-existing.
+        Route::get('/add', function () { abort(404); })->name('admin.add');
+        Route::post('/store', function () { abort(404); })->name('admin.store');
     });
 
     // ----------------------
